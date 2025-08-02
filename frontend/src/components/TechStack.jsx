@@ -9,7 +9,8 @@ import {
   Layers, 
   Wind, 
   GitBranch, 
-  Github 
+  Github,
+  Layout
 } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { portfolioAPI } from '../services/api';
@@ -25,7 +26,8 @@ const iconMap = {
   Layers,
   Wind,
   GitBranch,
-  Github
+  Github,
+  Layout
 };
 
 const TechStack = ({ techStackData }) => {
@@ -104,10 +106,19 @@ const TechStack = ({ techStackData }) => {
                 <CardContent className="p-6 text-center">
                   <div className="mb-4 flex justify-center">
                     <div className="w-16 h-16 rounded-full bg-gray-700/50 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors duration-300">
-                      <Icon 
-                        className="h-8 w-8 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" 
-                        style={{ color: tech.color }}
-                      />
+                      {Icon ? (
+                        <Icon 
+                          className="h-8 w-8 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" 
+                          style={{ color: tech.color }}
+                        />
+                      ) : (
+                        <div 
+                          className="h-8 w-8 text-gray-400 group-hover:text-blue-400 transition-colors duration-300"
+                          style={{ color: tech.color }}
+                        >
+                          {tech.name.charAt(0)}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <h3 className="text-white font-semibold text-sm group-hover:text-blue-400 transition-colors duration-300">
