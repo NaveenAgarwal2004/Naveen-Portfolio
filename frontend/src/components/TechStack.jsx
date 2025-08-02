@@ -28,12 +28,20 @@ const iconMap = {
   Github
 };
 
-const TechStack = () => {
+const TechStack = ({ techStackData }) => {
   const [techStack, setTechStack] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // If techStackData is provided as prop, use it directly
+    if (techStackData) {
+      setTechStack(techStackData);
+      setLoading(false);
+      return;
+    }
+
+    // Otherwise fetch data from backend
     const fetchTechStack = async () => {
       try {
         const response = await portfolioAPI.getTechStack();
@@ -47,7 +55,7 @@ const TechStack = () => {
     };
 
     fetchTechStack();
-  }, []);
+  }, [techStackData]);
 
   if (loading) {
     return (

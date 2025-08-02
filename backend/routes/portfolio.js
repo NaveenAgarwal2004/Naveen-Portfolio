@@ -22,6 +22,14 @@ router.get('/personal', async (req, res) => {
         location: 'India',
         profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
         resumeUrl: '',
+        skills: [
+          { name: "React.js", level: 90 },
+          { name: "JavaScript", level: 85 },
+          { name: "HTML/CSS", level: 95 },
+          { name: "Node.js", level: 80 },
+          { name: "MongoDB", level: 75 },
+          { name: "Python", level: 70 }
+        ],
         socialLinks: {
           github: 'https://github.com/naveen-agarwal',
           linkedin: 'https://linkedin.com/in/naveen-agarwal-dev',

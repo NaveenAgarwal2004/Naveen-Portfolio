@@ -1,47 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Download, MapPin, Mail, Phone } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Progress } from './ui/progress';
-import { portfolioAPI } from '../services/api';
 
-const About = () => {
-  const [personalData, setPersonalData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const About = ({ personalData }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchPersonalData = async () => {
-      try {
-        const response = await portfolioAPI.getPersonal();
-        if (response.data.success) {
-          setPersonalData(response.data.data);
-        } else {
-          throw new Error('Failed to fetch personal data');
-        }
-      } catch (err) {
-        console.error('Error fetching personal data:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Use personalData if available, otherwise provide default values
+  const displayData = personalData || {};
 
-    fetchPersonalData();
-  }, []);
-
-  // Use personalData if available
-  const displayData = personalData;
-
-  const resumes = displayData ? [
+  const resumes = personalData ? [
     {
       name: "Frontend Resume",
-      url: (displayData.resumeUrl || displayData.frontendResumeUrl) || "/Naveen Agarwal - Frontend.pdf"
+      url: (personalData.resumeUrl || personalData.frontendResumeUrl) || "/Naveen Agarwal - Frontend.pdf"
     },
     {
       name: "Backend Resume",
-      url: displayData.backendResumeUrl || "/NaveenAgarwal_Backend.pdf"
+      url: personalData.backendResumeUrl || "/NaveenAgarwal_Backend.pdf"
     }
   ] : [];
 
@@ -52,56 +28,6 @@ const About = () => {
     link.download = name;
     link.click();
   };
-
-  if (loading) {
-    return (
-      <section id="about" className="py-20 bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-12 bg-gray-700 rounded w-64 mx-auto mb-4"></div>
-              <div className="h-6 bg-gray-700 rounded w-96 mx-auto mb-8"></div>
-              <div className="grid lg:grid-cols-2 gap-12">
-                <div className="space-y-8">
-                  <div className="h-80 bg-gray-700 rounded-2xl"></div>
-                  <div className="h-64 bg-gray-700 rounded-lg"></div>
-                </div>
-                <div className="space-y-8">
-                  <div className="h-32 bg-gray-700 rounded-lg"></div>
-                  <div className="h-64 bg-gray-700 rounded-lg"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (!displayData) {
-    return (
-      <section id="about" className="py-20 bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-12 bg-gray-700 rounded w-64 mx-auto mb-4"></div>
-              <div className="h-6 bg-gray-700 rounded w-96 mx-auto mb-8"></div>
-              <div className="grid lg:grid-cols-2 gap-12">
-                <div className="space-y-8">
-                  <div className="h-80 bg-gray-700 rounded-2xl"></div>
-                  <div className="h-64 bg-gray-700 rounded-lg"></div>
-                </div>
-                <div className="space-y-8">
-                  <div className="h-32 bg-gray-700 rounded-lg"></div>
-                  <div className="h-64 bg-gray-700 rounded-lg"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section id="about" className="py-20 bg-gray-800">
@@ -197,6 +123,50 @@ const About = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+          
+          {/* Right Side - Bio and Skills */}
+          <div className="space-y-8">
+            {/* Bio */}
+            <div>
+              <h3 className="text-2xl font-semibold text-white mb-6">My Story</h3>
+              <p className="text-gray-300 leading-relaxed text-lg mb-6">
+                {displayData.bio || "I'm a passionate frontend developer with expertise in creating modern, responsive web applications using cutting-edge technologies like React, Tailwind CSS, and the MERN stack. With a strong foundation in both frontend and backend development, I specialize in building seamless user experiences that are both visually appealing and highly functional."}
+              </p>
+              <p className="text-gray-400 leading-relaxed">
+                When I'm not coding, I enjoy exploring new technologies, contributing to open-source projects, and staying updated with the latest trends in web development and artificial intelligence.
+              </p>
+            </div>
+            
+            {/* Skills Progress Bars */}
+            <div>
+              <h3 className="text-2xl font-semibold text-white mb-6">Technical Skills</h3>
+              <div className="grid gap-6">
+                {(displayData.skills || [
+                  { name: "React.js", level: 90 },
+                  { name: "JavaScript", level: 85 },
+                  { name: "HTML/CSS", level: 95 },
+                  { name: "Node.js", level: 80 },
+                  { name: "MongoDB", level: 75 },
+                  { name: "Python", level: 70 }
+                ]).map((skill, index) => (
+                  <div key={skill.name || index} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300 font-medium">{skill.name}</span>
+                      <span className="text-blue-400 text-sm">{skill.level}%</span>
+                    </div>
+                    <Progress 
+                      value={skill.level} 
+                      className="h-2 bg-gray-700"
+                      style={{
+                        '--progress-background': '#1f2937',
+                        '--progress-foreground': '#3b82f6'
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

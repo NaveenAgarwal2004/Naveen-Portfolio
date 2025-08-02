@@ -32,6 +32,9 @@ const AdminPersonal = () => {
     resumeUrl: '',
     frontendResumeUrl: '',
     backendResumeUrl: '',
+    skills: [
+      { name: '', level: 50 }
+    ],
     socialLinks: {
       github: '',
       linkedin: '',
@@ -70,6 +73,7 @@ const AdminPersonal = () => {
           resumeUrl: data.resumeUrl || '',
           frontendResumeUrl: data.frontendResumeUrl || '',
           backendResumeUrl: data.backendResumeUrl || '',
+          skills: data.skills && data.skills.length > 0 ? data.skills : [{ name: '', level: 50 }],
           socialLinks: {
             github: data.socialLinks?.github || '',
             linkedin: data.socialLinks?.linkedin || '',
@@ -115,8 +119,36 @@ const AdminPersonal = () => {
     }
   };
 
+  const handleSkillChange = (index, field, value) => {
+    const updatedSkills = [...formData.skills];
+    updatedSkills[index] = { ...updatedSkills[index], [field]: value };
+    setFormData(prev => ({ ...prev, skills: updatedSkills }));
+  };
+
+  const addSkill = () => {
+    setFormData(prev => ({
+      ...prev,
+      skills: [...prev.skills, { name: '', level: 50 }]
+    }));
+  };
+
+  const removeSkill = (index) => {
+    if (formData.skills.length <= 1) {
+      toast({
+        title: 'Cannot Remove Skill',
+        description: 'You must have at least one skill.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    const updatedSkills = formData.skills.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, skills: updatedSkills }));
+  };
+
   const validateForm = () => {
     const newErrors = {};
+    
     
     if (!formData.name.trim()) newErrors.name = 'Name is required';
     if (!formData.title.trim()) newErrors.title = 'Title is required';
@@ -450,6 +482,61 @@ const AdminPersonal = () => {
                   {errors.bio && <p className="text-red-400 text-sm mt-1">{errors.bio}</p>}
                 </div>
               </form>
+            </CardContent>
+          </Card>
+
+          {/* Skills */}
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white">Technical Skills</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {formData.skills.map((skill, index) => (
+                <div key={index} className="grid grid-cols-12 gap-4 items-center">
+                  <div className="col-span-5">
+                    <input
+                      type="text"
+                      value={skill.name}
+                      onChange={(e) => handleSkillChange(index, 'name', e.target.value)}
+                      placeholder="Skill name"
+                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="col-span-5">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={skill.level}
+                      onChange={(e) => handleSkillChange(index, 'level', parseInt(e.target.value))}
+                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <div className="flex justify-between text-xs text-gray-400 mt-1">
+                      <span>0%</span>
+                      <span>{skill.level}%</span>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                  <div className="col-span-2 flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => removeSkill(index)}
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addSkill}
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
+              >
+                Add Skill
+              </Button>
             </CardContent>
           </Card>
 

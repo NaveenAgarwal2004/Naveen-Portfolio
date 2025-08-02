@@ -135,6 +135,17 @@ const personalValidation = [
     .trim()
     .custom((value) => !value || value.trim().length > 0)
     .withMessage('Profile image public ID must be a string'),
+  body('skills')
+    .optional()
+    .isArray()
+    .withMessage('Skills must be an array'),
+  body('skills.*.name')
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Skill name must be between 1 and 100 characters'),
+  body('skills.*.level')
+    .isInt({ min: 0, max: 100 })
+    .withMessage('Skill level must be between 0 and 100'),
   body('socialLinks.github')
     .optional()
     .trim()

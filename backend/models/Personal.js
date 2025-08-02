@@ -66,6 +66,19 @@ const personalSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  skills: [{
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    level: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 100
+    }
+  }],
   socialLinks: {
     github: { type: String, default: '' },
     linkedin: { type: String, default: '' },
