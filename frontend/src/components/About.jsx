@@ -47,20 +47,20 @@ const About = ({ personalData }) => {
           {/* Left Side - Image and Info */}
           <div className="space-y-8">
             {/* Profile Image */}
-            <div className="relative group">
-              <div className="w-80 h-80 mx-auto rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 p-1">
-                <div className="w-full h-full rounded-2xl overflow-hidden">
-                  <img 
-                    src={displayData.profileImageUrl || "Naveen.jpg"}
-                    alt={displayData.name || "Naveen Agarwal"}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    onError={(e) => {
-                      e.target.src = "Naveen.jpg";
-                    }}
-                  />
+              <div className="relative group">
+                <div className="w-80 h-80 mx-auto rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 p-1">
+                  <div className="w-full h-full rounded-2xl overflow-hidden">
+                    <img 
+                      src={displayData.profileImageUrl || "/Naveen.jpg"}
+                      alt={displayData.name || "Naveen Agarwal"}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        e.target.src = "/Naveen.jpg";
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
             {/* Contact Info Card */}
             <Card className="bg-gray-700/50 border-gray-600">

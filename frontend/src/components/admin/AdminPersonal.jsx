@@ -190,15 +190,21 @@ const AdminPersonal = () => {
       return;
     }
 
+    // Filter out skills with empty names before sending to backend
+    const filteredFormData = {
+      ...formData,
+      skills: formData.skills.filter(skill => skill.name.trim() !== '')
+    };
+
     setSaving(true);
     try {
-      const response = await adminAPI.updatePersonal(formData);
+      const response = await adminAPI.updatePersonal(filteredFormData);
       if (response.data.success) {
         toast({
           title: 'Personal Info Updated',
           description: 'Your personal information has been updated successfully.',
         });
-        setOriginalData(formData);
+        setOriginalData(filteredFormData);
       } else {
         toast({
           title: 'Update Failed',
@@ -727,11 +733,11 @@ const AdminPersonal = () => {
                       className="hidden"
                       id="profile-image"
                     />
-                    <label htmlFor="profile-image">
+                    <label htmlFor="profile-image" className="cursor-pointer">
                       <Button
                         type="button"
                         variant="outline"
-                        className="border-gray-600 text-gray-300 hover:bg-gray-700 cursor-pointer"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700"
                         disabled={uploadingImage}
                       >
                         {uploadingImage ? (
@@ -783,11 +789,11 @@ const AdminPersonal = () => {
                         className="hidden"
                         id="resume-upload"
                       />
-                      <label htmlFor="resume-upload">
+                      <label htmlFor="resume-upload" className="cursor-pointer">
                         <Button
                           type="button"
                           variant="outline"
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full cursor-pointer"
+                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
                           disabled={uploadingResume}
                         >
                           {uploadingResume ? (
@@ -829,11 +835,11 @@ const AdminPersonal = () => {
                         className="hidden"
                         id="frontend-resume-upload"
                       />
-                      <label htmlFor="frontend-resume-upload">
+                      <label htmlFor="frontend-resume-upload" className="cursor-pointer">
                         <Button
                           type="button"
                           variant="outline"
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full cursor-pointer"
+                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
                           disabled={uploadingResume}
                         >
                           {uploadingResume ? (
@@ -875,11 +881,11 @@ const AdminPersonal = () => {
                         className="hidden"
                         id="backend-resume-upload"
                       />
-                      <label htmlFor="backend-resume-upload">
+                      <label htmlFor="backend-resume-upload" className="cursor-pointer">
                         <Button
                           type="button"
                           variant="outline"
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full cursor-pointer"
+                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
                           disabled={uploadingResume}
                         >
                           {uploadingResume ? (
