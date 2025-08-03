@@ -4,8 +4,9 @@
   "description": "Backend API for Naveen Agarwal's Portfolio Website",
   "main": "server.js",
   "scripts": {
-    "start": "npm run seed-if-empty && node server.js",
-    "seed-if-empty": "node scripts/checkAndSeed.js",
+    "start": "node server.js",
+    "start:with-seed": "npm run seed-if-empty && node server.js",
+    "seed-if-empty": "timeout 30s node scripts/checkAndSeed.js || true",
     "dev": "nodemon server.js",
     "seed": "node scripts/seedDatabase.js",
     "test": "echo \"Error: no test specified\" && exit 1",
