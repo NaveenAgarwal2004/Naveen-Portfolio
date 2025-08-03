@@ -29,13 +29,18 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    const allowedOrigins = [
+    // Get allowed origins from environment variable or use defaults
+    const envAllowedOrigins = process.env.ALLOWED_ORIGINS ? 
+      process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()) : [];
+    
+    const defaultAllowedOrigins = [
       'http://localhost:3000',
       'http://127.0.0.1:3000',
       'https://naveenagarwal-portfolio.vercel.app',
-      'https://naveen-portfolio-il6e.onrender.com',
-      'https://naveenagarwal-portfolio.vercel.app/'
+      'https://naveen-portfolio-il6e.onrender.com'
     ];
+    
+    const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...envAllowedOrigins])];
     
     // Check if origin is in allowed list or is a Vercel preview URL
     if (allowedOrigins.includes(origin) || 

@@ -36,9 +36,22 @@ const SEO = ({ title, description, keywords }) => {
 const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [portfolioData, setPortfolioData] = useState(null);
+  const [error, setError] = useState(null);
 
-  const fetchPortfolioData = async () => {
+  const fetchPortfolioData = async (useCache = true) => {
     try {
+      // Try to get data from localStorage cache first (valid for 5 minutes)
+      const cachedData = useCache ? localStorage.getItem('portfolioData') : null;
+      const cacheTimestamp = useCache ? localStorage.getItem('portfolioDataTimestamp') : null;
+      const now = new Date().getTime();
+      const cacheValid = cacheTimestamp && (now - parseInt(cacheTimestamp)) < 5 * 60 * 1000; // 5 minutes
+
+      if (cachedData && cacheValid) {
+        setPortfolioData(JSON.parse(cachedData));
+        setIsLoading(false);
+        return;
+      }
+
       const [personalResponse, projectsResponse, techStackResponse, statsResponse] = await Promise.all([
         portfolioAPI.getPersonal(),
         portfolioAPI.getProjects(),
@@ -46,49 +59,64 @@ const Home = () => {
         portfolioAPI.getStats()
       ]);
 
-      setPortfolioData({
+      const data = {
         personal: personalResponse.data.data,
         projects: projectsResponse.data.data,
         techStack: techStackResponse.data.data,
         stats: statsResponse.data.data
-      });
+      };
+
+      setPortfolioData(data);
+      
+      // Cache the data in localStorage
+      localStorage.setItem('portfolioData', JSON.stringify(data));
+      localStorage.setItem('portfolioDataTimestamp', now.toString());
     } catch (error) {
       console.error('Error fetching portfolio data:', error);
-      // Set fallback data
-      setPortfolioData({
-        personal: {
-          name: 'Naveen Agarwal',
-          title: 'Front-End Web Developer',
-          tagline: 'Building modern, responsive web experiences with clean code and creative design'
-        },
-        projects: [],
-        techStack: [],
-        stats: {}
-      });
+      
+      // Try to use cached data even if it's older
+      const cachedData = localStorage.getItem('portfolioData');
+      if (cachedData) {
+        setPortfolioData(JSON.parse(cachedData));
+        setError('Using cached data. Having trouble connecting to the server.');
+      } else {
+        // Set fallback data
+        setPortfolioData({
+          personal: {
+            name: 'Naveen Agarwal',
+            title: 'Front-End Web Developer',
+            tagline: 'Building modern, responsive web experiences with clean code and creative design'
+          },
+          projects: [],
+          techStack: [],
+          stats: {}
+        });
+        setError('Using fallback data. Having trouble connecting to the server.');
+      }
     } finally {
-      setTimeout(() => setIsLoading(false), 1000);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     // Fetch initial portfolio data
-    const debounceTimeout = setTimeout(() => {
-      fetchPortfolioData();
-    }, 500);
+    fetchPortfolioData();
 
-    return () => clearTimeout(debounceTimeout);
-  }, []);
-
-  useEffect(() => {
     // Listen for personal data updates from AdminPersonal component
     const handlePersonalDataUpdate = () => {
-      fetchPortfolioData();
+      fetchPortfolioData(false); // Don't use cache when personal data is updated
     };
 
     window.addEventListener('personalDataUpdated', handlePersonalDataUpdate);
 
+    // Refresh data every 5 minutes
+    const interval = setInterval(() => {
+      fetchPortfolioData();
+    }, 5 * 60 * 1000); // 5 minutes
+
     return () => {
       window.removeEventListener('personalDataUpdated', handlePersonalDataUpdate);
+      clearInterval(interval);
     };
   }, []);
 
@@ -98,6 +126,7 @@ const Home = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-400">Loading portfolio...</p>
+          {error && <p className="text-yellow-400 mt-2">{error}</p>}
         </div>
       </div>
     );

@@ -36,8 +36,12 @@ const Header = () => {
 
   const resumes = personalData ? [
     {
+      name: "Main Resume",
+      url: personalData.resumeUrl || "/Naveen Agarwal - Frontend.pdf"
+    },
+    {
       name: "Frontend Resume",
-      url: (personalData.resumeUrl || personalData.frontendResumeUrl) || "/Naveen Agarwal - Frontend.pdf"
+      url: personalData.frontendResumeUrl || "/Naveen Agarwal - Frontend.pdf"
     },
     {
       name: "Backend Resume",

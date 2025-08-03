@@ -12,8 +12,12 @@ const About = ({ personalData }) => {
 
   const resumes = personalData ? [
     {
+      name: "Main Resume",
+      url: personalData.resumeUrl || "/Naveen Agarwal - Frontend.pdf"
+    },
+    {
       name: "Frontend Resume",
-      url: (personalData.resumeUrl || personalData.frontendResumeUrl) || "/Naveen Agarwal - Frontend.pdf"
+      url: personalData.frontendResumeUrl || "/Naveen Agarwal - Frontend.pdf"
     },
     {
       name: "Backend Resume",
@@ -22,7 +26,6 @@ const About = ({ personalData }) => {
   ] : [];
 
   const handleDownloadResume = (url, name) => {
-    // Download resume from public folder
     const link = document.createElement('a');
     link.href = url;
     link.download = name;
