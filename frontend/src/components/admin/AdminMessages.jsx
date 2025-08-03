@@ -13,7 +13,9 @@ import {
   Calendar,
   CheckCircle,
   AlertCircle,
-  MailOpen
+  MailOpen,
+  Menu,
+  X
 } from 'lucide-react';
 import { adminAPI } from '../../services/api';
 import { useToast } from '../../hooks/use-toast';
@@ -28,6 +30,7 @@ const AdminMessages = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
 
   const statusOptions = ['All', 'new', 'read', 'replied', 'archived'];
@@ -47,7 +50,6 @@ const AdminMessages = () => {
     try {
       const response = await adminAPI.getMessages();
       if (response.data.success) {
-        // Backend returns { contacts, pagination } object, extract contacts array
         const contactsData = response.data.data?.contacts || response.data.data;
         setMessages(Array.isArray(contactsData) ? contactsData : []);
       }
@@ -58,7 +60,6 @@ const AdminMessages = () => {
         description: 'Failed to fetch messages.',
         variant: 'destructive',
       });
-      // Set empty array on error to prevent filter errors
       setMessages([]);
     } finally {
       setLoading(false);
@@ -90,7 +91,6 @@ const AdminMessages = () => {
     setSelectedMessage(message);
     setShowMessageModal(true);
     
-    // Mark as read if it's new
     if (message.status === 'new') {
       updateMessageStatus(message._id, 'read');
     }
@@ -122,7 +122,6 @@ const AdminMessages = () => {
     });
   };
 
-  // Filter messages
   const filteredMessages = messages.filter(message => {
     const matchesSearch = 
       message.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -146,12 +145,12 @@ const AdminMessages = () => {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-700 rounded w-64"></div>
-          <div className="space-y-4">
+      <div className="p-4 md:p-6">
+        <div className="animate-pulse space-y-4 md:space-y-6">
+          <div className="h-6 md:h-8 bg-gray-700 rounded w-48 md:w-64"></div>
+          <div className="space-y-3 md:space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-700 rounded"></div>
+              <div key={i} className="h-20 md:h-24 bg-gray-700 rounded"></div>
             ))}
           </div>
         </div>
@@ -160,59 +159,72 @@ const AdminMessages = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <MessageSquare className="h-8 w-8 text-green-400" />
-            Messages Management
+          <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2 md:gap-3">
+            <MessageSquare className="h-6 w-6 md:h-8 md:w-8 text-green-400" />
+            <span className="hidden sm:inline">Messages Management</span>
+            <span className="sm:hidden">Messages</span>
           </h1>
-          <p className="text-gray-400 mt-2">
+          <p className="text-gray-400 mt-1 md:mt-2 text-sm md:text-base">
             Manage contact form submissions and inquiries.
           </p>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Stats - Mobile responsive grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-white">{messages.length}</p>
-            <p className="text-sm text-gray-400">Total Messages</p>
+          <CardContent className="p-3 md:p-4 text-center">
+            <p className="text-xl md:text-2xl font-bold text-white">{messages.length}</p>
+            <p className="text-xs md:text-sm text-gray-400">Total</p>
           </CardContent>
         </Card>
         <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-green-400">
+          <CardContent className="p-3 md:p-4 text-center">
+            <p className="text-xl md:text-2xl font-bold text-green-400">
               {messages.filter(m => m.status === 'new').length}
             </p>
-            <p className="text-sm text-gray-400">New</p>
+            <p className="text-xs md:text-sm text-gray-400">New</p>
           </CardContent>
         </Card>
         <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-yellow-400">
+          <CardContent className="p-3 md:p-4 text-center">
+            <p className="text-xl md:text-2xl font-bold text-yellow-400">
               {messages.filter(m => m.status === 'read').length}
             </p>
-            <p className="text-sm text-gray-400">Read</p>
+            <p className="text-xs md:text-sm text-gray-400">Read</p>
           </CardContent>
         </Card>
         <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-blue-400">
+          <CardContent className="p-3 md:p-4 text-center">
+            <p className="text-xl md:text-2xl font-bold text-blue-400">
               {messages.filter(m => m.status === 'replied').length}
             </p>
-            <p className="text-sm text-gray-400">Replied</p>
+            <p className="text-xs md:text-sm text-gray-400">Replied</p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Mobile Filter Toggle */}
+      <div className="md:hidden">
+        <Button
+          onClick={() => setShowFilters(!showFilters)}
+          variant="outline"
+          className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+        >
+          <Filter className="h-4 w-4 mr-2" />
+          {showFilters ? 'Hide Filters' : 'Show Filters'}
+        </Button>
+      </div>
+
       {/* Filters */}
-      <Card className="bg-gray-800 border-gray-700">
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="flex gap-4 items-center">
+      <Card className={`bg-gray-800 border-gray-700 ${showFilters || 'hidden md:block'}`}>
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-stretch sm:items-center">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <input
@@ -220,16 +232,16 @@ const AdminMessages = () => {
                   placeholder="Search messages..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="pl-10 pr-4 py-2 w-full sm:w-auto bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
               
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-gray-400" />
+                <Filter className="h-4 w-4 text-gray-400 hidden sm:block" />
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-gray-700 border border-gray-600 rounded-lg text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="bg-gray-700 border border-gray-600 rounded-lg text-white px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   {statusOptions.map(status => (
                     <option key={status} value={status}>
@@ -246,10 +258,10 @@ const AdminMessages = () => {
       {/* Messages List */}
       {filteredMessages.length === 0 ? (
         <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-12 text-center">
-            <MessageSquare className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2">No messages found</h3>
-            <p className="text-gray-400">
+          <CardContent className="p-8 md:p-12 text-center">
+            <MessageSquare className="h-8 w-8 md:h-12 md:w-12 text-gray-500 mx-auto mb-3 md:mb-4" />
+            <h3 className="text-base md:text-lg font-medium text-white mb-2">No messages found</h3>
+            <p className="text-gray-400 text-sm md:text-base">
               {searchTerm || statusFilter !== 'All' 
                 ? 'No messages match your search criteria.' 
                 : 'No contact messages yet.'}
@@ -257,7 +269,7 @@ const AdminMessages = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {filteredMessages.map((message) => (
             <Card 
               key={message._id} 
@@ -266,8 +278,68 @@ const AdminMessages = () => {
               }`}
               onClick={() => handleViewMessage(message)}
             >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-3 md:p-4">
+                {/* Mobile Layout */}
+                <div className="md:hidden space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                        <User className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <div>
+                        <h3 className={`font-medium text-sm ${message.status === 'new' ? 'text-white' : 'text-gray-300'}`}>
+                          {message.name}
+                        </h3>
+                        <p className="text-xs text-gray-400">{message.email}</p>
+                      </div>
+                    </div>
+                    <Badge 
+                      className={`${statusColors[message.status]} text-white text-xs flex items-center gap-1`}
+                    >
+                      {getStatusIcon(message.status)}
+                      {message.status}
+                    </Badge>
+                  </div>
+                  
+                  <p className={`text-sm line-clamp-2 ${message.status === 'new' ? 'text-gray-300' : 'text-gray-400'}`}>
+                    {message.message}
+                  </p>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-gray-400 text-xs">
+                      <Calendar className="h-3 w-3" />
+                      <span>{formatDate(message.createdAt)}</span>
+                    </div>
+                    
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-blue-400 hover:bg-blue-400/20 h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReply(message);
+                        }}
+                      >
+                        <Reply className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-gray-400 hover:bg-gray-600 h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateMessageStatus(message._id, 'archived');
+                        }}
+                      >
+                        <Archive className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden md:flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
                     <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
                       <User className="h-6 w-6 text-gray-400" />
@@ -343,9 +415,9 @@ const AdminMessages = () => {
       {showMessageModal && selectedMessage && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="bg-gray-800 border-gray-700 w-full max-w-2xl max-h-[90vh] overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-gray-700 p-4">
               <div>
-                <CardTitle className="text-white">Message Details</CardTitle>
+                <CardTitle className="text-white text-lg">Message Details</CardTitle>
                 <p className="text-gray-400 text-sm mt-1">
                   From {selectedMessage.name} • {formatDate(selectedMessage.createdAt)}
                 </p>
@@ -354,24 +426,24 @@ const AdminMessages = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowMessageModal(false)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 hover:text-white h-8 w-8 p-0"
               >
-                ×
+                <X className="h-4 w-4" />
               </Button>
             </CardHeader>
             
-            <CardContent className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+            <CardContent className="p-4 md:p-6 space-y-4 md:space-y-6 overflow-y-auto max-h-[calc(90vh-200px)]">
               {/* Sender Info */}
-              <div className="flex items-center gap-4 p-4 bg-gray-700/30 rounded-lg">
-                <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
-                  <User className="h-6 w-6 text-gray-400" />
+              <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-gray-700/30 rounded-lg">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-700 rounded-full flex items-center justify-center">
+                  <User className="h-5 w-5 md:h-6 md:w-6 text-gray-400" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-white font-medium">{selectedMessage.name}</h3>
-                  <p className="text-gray-400 text-sm">{selectedMessage.email}</p>
+                  <h3 className="text-white font-medium text-sm md:text-base">{selectedMessage.name}</h3>
+                  <p className="text-gray-400 text-xs md:text-sm">{selectedMessage.email}</p>
                 </div>
                 <Badge 
-                  className={`${statusColors[selectedMessage.status]} text-white flex items-center gap-1`}
+                  className={`${statusColors[selectedMessage.status]} text-white flex items-center gap-1 text-xs`}
                 >
                   {getStatusIcon(selectedMessage.status)}
                   {selectedMessage.status}
@@ -380,19 +452,19 @@ const AdminMessages = () => {
 
               {/* Message Content */}
               <div>
-                <h4 className="text-white font-medium mb-3">Message:</h4>
-                <div className="bg-gray-700/30 rounded-lg p-4">
-                  <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                <h4 className="text-white font-medium mb-3 text-sm md:text-base">Message:</h4>
+                <div className="bg-gray-700/30 rounded-lg p-3 md:p-4">
+                  <p className="text-gray-300 leading-relaxed whitespace-pre-wrap text-sm md:text-base">
                     {selectedMessage.message}
                   </p>
                 </div>
               </div>
 
               {/* Metadata */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-700">
                 <div>
-                  <p className="text-gray-400 text-sm">Received</p>
-                  <p className="text-white">
+                  <p className="text-gray-400 text-xs md:text-sm">Received</p>
+                  <p className="text-white text-sm md:text-base">
                     {new Date(selectedMessage.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -403,7 +475,7 @@ const AdminMessages = () => {
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-sm">Status</p>
+                  <p className="text-gray-400 text-xs md:text-sm">Status</p>
                   <div className="flex items-center gap-2 mt-1">
                     <select
                       value={selectedMessage.status}
@@ -411,7 +483,7 @@ const AdminMessages = () => {
                         updateMessageStatus(selectedMessage._id, e.target.value);
                         setSelectedMessage(prev => ({ ...prev, status: e.target.value }));
                       }}
-                      className="bg-gray-700 border border-gray-600 rounded text-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="bg-gray-700 border border-gray-600 rounded text-white px-2 py-1 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
                       {statusOptions.slice(1).map(status => (
                         <option key={status} value={status}>
@@ -424,10 +496,10 @@ const AdminMessages = () => {
               </div>
             </CardContent>
 
-            <div className="border-t border-gray-700 p-4 flex gap-3">
+            <div className="border-t border-gray-700 p-3 md:p-4 flex flex-col sm:flex-row gap-2 md:gap-3">
               <Button
                 onClick={() => handleReply(selectedMessage)}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-sm"
               >
                 <Reply className="h-4 w-4 mr-2" />
                 Reply via Email
@@ -435,7 +507,7 @@ const AdminMessages = () => {
               <Button
                 variant="outline"
                 onClick={() => updateMessageStatus(selectedMessage._id, 'archived')}
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 text-sm"
               >
                 <Archive className="h-4 w-4 mr-2" />
                 Archive
@@ -443,7 +515,7 @@ const AdminMessages = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowMessageModal(false)}
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 text-sm sm:hidden"
               >
                 Close
               </Button>
