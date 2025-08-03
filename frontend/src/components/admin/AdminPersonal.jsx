@@ -231,6 +231,12 @@ const AdminPersonal = () => {
           description: 'Your personal information has been updated successfully.',
         });
         setOriginalData(filteredFormData);
+        
+        // Refetch personal data to update state with latest info
+        await fetchPersonalData();
+        
+        // Dispatch a custom event to notify other components that personal data has been updated
+        window.dispatchEvent(new CustomEvent('personalDataUpdated'));
       } else {
         toast({
           title: 'Update Failed',

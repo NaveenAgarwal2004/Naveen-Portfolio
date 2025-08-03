@@ -37,46 +37,59 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [portfolioData, setPortfolioData] = useState(null);
 
+  const fetchPortfolioData = async () => {
+    try {
+      const [personalResponse, projectsResponse, techStackResponse, statsResponse] = await Promise.all([
+        portfolioAPI.getPersonal(),
+        portfolioAPI.getProjects(),
+        portfolioAPI.getTechStack(),
+        portfolioAPI.getStats()
+      ]);
+
+      setPortfolioData({
+        personal: personalResponse.data.data,
+        projects: projectsResponse.data.data,
+        techStack: techStackResponse.data.data,
+        stats: statsResponse.data.data
+      });
+    } catch (error) {
+      console.error('Error fetching portfolio data:', error);
+      // Set fallback data
+      setPortfolioData({
+        personal: {
+          name: 'Naveen Agarwal',
+          title: 'Front-End Web Developer',
+          tagline: 'Building modern, responsive web experiences with clean code and creative design'
+        },
+        projects: [],
+        techStack: [],
+        stats: {}
+      });
+    } finally {
+      setTimeout(() => setIsLoading(false), 1000);
+    }
+  };
+
   useEffect(() => {
-    const fetchPortfolioData = async () => {
-      try {
-        const [personalResponse, projectsResponse, techStackResponse, statsResponse] = await Promise.all([
-          portfolioAPI.getPersonal(),
-          portfolioAPI.getProjects(),
-          portfolioAPI.getTechStack(),
-          portfolioAPI.getStats()
-        ]);
-
-        setPortfolioData({
-          personal: personalResponse.data.data,
-          projects: projectsResponse.data.data,
-          techStack: techStackResponse.data.data,
-          stats: statsResponse.data.data
-        });
-      } catch (error) {
-        console.error('Error fetching portfolio data:', error);
-        // Set fallback data
-        setPortfolioData({
-          personal: {
-            name: 'Naveen Agarwal',
-            title: 'Front-End Web Developer',
-            tagline: 'Building modern, responsive web experiences with clean code and creative design'
-          },
-          projects: [],
-          techStack: [],
-          stats: {}
-        });
-      } finally {
-        setTimeout(() => setIsLoading(false), 1000);
-      }
-    };
-
-    // Debounce fetchPortfolioData to reduce rapid calls
+    // Fetch initial portfolio data
     const debounceTimeout = setTimeout(() => {
       fetchPortfolioData();
     }, 500);
 
     return () => clearTimeout(debounceTimeout);
+  }, []);
+
+  useEffect(() => {
+    // Listen for personal data updates from AdminPersonal component
+    const handlePersonalDataUpdate = () => {
+      fetchPortfolioData();
+    };
+
+    window.addEventListener('personalDataUpdated', handlePersonalDataUpdate);
+
+    return () => {
+      window.removeEventListener('personalDataUpdated', handlePersonalDataUpdate);
+    };
   }, []);
 
   if (isLoading) {
