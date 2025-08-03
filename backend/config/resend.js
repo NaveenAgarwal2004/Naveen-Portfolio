@@ -5,9 +5,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const sendContactEmail = async ({ name, email, message }) => {
   try {
     await resend.emails.send({
-      from: 'Naveen Agarwal <onboarding@resend.dev>', // Verified domain sender
-      to: 'naveenagarwal7624@gmail.com',               // Your admin inbox
-      replyTo: email,                                  // So you can reply directly
+      from: 'Naveen Agarwal <onboarding@resend.dev>',
+      to: 'naveenagarwal7624@gmail.com',
+      replyTo: email,
       subject: 'New Contact Message from Portfolio',
       html: `
         <h2>New Contact Message</h2>

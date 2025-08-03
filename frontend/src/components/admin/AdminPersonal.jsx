@@ -55,12 +55,31 @@ const AdminPersonal = () => {
     fetchPersonalData();
   }, []);
 
-    const fetchPersonalData = async () => {
+  const fetchPersonalData = async () => {
     setLoading(true);
     try {
+      console.log("🚀 Fetching personal data...");
       const response = await adminAPI.getPersonal();
+      
+      // DEBUG: Log the full API response
+      console.log("📡 Full API Response:", response);
+      console.log("📊 Response Data:", response.data);
+      
       if (response.data.success) {
         const data = response.data.data;
+        
+        // DEBUG: Log profile image specific data
+        console.log("🖼️ Profile Image URL from backend:", data.profileImageUrl);
+        console.log("🆔 Profile Image Public ID:", data.profileImagePublicId);
+        console.log("📋 All personal data fields:", {
+          name: data.name,
+          profileImageUrl: data.profileImageUrl,
+          profileImagePublicId: data.profileImagePublicId,
+          resumeUrl: data.resumeUrl,
+          frontendResumeUrl: data.frontendResumeUrl,
+          backendResumeUrl: data.backendResumeUrl,
+        });
+        
         setFormData({
           name: data.name || '',
           title: data.title || '',
@@ -81,10 +100,18 @@ const AdminPersonal = () => {
             twitter: data.socialLinks?.twitter || ''
           }
         });
+        
+        // DEBUG: Log what was set in formData
+        console.log("✅ FormData after setting:", {
+          profileImageUrl: data.profileImageUrl || '',
+          name: data.name || ''
+        });
+        
         setOriginalData(data);
       }
     } catch (error) {
-      console.error('Error fetching personal data:', error);
+      console.error('❌ Error fetching personal data:', error);
+      console.error('❌ Error details:', error.response?.data);
       toast({
         title: 'Error',
         description: 'Failed to fetch personal information.',
@@ -148,7 +175,6 @@ const AdminPersonal = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
     
     if (!formData.name.trim()) newErrors.name = 'Name is required';
     if (!formData.title.trim()) newErrors.title = 'Title is required';
@@ -276,10 +302,11 @@ const AdminPersonal = () => {
         }
         toast({
           title: 'Resume Uploaded',
-          description: `Your ${resumeType} resume has been uploaded successfully.`,
+          description: `Your ${resumeType} resume has been uploaded successfully. Don't forget to save changes!`,
         });
       }
     } catch (error) {
+      console.error('Resume upload error:', error);
       toast({
         title: 'Upload Failed',
         description: `Failed to upload ${resumeType} resume.`,
@@ -287,6 +314,8 @@ const AdminPersonal = () => {
       });
     } finally {
       setUploadingResume(false);
+      // Clear the file input
+      e.target.value = '';
     }
   };
 
@@ -314,18 +343,25 @@ const AdminPersonal = () => {
 
     setUploadingImage(true);
     try {
+      console.log("📤 Uploading profile image...");
       const response = await adminAPI.uploadProfileImage(file);
+      console.log("📸 Upload response:", response.data);
+      
       if (response.data.success) {
         setFormData(prev => ({
           ...prev,
           profileImageUrl: response.data.data.url
         }));
+        
+        console.log("✅ Profile image updated in state:", response.data.data.url);
+        
         toast({
           title: 'Profile Image Uploaded',
-          description: 'Your profile image has been uploaded successfully.',
+          description: 'Your profile image has been uploaded successfully. Don\'t forget to save changes!',
         });
       }
     } catch (error) {
+      console.error('❌ Profile image upload error:', error);
       toast({
         title: 'Upload Failed',
         description: 'Failed to upload profile image.',
@@ -333,6 +369,8 @@ const AdminPersonal = () => {
       });
     } finally {
       setUploadingImage(false);
+      // Clear the file input
+      e.target.value = '';
     }
   };
 
@@ -351,6 +389,9 @@ const AdminPersonal = () => {
       </div>
     );
   }
+
+  // DEBUG: Log current state before render
+  console.log("🎨 Rendering with profileImageUrl:", formData.profileImageUrl);
 
   return (
     <div className="p-6 space-y-6">
@@ -719,6 +760,13 @@ const AdminPersonal = () => {
                       src={formData.profileImageUrl} 
                       alt="Profile"
                       className="w-20 h-20 rounded-full object-cover border-2 border-gray-600"
+                      onError={(e) => {
+                        console.error('❌ Profile image failed to load:', formData.profileImageUrl);
+                        e.target.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('✅ Profile image loaded successfully:', formData.profileImageUrl);
+                      }}
                     />
                   ) : (
                     <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center border-2 border-gray-600">
@@ -733,26 +781,25 @@ const AdminPersonal = () => {
                       className="hidden"
                       id="profile-image"
                     />
-                    <label htmlFor="profile-image" className="cursor-pointer">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                        disabled={uploadingImage}
-                      >
-                        {uploadingImage ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Uploading...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="h-4 w-4 mr-2" />
-                            Upload Image
-                          </>
-                        )}
-                      </Button>
-                    </label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                      disabled={uploadingImage}
+                      onClick={() => document.getElementById('profile-image').click()}
+                    >
+                      {uploadingImage ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Image
+                        </>
+                      )}
+                    </Button>
                     <p className="text-xs text-gray-400 mt-1">
                       Recommended: 400x400px, Max 2MB
                     </p>
@@ -789,26 +836,25 @@ const AdminPersonal = () => {
                         className="hidden"
                         id="resume-upload"
                       />
-                      <label htmlFor="resume-upload" className="cursor-pointer">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
-                          disabled={uploadingResume}
-                        >
-                          {uploadingResume ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="h-4 w-4 mr-2" />
-                              {formData.resumeUrl ? 'Replace Resume' : 'Upload Resume'}
-                            </>
-                          )}
-                        </Button>
-                      </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
+                        disabled={uploadingResume}
+                        onClick={() => document.getElementById('resume-upload').click()}
+                      >
+                        {uploadingResume ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            {formData.resumeUrl ? 'Replace Resume' : 'Upload Resume'}
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
 
@@ -835,26 +881,25 @@ const AdminPersonal = () => {
                         className="hidden"
                         id="frontend-resume-upload"
                       />
-                      <label htmlFor="frontend-resume-upload" className="cursor-pointer">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
-                          disabled={uploadingResume}
-                        >
-                          {uploadingResume ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="h-4 w-4 mr-2" />
-                              {formData.frontendResumeUrl ? 'Replace Resume' : 'Upload Resume'}
-                            </>
-                          )}
-                        </Button>
-                      </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
+                        disabled={uploadingResume}
+                        onClick={() => document.getElementById('frontend-resume-upload').click()}
+                      >
+                        {uploadingResume ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            {formData.frontendResumeUrl ? 'Replace Resume' : 'Upload Resume'}
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
 
@@ -881,26 +926,25 @@ const AdminPersonal = () => {
                         className="hidden"
                         id="backend-resume-upload"
                       />
-                      <label htmlFor="backend-resume-upload" className="cursor-pointer">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
-                          disabled={uploadingResume}
-                        >
-                          {uploadingResume ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="h-4 w-4 mr-2" />
-                              {formData.backendResumeUrl ? 'Replace Resume' : 'Upload Resume'}
-                            </>
-                          )}
-                        </Button>
-                      </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
+                        disabled={uploadingResume}
+                        onClick={() => document.getElementById('backend-resume-upload').click()}
+                      >
+                        {uploadingResume ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            {formData.backendResumeUrl ? 'Replace Resume' : 'Upload Resume'}
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -923,6 +967,13 @@ const AdminPersonal = () => {
                         src={formData.profileImageUrl} 
                         alt="Profile"
                         className="w-16 h-16 rounded-full object-cover"
+                        onError={(e) => {
+                          console.error('❌ Preview image failed to load:', formData.profileImageUrl);
+                          e.target.style.display = 'none';
+                        }}
+                        onLoad={() => {
+                          console.log('✅ Preview image loaded successfully:', formData.profileImageUrl);
+                        }}
                       />
                     ) : (
                       <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center">
@@ -1042,6 +1093,25 @@ const AdminPersonal = () => {
                             View Backend Resume
                           </Button>
                         )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Skills Preview */}
+                  {formData.skills.some(skill => skill.name.trim()) && (
+                    <div>
+                      <h4 className="text-white font-medium mb-2">Skills</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.skills
+                          .filter(skill => skill.name.trim())
+                          .map((skill, index) => (
+                            <span
+                              key={index}
+                              className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm"
+                            >
+                              {skill.name} ({skill.level}%)
+                            </span>
+                          ))}
                       </div>
                     </div>
                   )}
