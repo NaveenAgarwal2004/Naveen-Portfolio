@@ -116,6 +116,23 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Health check endpoints for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Portfolio API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Root endpoint
 app.get('/api', (req, res) => {
   res.json({ 
@@ -194,11 +211,17 @@ app.use('*', (req, res) => {
   });
 });
 
+// Start server
 const PORT = process.env.PORT || 8001;
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Signal that server is ready (important for Render)
+  if (process.send) {
+    process.send('ready');
+  }
 });
 
 // Handle server startup errors
@@ -208,16 +231,14 @@ server.on('error', (err) => {
 });
 
 // Handle graceful shutdown
-server.on('listening', () => {
-  console.log(`Server is listening on port ${PORT}`);
-});
-
-// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection closed.');
-    process.exit(0);
+  server.close(() => {
+    console.log('Server closed.');
+    mongoose.connection.close(() => {
+      console.log('MongoDB connection closed.');
+      process.exit(0);
+    });
   });
 });
 
