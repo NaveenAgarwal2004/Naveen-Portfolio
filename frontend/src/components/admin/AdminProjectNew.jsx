@@ -86,6 +86,7 @@ const AdminProjectNew = () => {
 
     setLoading(true);
     try {
+      // Convert techStack string to array
       const techStackArray = formData.techStack
         .split(',')
         .map(tech => tech.trim())

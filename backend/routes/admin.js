@@ -623,10 +623,10 @@ router.put('/contact/messages/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!['new', 'read', 'replied'].includes(status)) {
+    if (!['new', 'read', 'replied', 'archived'].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid status. Must be one of: new, read, replied'
+        message: 'Invalid status. Must be one of: new, read, replied, archived'
       });
     }
 

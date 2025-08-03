@@ -48,15 +48,7 @@ const Home = () => {
         ]);
 
         setPortfolioData({
-          personal: {
-            ...personalResponse.data.data,
-            socialLinks: {
-              github: "https://github.com/NaveenAgarwal2004",
-              linkedin: "https://linkedin.com/in/naveen-agar",
-              email: "mailto:naveenagarwal7624@gmail.com",
-              twitter: "https://x.com/NaveenAgar47373"
-            }
-          },
+          personal: personalResponse.data.data,
           projects: projectsResponse.data.data,
           techStack: techStackResponse.data.data,
           stats: statsResponse.data.data

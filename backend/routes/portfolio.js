@@ -8,17 +8,18 @@ const router = express.Router();
 // GET /api/portfolio/personal - Get personal information
 router.get('/personal', async (req, res) => {
   try {
-    let personal = await Personal.findOne();
+    // Always get the personal data from the database
+    const personal = await Personal.findOne();
     
     // If no personal data exists, return default data
     if (!personal) {
-      personal = {
+      const defaultData = {
         name: 'Naveen Agarwal',
         title: 'Front-End Web Developer',
         tagline: 'Building modern, responsive web experiences with clean code and creative design',
         bio: 'Passionate Front-End Developer with expertise in modern web technologies.',
-        email: 'naveen.agarwal.dev@gmail.com',
-        phone: '+91 98765 43210',
+        email: 'naveenagarwal7624@gmail.com',
+        phone: '+91 9079691064',
         location: 'India',
         profileImageUrl: '/Naveen.jpg',
         resumeUrl: '',
@@ -31,17 +32,27 @@ router.get('/personal', async (req, res) => {
           { name: "Python", level: 70 }
         ],
         socialLinks: {
-          github: 'https://github.com/naveen-agarwal',
-          linkedin: 'https://linkedin.com/in/naveen-agarwal-dev',
+          github: 'https://github.com/naveenagarwal2004',
+          linkedin: 'https://linkedin.com/in/naveen-agar',
           twitter: 'https://twitter.com/naveen_dev',
-          email: 'mailto:naveen.agarwal.dev@gmail.com'
+          email: 'mailto:naveenagarwal7624@gmail.com'
         }
       };
+      return res.json({
+        success: true,
+        data: defaultData
+      });
     }
-
+    
+    // If we have personal data, return it with a fallback for profile image
+    const result = {
+      ...personal.toObject(),
+      profileImageUrl: personal.profileImageUrl || '/Naveen.jpg'
+    };
+    
     res.json({
       success: true,
-      data: personal
+      data: result
     });
   } catch (error) {
     console.error('Error fetching personal data:', error);
