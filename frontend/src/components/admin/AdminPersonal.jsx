@@ -58,27 +58,10 @@ const AdminPersonal = () => {
   const fetchPersonalData = async () => {
     setLoading(true);
     try {
-      console.log("🚀 Fetching personal data...");
       const response = await adminAPI.getPersonal();
-      
-      // DEBUG: Log the full API response
-      console.log("📡 Full API Response:", response);
-      console.log("📊 Response Data:", response.data);
       
       if (response.data.success) {
         const data = response.data.data;
-        
-        // DEBUG: Log profile image specific data
-        console.log("🖼️ Profile Image URL from backend:", data.profileImageUrl);
-        console.log("🆔 Profile Image Public ID:", data.profileImagePublicId);
-        console.log("📋 All personal data fields:", {
-          name: data.name,
-          profileImageUrl: data.profileImageUrl,
-          profileImagePublicId: data.profileImagePublicId,
-          resumeUrl: data.resumeUrl,
-          frontendResumeUrl: data.frontendResumeUrl,
-          backendResumeUrl: data.backendResumeUrl,
-        });
         
         setFormData({
           name: data.name || '',
@@ -101,12 +84,6 @@ const AdminPersonal = () => {
           }
         });
         
-        // DEBUG: Log what was set in formData
-        console.log("✅ FormData after setting:", {
-          profileImageUrl: data.profileImageUrl || '',
-          name: data.name || ''
-        });
-        
         setOriginalData(data);
       }
     } catch (error) {
@@ -121,6 +98,7 @@ const AdminPersonal = () => {
       setLoading(false);
     }
   };
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -359,8 +337,6 @@ const AdminPersonal = () => {
           profileImageUrl: response.data.data.url
         }));
         
-        console.log("✅ Profile image updated in state:", response.data.data.url);
-        
         toast({
           title: 'Profile Image Uploaded',
           description: 'Your profile image has been uploaded successfully. Don\'t forget to save changes!',
@@ -395,9 +371,6 @@ const AdminPersonal = () => {
       </div>
     );
   }
-
-  // DEBUG: Log current state before render
-  console.log("🎨 Rendering with profileImageUrl:", formData.profileImageUrl);
 
   return (
     <div className="p-6 space-y-6">

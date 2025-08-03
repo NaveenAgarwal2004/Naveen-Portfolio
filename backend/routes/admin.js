@@ -215,6 +215,13 @@ router.put('/personal', personalValidation, handleValidationErrors, async (req, 
     if (!personal) {
       personal = new Personal(updateData);
     } else {
+      // For nested arrays like skills, we need to explicitly set them to ensure Mongoose detects changes
+      if (updateData.skills) {
+        personal.skills = updateData.skills;
+        delete updateData.skills; // Remove skills from updateData to avoid duplication
+      }
+      
+      // Update all other fields
       Object.assign(personal, updateData);
     }
 
