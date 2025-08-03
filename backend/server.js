@@ -108,6 +108,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Simple health check for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Root endpoint
 app.get('/api', (req, res) => {
   res.json({ 
@@ -188,9 +196,20 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 8001;
 
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Handle server startup errors
+server.on('error', (err) => {
+  console.error('Server failed to start:', err);
+  process.exit(1);
+});
+
+// Handle graceful shutdown
+server.on('listening', () => {
+  console.log(`Server is listening on port ${PORT}`);
 });
 
 // Graceful shutdown
