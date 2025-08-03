@@ -33,7 +33,8 @@ app.use(cors({
       'http://localhost:3000',
       'http://127.0.0.1:3000',
       'https://naveenagarwal-portfolio.vercel.app',
-      'https://naveen-portfolio-il6e.onrender.com'
+      'https://naveen-portfolio-il6e.onrender.com',
+      'https://naveenagarwal-portfolio.vercel.app/'
     ];
     
     // Check if origin is in allowed list or is a Vercel preview URL
