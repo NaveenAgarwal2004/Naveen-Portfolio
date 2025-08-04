@@ -283,26 +283,41 @@ const AdminPersonal = () => {
       }
       
       if (response.data.success) {
+        let updatedData = {};
         if (resumeType === 'frontend') {
+          updatedData.frontendResumeUrl = response.data.data.url;
           setFormData(prev => ({
             ...prev,
             frontendResumeUrl: response.data.data.url
           }));
         } else if (resumeType === 'backend') {
+          updatedData.backendResumeUrl = response.data.data.url;
           setFormData(prev => ({
             ...prev,
             backendResumeUrl: response.data.data.url
           }));
-        } else {
+        } else if (resumeType === 'main') {
+          updatedData.resumeUrl = response.data.data.url;
           setFormData(prev => ({
             ...prev,
             resumeUrl: response.data.data.url
           }));
         }
-        toast({
-          title: 'Resume Uploaded',
-          description: `Your ${resumeType} resume has been uploaded successfully. Don't forget to save changes!`,
-        });
+        // Save updated resume URLs to backend
+        try {
+          await adminAPI.updatePersonal(updatedData);
+          toast({
+            title: 'Resume Uploaded',
+            description: `Your ${resumeType} resume has been uploaded and saved successfully.`,
+          });
+        } catch (saveError) {
+          console.error('Error saving updated resume URL:', saveError);
+          toast({
+            title: 'Save Failed',
+            description: 'Failed to save resume URL after upload.',
+            variant: 'destructive',
+          });
+        }
       }
     } catch (error) {
       console.error('Resume upload error:', error);
