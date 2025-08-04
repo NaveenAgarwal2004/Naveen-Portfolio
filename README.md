@@ -1,130 +1,154 @@
-🚀 Naveen Agarwal — AI Portfolio (Full-Stack MERN)
-This is a dynamic and responsive portfolio website built with the MERN stack, featuring an admin dashboard, secure contact form with email notifications via Resend, and fully customizable content via MongoDB.
+# **Role:**
+Full-Stack Developer – Portfolio Website Creator
 
-🛠 Tech Stack
-⚙️ Backend:
-Node.js + Express.js
+# **Objective:**
+To present a modern, full-stack developer portfolio using React and Express with an integrated admin panel and contact system, designed for hiring managers and collaborators to evaluate skills, projects, and tech stack.
 
-MongoDB + Mongoose
+# **Context:**
+This portfolio is built using the MERN stack (MongoDB, Express, React, Node.js), with full CRUD capabilities via an admin dashboard and a contact form backed by email services. Tailwind CSS and shadcn/ui were used to build a modern and responsive design.
 
-JWT Authentication
+# **Instructions:**
 
-Email Integration: Resend API
+## **Instruction 1 :**
+Clone the repository and set up both frontend and backend separately. Use `.env.example` to configure your environment variables for backend services like MongoDB, Cloudinary, and Resend.
 
-Image Uploads: Cloudinary
+## **Instruction 2 :**
+Use `npm install` and `npm start` (or `npm run dev` for backend) to start both services. The backend runs on port `8001` and serves protected routes for admin functionality.
 
-🎨 Frontend:
-React.js + Vite
+## **Instruction 3 :**
+Log in to the admin dashboard via `/admin/login` and use the UI to manage portfolio content dynamically (projects, personal info, tech stack, and messages).
 
-Tailwind CSS
+# **Notes:**
+- Built with React (CRA), Tailwind CSS, shadcn/ui, Node.js, Express, MongoDB.
+- Includes fully protected admin dashboard using JWT and context-based authentication.
+- Designed to scale and update as the developer adds more projects or changes their stack.
+- Admin credentials are stored securely and managed via environment variables.
 
-ShadCN/UI & Lucide Icons
+---
 
-React Router DOM
+# 🧠 AI-Powered Portfolio – Full-Stack Developer Showcase
 
-Admin Panel with Protected Routes
+A full-stack portfolio website built with React and Express, featuring a dynamic admin panel, contact form, and project showcase. Designed to present your developer profile professionally with clean UI, animations, and robust backend integrations.
 
-📂 Project Structure
-bash
-Copy
-Edit
-root/
-├── backend/             # Express backend API
-│   ├── routes/          # API routes (auth, contact, portfolio, admin)
-│   ├── models/          # MongoDB models
-│   ├── config/          # Cloudinary, Resend config
-│   ├── middleware/      # Auth, validation
-│   └── server.js        # Main backend entry point
-│
-├── frontend/            # React frontend
-│   ├── public/          # Static assets (images, resume)
-│   ├── src/
-│   │   ├── components/  # UI sections (Hero, Projects, Contact etc.)
-│   │   ├── admin/       # Admin panel components
-│   │   ├── services/    # API service functions
-│   │   ├── contexts/    # Auth context
-│   │   └── App.js       # App entry point
-│
-├── .env                 # Environment variables
-├── .gitignore
-├── README.md
-└── package.json
-⚡️ Features
-🔐 Admin Authentication with JWT
+---
 
-✏️ Admin Dashboard to manage projects, tech stack, and personal info
+## 🚀 Tech Stack
 
-📬 Secure Contact Form — sends email notifications via Resend API
+### Frontend
+- **React** (CRA)
+- **Tailwind CSS**
+- **ShadCN/UI Components**
+- **React Router DOM**
+- **Axios**
+- **Context API**
 
-💾 MongoDB Integration for dynamic content
+### Backend
+- **Node.js** + **Express**
+- **MongoDB** + **Mongoose**
+- **JWT Auth**
+- **Resend API** (Email)
+- **Cloudinary** (Resume/Image Upload)
 
-🌐 Fully Responsive UI using Tailwind + ShadCN
+---
 
-📤 Cloudinary File Uploads for project images and resume
+## 🎯 Features
 
-🚧 Setup Instructions
-1. Clone the Repository
-bash
-Copy
-Edit
-git clone https://github.com/yourusername/ai-portfolio.git
-cd ai-portfolio
-2. Setup the Backend
-bash
-Copy
-Edit
+### 🌐 Portfolio Website
+- Responsive UI with animated Hero
+- Project gallery with filtering
+- Tech stack section
+- Contact form (email integration)
+- Resume download
+
+### 🔐 Admin Panel
+- Secure Admin Login
+- Add/Edit/Delete:
+  - Projects
+  - Tech Stack
+  - Personal Info
+- View Contact Messages
+- Admin routes protected via JWT
+
+---
+
+## 🗂️ Project Structure
+
+```
+frontend/
+├── public/
+├── src/
+│   ├── components/ (UI + Pages)
+│   ├── components/admin/ (Admin panel)
+│   ├── components/ui/ (Reusable UI)
+│   ├── services/ (API calls)
+│   ├── contexts/ (Auth Context)
+│   └── hooks/, lib/, mock.js
+backend/
+├── server.js
+├── routes/
+├── models/
+├── middleware/
+├── config/
+├── scripts/ (Seeder scripts)
+```
+
+---
+
+## ⚙️ Getting Started
+
+### 🖥️ Frontend
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+### 🧠 Backend
+
+```bash
 cd backend
 npm install
-Create a .env file in /backend with:
+# Create a .env file (see below)
+npm run dev
+```
 
-env
-Copy
-Edit
+---
+
+## 🔐 Environment Variables
+
+### `.env` (Backend)
+
+```env
 PORT=8001
-MONGO_URL=mongodb://localhost:27017/portfolio
-JWT_SECRET=your_jwt_secret_key
+MONGODB_URL=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=secure_password
+
 RESEND_API_KEY=your_resend_api_key
 CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-FRONTEND_URL=http://localhost:3000
-Start the backend:
+CLOUDINARY_API_KEY=your_cloudinary_key
+CLOUDINARY_API_SECRET=your_cloudinary_secret
+```
 
-bash
-Copy
-Edit
-npm run dev
-3. Setup the Frontend
-bash
-Copy
-Edit
-cd ../frontend
-npm install
-npm run dev
-🌍 Deployment
-You can deploy:
+---
 
-Frontend: on Vercel
+## 📬 Contact
 
-Backend: on Render 
+If you'd like to connect or provide feedback:
 
-🧪 Test Admin Login
-Login URL: /admin/login
+- **LinkedIn**: [linkedin.com/in/naveenagarwal](https://www.linkedin.com/in/naveen-agar)
+- **Email**: naveenagarwal7624@gmail.com
+- **Live Site**: [naveenagarwal-portfolio.vercel.app](https://naveenagarwal-portfolio.vercel.app)
 
-Email: admin@naveen-portfolio.com
+---
 
-Password: N@veenDev#2025
+## 📄 License
 
-📞 Contact
-If you'd like to connect with me:
+MIT License. Free to use with attribution.
 
-📧 Email: naveenagarwal7624@gmail.com
+---
 
-🌐 Portfolio Live
-
-🧑‍💻 GitHub
-
-💼 LinkedIn
-
-📄 License
-This project is licensed under the MIT License.
+> Built with ❤️ by **Naveen Agarwal** – MERN Stack Developer

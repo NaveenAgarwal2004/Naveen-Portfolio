@@ -104,3 +104,6 @@ frontend/public/NaveenAgarwal_Backend.pdf
 # Git Ignore Catch-all (optional)
 # ===================
 *.log
+analyze-project.js
+project-summary.txt
+backend_test.py
