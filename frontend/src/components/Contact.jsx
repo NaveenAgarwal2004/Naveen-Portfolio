@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mail, MapPin, Phone, Github, Linkedin, Twitter, CheckCircle, Clock, Zap } from 'lucide-react';
+import { contactAPI } from '../services/api';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -94,19 +95,25 @@ const Contact = () => {
     });
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await contactAPI.submitContact(formData);
+      if (response.data.success) {
+        setIsSubmitted(true);
+        setFormData({ name: '', email: '', message: '' });
+        setTimeout(() => setIsSubmitted(false), 5000);
+      } else {
+        // handle failure
+        alert(response.data.message || 'Failed to send message');
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || 'Failed to send message');
+    } finally {
       setIsSubmitting(false);
-      setIsSubmitted(true);
-      setFormData({ name: '', email: '', message: '' });
-      
-      // Reset success state after 5 seconds
-      setTimeout(() => setIsSubmitted(false), 5000);
-    }, 2000);
+    }
   };
 
   const contactInfo = [
