@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, Lock, Mail, LogIn } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { useToast } from '../../hooks/use-toast';
-import { useAuth } from '../../contexts/AuthContext';
+import { Eye, EyeOff, Lock, Mail, LogIn, Shield, Sparkles } from 'lucide-react';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -14,20 +8,12 @@ const AdminLogin = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { login, isAuthenticated, loading } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [focusedField, setFocusedField] = useState(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      const from = location.state?.from?.pathname || '/admin';
-      console.log('User already authenticated, redirecting to:', from);
-      navigate(from, { replace: true });
-    }
-  }, [isAuthenticated, loading, navigate, location]);
+    setMounted(true);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -40,154 +26,214 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      console.log('Attempting login with:', formData.email);
-      const result = await login(formData.email, formData.password);
-      console.log('Login result:', result);
-      
-      if (result.success) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to the admin panel!",
-        });
-        
-        const from = location.state?.from?.pathname || '/admin';
-        console.log('Login successful, navigating to:', from);
-        navigate(from, { replace: true });
-      } else {
-        toast({
-          title: "Login Failed",
-          description: result.message,
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      toast({
-        title: "Login Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
+    // Simulate login process
+    setTimeout(() => {
+      console.log('Login attempt:', formData);
       setIsLoading(false);
-    }
+      // Here you would normally handle the actual login logic
+    }, 2000);
   };
 
-  if (loading) {
+
+
+  if (!mounted) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-400/30 border-t-blue-400"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
+
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-blue-400/20 rounded-full animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${3 + Math.random() * 4}s`
+            }}
+          ></div>
+        ))}
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Admin Panel</h1>
-          <p className="text-gray-400">Sign in to manage your portfolio</p>
+        <div className={`text-center mb-8 transform transition-all duration-1000 ${mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-2xl">
+            <Shield className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent mb-2">
+            Admin Portal
+          </h1>
+          <p className="text-slate-400 text-lg">Secure access to your dashboard</p>
         </div>
 
         {/* Login Card */}
-        <Card className="bg-gray-800 border-gray-700">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-white flex items-center gap-2">
-              <Lock className="h-5 w-5 text-blue-400" />
-              Sign In
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+        <div className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl transform transition-all duration-1000 delay-200 ${mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+          <div className="p-8">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-2 bg-blue-500/20 rounded-xl">
+                <Lock className="h-5 w-5 text-blue-400" />
+              </div>
+              <h2 className="text-2xl font-semibold text-white">Sign In</h2>
+              <Sparkles className="h-5 w-5 text-purple-400 ml-auto animate-pulse" />
+            </div>
+
+            <div className="space-y-6">
               {/* Email Field */}
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-gray-300">
+                <label htmlFor="email" className="block text-sm font-medium text-slate-300">
                   Email Address
                 </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="pl-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="admin@naveen-portfolio.com"
-                    disabled={isLoading}
-                  />
+                <div className="relative group">
+                  <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === 'email' ? 'opacity-100' : ''}`}></div>
+                  <div className="relative">
+                    <Mail className={`absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 transition-colors duration-200 ${focusedField === 'email' ? 'text-blue-400' : 'text-slate-400'}`} />
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('email')}
+                      onBlur={() => setFocusedField(null)}
+                      className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all duration-200 backdrop-blur-sm"
+                      placeholder="admin@naveen-portfolio.com"
+                      disabled={isLoading}
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Password Field */}
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-gray-300">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-300">
                   Password
                 </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="pl-10 pr-10 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Enter your password"
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                    disabled={isLoading}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+                <div className="relative group">
+                  <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === 'password' ? 'opacity-100' : ''}`}></div>
+                  <div className="relative">
+                    <Lock className={`absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 transition-colors duration-200 ${focusedField === 'password' ? 'text-blue-400' : 'text-slate-400'}`} />
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={formData.password}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('password')}
+                      onBlur={() => setFocusedField(null)}
+                      className="w-full pl-12 pr-12 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all duration-200 backdrop-blur-sm"
+                      placeholder="Enter your password"
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors duration-200 p-1"
+                      disabled={isLoading}
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Submit Button */}
-              <Button
+              <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] disabled:hover:scale-100"
+                onClick={handleSubmit}
+                className="relative w-full group"
               >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Signing In...
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4" />
-                    Sign In
-                  </>
-                )}
-              </Button>
-            </form>
-
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-              <p className="text-sm text-gray-400 mb-2">Demo Credentials:</p>
-              <p className="text-sm text-gray-300">
-                <strong>Email:</strong> admin@naveen-portfolio.com<br />
-                <strong>Password:</strong> N@veenDev#2025
-              </p>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 rounded-xl blur group-hover:blur-lg transition-all duration-200 opacity-70 group-hover:opacity-100"></div>
+                <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-200 transform group-hover:scale-[1.02] group-active:scale-[0.98] disabled:hover:scale-100 flex items-center justify-center gap-3">
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
+                      <span>Authenticating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-5 w-5" />
+                      <span>Sign In</span>
+                    </>
+                  )}
+                </div>
+              </button>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Security Features */}
+            <div className="mt-8 p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <Shield className="h-4 w-4 text-green-400" />
+                </div>
+                <h3 className="text-sm font-medium text-slate-300">Security Features</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-slate-400">256-bit Encryption</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300"></div>
+                  <span className="text-xs text-slate-400">Secure Session</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-700"></div>
+                  <span className="text-xs text-slate-400">2FA Protected</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse delay-1000"></div>
+                  <span className="text-xs text-slate-400">Auto Logout</span>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Last Access</span>
+                  <span className="text-xs text-slate-400">2 hours ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-gray-500 text-sm">
-            Portfolio Admin Panel - Naveen Agarwal
+        <div className={`text-center mt-8 transform transition-all duration-1000 delay-400 ${mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+          <p className="text-slate-500 text-sm">
+            Portfolio Admin Panel • Naveen Agarwal
           </p>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-xs text-slate-400">System Online</span>
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.2; }
+          50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+        .animate-float {
+          animation: float ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };

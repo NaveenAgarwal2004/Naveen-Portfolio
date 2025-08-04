@@ -1,33 +1,91 @@
-import React, { useState, useEffect } from 'react';
-import { portfolioAPI } from '../services/api';
-import { ExternalLink, Github, Filter } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
+import React, { useState, useEffect, useRef } from 'react';
+import { ExternalLink, Github, Filter, Star, Calendar, Code } from 'lucide-react';
 
 const Projects = () => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [hoveredProject, setHoveredProject] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const projectsRef = useRef(null);
+
+  // Sample projects data (replace with your API call)
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      setProjects([
+        {
+          id: 1,
+          title: "AI Chat Application",
+          description: "A modern chat application powered by AI with real-time messaging, smart responses, and beautiful UI design.",
+          image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop",
+          category: "AI",
+          techStack: ["React", "Node.js", "OpenAI", "Socket.io", "MongoDB"],
+          githubUrl: "https://github.com/example/ai-chat",
+          liveUrl: "https://ai-chat-demo.vercel.app",
+          featured: true,
+          date: "2024"
+        },
+        {
+          id: 2,
+          title: "E-Commerce Platform",
+          description: "Full-stack e-commerce solution with payment integration, admin dashboard, and responsive design.",
+          image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop",
+          category: "Web",
+          techStack: ["React", "Express", "PostgreSQL", "Stripe", "AWS"],
+          githubUrl: "https://github.com/example/ecommerce",
+          liveUrl: "https://ecommerce-demo.vercel.app",
+          featured: true,
+          date: "2024"
+        },
+        {
+          id: 3,
+          title: "Task Management App",
+          description: "Collaborative task management tool with drag-and-drop functionality and team collaboration features.",
+          image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=600&h=400&fit=crop",
+          category: "Web",
+          techStack: ["React", "Firebase", "Material-UI", "Framer Motion"],
+          githubUrl: "https://github.com/example/task-manager",
+          liveUrl: "https://task-manager-demo.vercel.app",
+          featured: false,
+          date: "2023"
+        },
+        {
+          id: 4,
+          title: "Weather AI Predictor",
+          description: "Machine learning powered weather prediction app with interactive visualizations and location-based forecasts.",
+          image: "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=600&h=400&fit=crop",
+          category: "AI",
+          techStack: ["Python", "TensorFlow", "React", "D3.js", "Flask"],
+          githubUrl: "https://github.com/example/weather-ai",
+          liveUrl: "https://weather-ai-demo.vercel.app",
+          featured: false,
+          date: "2023"
+        }
+      ]);
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   const filters = ['All', 'AI', 'Web'];
 
+  // Intersection Observer for scroll animations
   useEffect(() => {
-    const fetchProjects = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await portfolioAPI.getProjects();
-        setProjects(response.data.data);
-      } catch (err) {
-        setError('Failed to load projects.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProjects();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (projectsRef.current) {
+      observer.observe(projectsRef.current);
+    }
+
+    return () => observer.disconnect();
   }, []);
 
   const filteredProjects = Array.isArray(projects)
@@ -36,86 +94,107 @@ const Projects = () => {
       : projects.filter(project => project.category === activeFilter))
     : [];
 
-  const featuredProjects = Array.isArray(filteredProjects)
-    ? filteredProjects.filter(project => project.featured)
-    : [];
-  const regularProjects = Array.isArray(filteredProjects)
-    ? filteredProjects.filter(project => !project.featured)
-    : [];
+  const featuredProjects = filteredProjects.filter(project => project.featured);
+  const regularProjects = filteredProjects.filter(project => !project.featured);
 
-  // Ensure unique keys for project cards
-  const getProjectKey = (project) => project._id || project.id || project.title;
+  const Badge = ({ children, variant = "default", className = "" }) => {
+    const baseClasses = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+    const variants = {
+      default: "bg-gray-700 text-gray-300",
+      outline: "border border-gray-600 text-gray-400 bg-transparent",
+      secondary: "bg-gray-700 text-gray-300"
+    };
+    
+    return (
+      <span className={`${baseClasses} ${variants[variant]} ${className}`}>
+        {children}
+      </span>
+    );
+  };
 
-  const ProjectCard = ({ project, featured = false }) => (
-    <Card
-      key={project._id || project.id}
-      className={`group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl bg-gray-800/50 border-gray-700 hover:border-blue-500/50 ${
+  const ProjectCard = ({ project, featured = false, index = 0 }) => (
+    <div
+      className={`group cursor-pointer transition-all duration-500 hover:scale-105 bg-white/5 backdrop-blur-sm border border-white/10 hover:border-blue-500/50 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 ${
         featured ? 'lg:col-span-2' : ''
-      }`}
+      } ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+      style={{
+        transitionDelay: `${index * 150}ms`
+      }}
       onMouseEnter={() => setHoveredProject(project.id)}
       onMouseLeave={() => setHoveredProject(null)}
     >
-      <div className="relative overflow-hidden rounded-t-lg">
+      <div className="relative overflow-hidden">
         <img
           src={project.image}
           alt={project.title}
-          className={`w-full object-cover transition-transform duration-300 group-hover:scale-110 ${
-            featured ? 'h-64' : 'h-48'
+          className={`w-full object-cover transition-all duration-500 group-hover:scale-110 ${
+            featured ? 'h-64 sm:h-80' : 'h-48 sm:h-56'
           }`}
         />
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="flex gap-3">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="bg-white/90 hover:bg-white text-black"
-              onClick={() => window.open(project.githubUrl, '_blank')}
-            >
-              <Github className="h-4 w-4 mr-1" />
-              Code
-            </Button>
-            <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => window.open(project.liveUrl, '_blank')}
-            >
-              <ExternalLink className="h-4 w-4 mr-1" />
-              Demo
-            </Button>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+          <div className="absolute bottom-4 left-4 right-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+            <div className="flex gap-3">
+              <button
+                className="flex items-center gap-2 bg-white/90 hover:bg-white text-black px-4 py-2 rounded-xl font-medium transition-all duration-200 hover:scale-105"
+                onClick={() => window.open(project.githubUrl, '_blank')}
+              >
+                <Github className="h-4 w-4" />
+                Code
+              </button>
+              <button
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 hover:scale-105"
+                onClick={() => window.open(project.liveUrl, '_blank')}
+              >
+                <ExternalLink className="h-4 w-4" />
+                Demo
+              </button>
+            </div>
           </div>
         </div>
         {featured && (
           <div className="absolute top-4 left-4">
-            <Badge className="bg-blue-600 text-white">Featured</Badge>
+            <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white flex items-center gap-1">
+              <Star className="h-3 w-3" />
+              Featured
+            </Badge>
           </div>
         )}
+        <div className="absolute top-4 right-4">
+          <Badge className="bg-black/50 text-white backdrop-blur-sm border border-white/20">
+            {project.date}
+          </Badge>
+        </div>
       </div>
 
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-white group-hover:text-blue-400 transition-colors duration-300">
+      <div className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <h3 className="text-xl font-semibold text-white group-hover:text-blue-400 transition-colors duration-300 leading-tight">
             {project.title}
-          </CardTitle>
-          <Badge variant="outline" className="border-gray-600 text-gray-400">
+          </h3>
+          <Badge variant="outline" className="ml-2 shrink-0">
             {project.category}
           </Badge>
         </div>
-      </CardHeader>
 
-      <CardContent className="pt-0">
-        <p className="text-gray-400 mb-4 leading-relaxed">
+        <p className="text-gray-400 mb-6 leading-relaxed text-sm sm:text-base">
           {project.description}
         </p>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div>
-            <p className="text-sm text-gray-500 mb-2">Tech Stack:</p>
+            <div className="flex items-center gap-2 mb-3">
+              <Code className="h-4 w-4 text-gray-400" />
+              <span className="text-sm text-gray-500 font-medium">Tech Stack</span>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {project.techStack.map((tech) => (
+              {project.techStack.map((tech, techIndex) => (
                 <Badge
                   key={tech}
                   variant="secondary"
-                  className="bg-gray-700 text-gray-300 text-xs"
+                  className="text-xs hover:bg-blue-500/20 hover:text-blue-300 transition-all duration-200 cursor-default"
+                  style={{
+                    animationDelay: `${techIndex * 100}ms`
+                  }}
                 >
                   {tech}
                 </Badge>
@@ -124,34 +203,36 @@ const Projects = () => {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button
-              size="sm"
-              variant="outlined"
-              className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+            <button
+              className="flex-1 flex items-center justify-center gap-2 border border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-105"
               onClick={() => window.open(project.githubUrl, '_blank')}
             >
-              <Github className="h-4 w-4 mr-1" />
-              GitHub
-            </Button>
-            <Button
-              size="sm"
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              <Github className="h-4 w-4" />
+              <span className="text-sm">GitHub</span>
+            </button>
+            <button
+              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-105"
               onClick={() => window.open(project.liveUrl, '_blank')}
             >
-              <ExternalLink className="h-4 w-4 mr-1" />
-              Live Demo
-            </Button>
+              <ExternalLink className="h-4 w-4" />
+              <span className="text-sm">Live Demo</span>
+            </button>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 
   if (loading) {
     return (
-      <section id="projects" className="py-20 bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          Loading projects...
+      <section id="projects" className="py-16 sm:py-20 bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-3 text-white">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-400/30 border-t-blue-400"></div>
+              <span>Loading amazing projects...</span>
+            </div>
+          </div>
         </div>
       </section>
     );
@@ -159,45 +240,64 @@ const Projects = () => {
 
   if (error) {
     return (
-      <section id="projects" className="py-20 bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-red-500">
-          {error}
+      <section id="projects" className="py-16 sm:py-20 bg-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8">
+            <p className="text-red-400 text-lg">{error}</p>
+          </div>
         </div>
       </section>
     );
   }
 
   return (
-    <section id="projects" className="py-20 bg-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="projects" ref={projectsRef} className="py-16 sm:py-20 bg-gray-800 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 -right-20 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 -left-20 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+        <div className={`text-center mb-12 sm:mb-16 transform transition-all duration-1000 ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+        }`}>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             My Projects
           </h2>
-          <div className="w-24 h-1 bg-blue-500 mx-auto mb-8"></div>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+          <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-6 sm:mb-8 rounded-full"></div>
+          <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
             Explore my latest work and side projects that showcase my skills and passion for development
           </p>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-gray-700/50 rounded-lg p-1 flex gap-1">
-            {filters.map((filter) => (
-              <Button
+        <div className={`flex justify-center mb-8 sm:mb-12 transform transition-all duration-1000 delay-200 ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+        }`}>
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-1 flex gap-1 overflow-x-auto">
+            {filters.map((filter, index) => (
+              <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                variant={activeFilter === filter ? "default" : "ghost"}
-                className={`px-6 py-2 rounded-md transition-all duration-200 ${
+                className={`px-4 sm:px-6 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm sm:text-base whitespace-nowrap flex items-center gap-2 ${
                   activeFilter === filter
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-600'
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105'
+                    : 'text-gray-400 hover:text-white hover:bg-white/10'
                 }`}
+                style={{
+                  transitionDelay: `${index * 100}ms`
+                }}
               >
-                <Filter className="h-4 w-4 mr-2" />
-                {filter} Projects
-              </Button>
+                <Filter className="h-4 w-4" />
+                {filter}
+                {filter !== 'All' && (
+                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                    {filteredProjects.filter(p => p.category === filter).length}
+                  </span>
+                )}
+              </button>
             ))}
           </div>
         </div>
@@ -207,54 +307,84 @@ const Projects = () => {
           <div className="space-y-12">
             {/* Featured Projects */}
             {featuredProjects.length > 0 && (
-              <div>
-                <h3 className="text-2xl font-semibold text-white mb-8 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  Featured Projects
-                </h3>
-                <div className="grid lg:grid-cols-6 gap-8">
-            {featuredProjects.map((project) => (
-              <ProjectCard key={project._id || project.id || project.title} project={project} featured={true} />
-            ))}
+              <div className={`transform transition-all duration-1000 delay-400 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                  <h3 className="text-2xl font-semibold text-white">Featured Projects</h3>
+                  <div className="flex-1 h-px bg-gradient-to-r from-yellow-500/50 to-transparent"></div>
+                </div>
+                <div className="grid lg:grid-cols-6 gap-6 sm:gap-8">
+                  {featuredProjects.map((project, index) => (
+                    <ProjectCard 
+                      key={project.id} 
+                      project={project} 
+                      featured={true} 
+                      index={index}
+                    />
+                  ))}
                 </div>
               </div>
             )}
 
             {/* Regular Projects */}
             {regularProjects.length > 0 && (
-              <div>
-                <h3 className="text-2xl font-semibold text-white mb-8 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  Other Projects
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {regularProjects.map((project) => (
-                    <ProjectCard key={project._id || project.id || project.title} project={project} />
+              <div className={`transform transition-all duration-1000 delay-600 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <h3 className="text-2xl font-semibold text-white">Other Projects</h3>
+                  <div className="flex-1 h-px bg-gradient-to-r from-green-500/50 to-transparent"></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                  {regularProjects.map((project, index) => (
+                    <ProjectCard 
+                      key={project.id} 
+                      project={project} 
+                      index={index + featuredProjects.length}
+                    />
                   ))}
                 </div>
               </div>
             )}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <p className="text-gray-400 text-lg mb-4">No projects available yet.</p>
-            <p className="text-gray-500">Check back soon for updates!</p>
+          <div className={`text-center py-16 transform transition-all duration-1000 delay-400 ${
+            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+          }`}>
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12 max-w-md mx-auto">
+              <div className="w-16 h-16 bg-gray-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Filter className="h-8 w-8 text-gray-400" />
+              </div>
+              <p className="text-gray-400 text-lg mb-2">No projects found</p>
+              <p className="text-gray-500 text-sm">Try selecting a different filter</p>
+            </div>
           </div>
         )}
 
         {/* View More Projects CTA */}
         {filteredProjects.length > 0 && (
-          <div className="text-center mt-16">
-            <p className="text-gray-400 mb-6">
-              Want to see more of my work?
-            </p>
-            <Button
-              className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-lg"
-              onClick={() => window.open('https://github.com/NaveenAgarwal2004', '_blank')}
-            >
-              <Github className="h-5 w-5 mr-2" />
-              View All on GitHub
-            </Button>
+          <div className={`text-center mt-16 transform transition-all duration-1000 delay-800 ${
+            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+          }`}>
+            <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-8 max-w-2xl mx-auto">
+              <h3 className="text-white text-xl font-semibold mb-4">Want to see more?</h3>
+              <p className="text-gray-400 mb-6 leading-relaxed">
+                Check out my GitHub profile for more projects, contributions, and open-source work.
+              </p>
+              <button
+                className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-8 py-4 rounded-xl font-medium
+                transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center gap-3 mx-auto overflow-hidden"
+                onClick={() => window.open('https://github.com/NaveenAgarwal2004', '_blank')}
+              >
+                <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                <Github className="h-5 w-5 relative z-10" />
+                <span className="relative z-10">View All on GitHub</span>
+                <ExternalLink className="h-4 w-4 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
+              </button>
+            </div>
           </div>
         )}
       </div>

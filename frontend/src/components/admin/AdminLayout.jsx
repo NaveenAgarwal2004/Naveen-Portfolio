@@ -73,16 +73,16 @@ const AdminLayout = () => {
   ];
 
   const Sidebar = ({ mobile = false }) => (
-    <div className={`${mobile ? 'lg:hidden' : 'hidden lg:flex'} flex-col w-64 bg-gray-800 border-r border-gray-700`}>
+    <div className={`${mobile ? 'lg:hidden' : 'hidden lg:flex'} flex-col w-64 bg-gray-800 border-r border-gray-700 h-full`}>
       {/* Logo */}
-      <div className="flex items-center justify-between h-16 px-6 border-b border-gray-700">
+      <div className="flex items-center justify-between h-16 px-6 border-b border-gray-700 shrink-0">
         <h1 className="text-xl font-bold text-white">
           Admin Panel
         </h1>
         {mobile && (
           <button
             onClick={() => setSidebarOpen(false)}
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-white transition-colors duration-200 p-1 rounded-md hover:bg-gray-700"
           >
             <X className="h-6 w-6" />
           </button>
@@ -90,7 +90,7 @@ const AdminLayout = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-2">
+      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -100,10 +100,10 @@ const AdminLayout = () => {
                 navigate(item.href);
                 if (mobile) setSidebarOpen(false);
               }}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 ${
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
                 item.current
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-lg transform scale-[1.02]'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-white hover:transform hover:scale-[1.01]'
               }`}
             >
               <Icon className="mr-3 h-5 w-5" />
@@ -114,20 +114,20 @@ const AdminLayout = () => {
       </nav>
 
       {/* User Info & Logout */}
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-gray-700 shrink-0">
         <div className="flex items-center mb-4">
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
             <User className="h-4 w-4 text-white" />
           </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-white">Admin</p>
-            <p className="text-xs text-gray-400">{user?.email}</p>
+          <div className="ml-3 min-w-0">
+            <p className="text-sm font-medium text-white truncate">Admin</p>
+            <p className="text-xs text-gray-400 truncate">{user?.email}</p>
           </div>
         </div>
         <Button
           onClick={handleLogout}
           variant="ghost"
-          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700"
+          className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-700 transition-all duration-200"
         >
           <LogOut className="mr-3 h-4 w-4" />
           Logout
@@ -138,32 +138,41 @@ const AdminLayout = () => {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="flex">
+      <div className="flex h-screen">
         {/* Desktop Sidebar */}
         <Sidebar />
 
-        {/* Mobile Sidebar */}
+        {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-            <div className="relative flex flex-col w-64 h-full">
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity duration-300 ease-in-out"
+              onClick={() => setSidebarOpen(false)} 
+            />
+            
+            {/* Sidebar */}
+            <div className={`
+              relative flex flex-col w-64 h-full transform transition-transform duration-300 ease-in-out
+              ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
               <Sidebar mobile />
             </div>
           </div>
         )}
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Mobile Header */}
-          <div className="lg:hidden flex items-center justify-between h-16 px-4 bg-gray-800 border-b border-gray-700">
+          <div className="lg:hidden flex items-center justify-between h-16 px-4 bg-gray-800 border-b border-gray-700 shrink-0">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white transition-colors duration-200 p-2 rounded-md hover:bg-gray-700"
             >
               <Menu className="h-6 w-6" />
             </button>
-            <h1 className="text-lg font-semibold text-white">Admin Panel</h1>
-            <div className="w-6" /> {/* Spacer */}
+            <h1 className="text-lg font-semibold text-white truncate">Admin Panel</h1>
+            <div className="w-10" /> {/* Spacer for centering */}
           </div>
 
           {/* Page Content */}

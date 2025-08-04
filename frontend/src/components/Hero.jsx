@@ -1,58 +1,43 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Github, Linkedin, Mail, ArrowRight } from 'lucide-react';
-import { Button } from './ui/button';
-import * as THREE from 'three';
+import { ChevronDown, Github, Linkedin, Mail, ArrowRight, Sparkles } from 'lucide-react';
 
 const Hero = ({ personalData }) => {
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
-  const vantaRef = useRef(null);
-  const vantaEffect = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const heroRef = useRef(null);
 
   const fullText = personalData?.title || 'Front-End Web Developer';
+  const name = personalData?.name || 'Naveen Agarwal';
+  const tagline = personalData?.tagline || 'Building modern, responsive web experiences with clean code and creative design';
+  const socialLinks = personalData?.socialLinks || {};
 
-  // Typing animation
+  // Mouse tracking for interactive effects
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Initial visibility animation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Enhanced typing animation with cursor blink
   useEffect(() => {
     if (currentIndex >= fullText.length) return;
     const timeout = setTimeout(() => {
       setDisplayText(prev => prev + fullText[currentIndex]);
       setCurrentIndex(prev => prev + 1);
-    }, 100);
+    }, 80);
     return () => clearTimeout(timeout);
   }, [currentIndex, fullText]);
-
-  // VANTA.GLOBE effect with mobile optimization
-  useEffect(() => {
-    const loadVanta = async () => {
-      const VANTA = await import('vanta/dist/vanta.globe.min');
-      if (vantaRef.current && !vantaEffect.current && window.innerWidth > 640) {
-        vantaEffect.current = VANTA.default({
-          el: vantaRef.current,
-          THREE,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.0,
-          minWidth: 200.0,
-          scale: 1.0,
-          scaleMobile: 0.75, // Better performance on mobile
-          color: 0x00ffff,
-          backgroundColor: 0x0f0f23,
-          size: 1.0,
-          points: 10,
-        });
-      }
-    };
-
-    loadVanta();
-
-    return () => {
-      if (vantaEffect.current) {
-        vantaEffect.current.destroy();
-        vantaEffect.current = null;
-      }
-    };
-  }, []);
 
   const scrollToProjects = () => {
     const element = document.getElementById('projects');
@@ -64,98 +49,183 @@ const Hero = ({ personalData }) => {
     if (element) element.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const name = personalData?.name || 'Naveen Agarwal';
-  const tagline =
-    personalData?.tagline ||
-    'Building modern, responsive web experiences with clean code and creative design';
-  const socialLinks = personalData?.socialLinks || {};
+  // Floating particles component
+  const FloatingParticles = () => (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(15)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-float"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${3 + Math.random() * 4}s`
+          }}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <section
       id="hero"
-      ref={vantaRef}
-      className="relative min-h-screen overflow-hidden flex items-center justify-center bg-[#0f0f23] pt-24 pb-32"
-      aria-hidden="true"
+      ref={heroRef}
+      className="relative min-h-screen overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 pt-16 sm:pt-20 pb-16 sm:pb-32"
     >
-      {/* Overlay Blobs */}
-      <div className="absolute inset-0 overflow-hidden z-0">
-        <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute -bottom-8 -right-4 w-72 h-72 bg-purple-500/10 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-500"></div>
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-60 h-60 sm:w-80 sm:h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-60 h-60 sm:w-80 sm:h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-96 sm:h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
+      <FloatingParticles />
+
+      {/* Interactive cursor following effect */}
+      <div 
+        className="fixed w-4 h-4 bg-blue-400/20 rounded-full pointer-events-none z-10 transition-all duration-300 hidden lg:block"
+        style={{
+          left: mousePosition.x - 8,
+          top: mousePosition.y - 8,
+          transform: `scale(${isVisible ? 1 : 0})`
+        }}
+      />
+
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <div className="animate-fade-in-up">
-          <p className="text-xl text-blue-400 mb-4 animate-fade-in delay-200">
-            👋 Hello, I'm
-          </p>
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 animate-fade-in delay-400">
-            {name}
-          </h1>
-          <div className="text-2xl md:text-4xl font-light text-gray-300 mb-8 h-16 flex items-center justify-center animate-fade-in delay-600">
-            <span className="border-r-2 border-blue-500 pr-2 animate-pulse">
-              {displayText}
-            </span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-20">
+        <div className="space-y-6 sm:space-y-8">
+          {/* Greeting */}
+          <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-6">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-blue-400 text-sm sm:text-base font-medium">Available for work</span>
+              <Sparkles className="h-4 w-4 text-blue-400 animate-pulse" />
+            </div>
+            <p className="text-lg sm:text-xl text-blue-400 mb-4 font-medium">
+              👋 Hello, I'm
+            </p>
           </div>
-          <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed animate-fade-in delay-800">
-            {tagline}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-fade-in delay-1000">
-            <Button
-              onClick={scrollToProjects}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-medium flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
-            >
-              View My Work <ArrowRight className="h-5 w-5" />
-            </Button>
-            <Button
-              onClick={scrollToAbout}
-              variant="outline"
-              className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-8 py-3 rounded-lg text-lg font-medium transition-all duration-300 hover:scale-105"
-            >
-              About Me
-            </Button>
+
+          {/* Name with gradient effect */}
+          <div className={`transform transition-all duration-1000 delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+                {name}
+              </span>
+            </h1>
           </div>
-          <div className="flex justify-center space-x-6 mb-16 animate-fade-in delay-1200">
-            {socialLinks.github && (
-              <a
-                href={socialLinks.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-all duration-300 hover:scale-110"
-              >
-                <Github className="h-6 w-6" />
-              </a>
-            )}
-            {socialLinks.linkedin && (
-              <a
-                href={socialLinks.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-all duration-300 hover:scale-110"
-              >
-                <Linkedin className="h-6 w-6" />
-              </a>
-            )}
-            {socialLinks.email && (
-              <a
-                href={`mailto:${socialLinks.email}`}
-                className="text-gray-400 hover:text-white transition-all duration-300 hover:scale-110"
-              >
-                <Mail className="h-6 w-6" />
-              </a>
-            )}
+
+          {/* Typing animation */}
+          <div className={`transform transition-all duration-1000 delay-400 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <div className="text-xl sm:text-2xl md:text-4xl font-light text-gray-300 mb-8 h-12 sm:h-16 flex items-center justify-center">
+              <span className="relative">
+                {displayText}
+                <span className="inline-block w-0.5 h-8 sm:h-10 bg-blue-500 ml-1 animate-pulse"></span>
+              </span>
+            </div>
           </div>
-          <div className="animate-bounce">
-            <button
-              onClick={scrollToAbout}
-              className="text-gray-500 hover:text-gray-300 transition-colors duration-300"
-            >
-              <ChevronDown className="h-8 w-8 mx-auto" />
-            </button>
+
+          {/* Tagline */}
+          <div className={`transform transition-all duration-1000 delay-600 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-4xl mx-auto mb-12 leading-relaxed px-4">
+              {tagline}
+            </p>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className={`transform transition-all duration-1000 delay-800 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+              <button
+                onClick={scrollToProjects}
+                className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-8 py-4 rounded-2xl text-lg font-medium
+                transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25 flex items-center gap-3 overflow-hidden w-full sm:w-auto"
+              >
+                <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                <span className="relative z-10 flex items-center gap-2">
+                  View My Work
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </span>
+              </button>
+              
+              <button
+                onClick={scrollToAbout}
+                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 text-white px-8 py-4 rounded-2xl text-lg font-medium
+                transition-all duration-300 hover:bg-white/10 hover:scale-105 w-full sm:w-auto"
+              >
+                <span className="relative z-10">About Me</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+              </button>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div className={`transform transition-all duration-1000 delay-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <div className="flex justify-center space-x-6 mb-16">
+              {socialLinks.github && (
+                <a
+                  href={socialLinks.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative p-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:border-white/20 transition-all duration-300 hover:scale-110 hover:bg-white/10"
+                >
+                  <Github className="h-6 w-6 text-gray-400 group-hover:text-white transition-colors duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-500/10 to-gray-300/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                </a>
+              )}
+              {socialLinks.linkedin && (
+                <a
+                  href={socialLinks.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative p-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:border-blue-400/50 transition-all duration-300 hover:scale-110 hover:bg-blue-500/10"
+                >
+                  <Linkedin className="h-6 w-6 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-blue-300/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                </a>
+              )}
+              {socialLinks.email && (
+                <a
+                  href={`mailto:${socialLinks.email}`}
+                  className="group relative p-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:border-red-400/50 transition-all duration-300 hover:scale-110 hover:bg-red-500/10"
+                >
+                  <Mail className="h-6 w-6 text-gray-400 group-hover:text-red-400 transition-colors duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-red-300/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Scroll Indicator */}
+          <div className={`transform transition-all duration-1000 delay-1200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+            <div className="flex flex-col items-center">
+              <span className="text-gray-500 text-sm mb-4">Scroll to explore</span>
+              <button
+                onClick={scrollToAbout}
+                className="group p-2 rounded-full border border-gray-600 hover:border-gray-400 transition-all duration-300 hover:bg-white/5"
+              >
+                <ChevronDown className="h-6 w-6 text-gray-500 group-hover:text-gray-300 animate-bounce transition-colors duration-300" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { 
+            transform: translateY(0px) rotate(0deg); 
+            opacity: 0.3; 
+          }
+          50% { 
+            transform: translateY(-20px) rotate(180deg); 
+            opacity: 0.8; 
+          }
+        }
+        .animate-float {
+          animation: float ease-in-out infinite;
+        }
+      `}</style>
     </section>
   );
 };
