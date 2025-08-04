@@ -20,7 +20,7 @@ const Footer = () => {
   });
 
   useEffect(() => {
-    import('../../services/api').then(({ portfolioAPI }) => {
+    import('../services/api').then(({ portfolioAPI }) => {
       portfolioAPI.getPersonal()
         .then(response => {
           if (response.data.success) {

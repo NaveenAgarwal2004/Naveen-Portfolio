@@ -13,7 +13,7 @@ const Projects = () => {
   // Sample projects data (replace with your API call)
   useEffect(() => {
     setLoading(true);
-    import('../../services/api').then(({ adminAPI }) => {
+    import('../services/api').then(({ adminAPI }) => {
       adminAPI.getProjects()
         .then(response => {
           if (response.data.success) {
