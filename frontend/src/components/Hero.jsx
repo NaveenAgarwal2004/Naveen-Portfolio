@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Github, Linkedin, Mail, ArrowRight, Sparkles } from 'lucide-react';
 
+
 const Hero = ({ personalData }) => {
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,44 +20,46 @@ const Hero = ({ personalData }) => {
   useEffect(() => {
     let vanta;
     
-    const initVanta = async () => {
+    const initVanta = () => {
       try {
-        // Dynamically import Vanta.js and Three.js
-        const [{ default: VANTA }, { default: THREE }] = await Promise.all([
-          import('vanta/dist/vanta.net.min.js'),
-          import('three')
-        ]);
-
-        if (vantaRef.current && !vantaEffect) {
-          vanta = VANTA.NET({
+        if (vantaRef.current && !vantaEffect && window.VANTA && window.VANTA.NET) {
+          const vanta = window.VANTA.NET({
             el: vantaRef.current,
-            THREE: THREE,
             mouseControls: true,
             touchControls: true,
             gyroControls: false,
             minHeight: 200.0,
             minWidth: 200.0,
             scale: 1.0,
-            scaleMobile: 0.8, // Reduced scale for mobile
+            scaleMobile: 0.8,
             color: 0x3b82f6,
             backgroundColor: 0x0f172a,
-            points: window.innerWidth < 768 ? 8.0 : 12.0, // Fewer points on mobile
+            points: window.innerWidth < 768 ? 8.0 : 12.0,
             maxDistance: window.innerWidth < 768 ? 15.0 : 20.0,
-            spacing: window.innerWidth < 768 ? 12.0 : 16.0
+            spacing: window.innerWidth < 740 ? 12.0 : 16.0
           });
           setVantaEffect(vanta);
+          console.log('Vanta effect initialized');
         }
       } catch (error) {
-        console.log('Vanta.js not available, using fallback background');
+        console.error('Vanta.js initialization error:', error);
       }
     };
 
-    const timer = setTimeout(initVanta, 100);
+    const timer = setTimeout(() => {
+      initVanta();
+    }, 100);
 
     return () => {
       clearTimeout(timer);
-      if (vanta) vanta.destroy();
-      if (vantaEffect) vantaEffect.destroy();
+      if (vanta) {
+        console.log('Destroying local vanta instance');
+        vanta.destroy();
+      }
+      if (vantaEffect) {
+        console.log('Destroying state vantaEffect instance');
+        vantaEffect.destroy();
+      }
     };
   }, [vantaEffect]);
 
