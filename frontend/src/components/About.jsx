@@ -1,28 +1,71 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Download, MapPin, Mail, Phone, ChevronDown } from 'lucide-react';
+import { Download, MapPin, Mail, Phone, ChevronDown, User, Code, Coffee, Award } from 'lucide-react';
 
 const About = ({ personalData }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [skillsVisible, setSkillsVisible] = useState(false);
   const [animatedSkills, setAnimatedSkills] = useState({});
+  const [aboutData, setAboutData] = useState(null);
+  const [loading, setLoading] = useState(false);
   const aboutRef = useRef(null);
   const skillsRef = useRef(null);
 
-  const displayData = personalData || {};
+  // Merge personalData with API data, prioritizing personalData
+  const displayData = personalData || aboutData || {};
 
-  const resumes = personalData ? [
+  // Fetch about data from API if no personalData provided
+  useEffect(() => {
+    if (!personalData) {
+      const fetchAboutData = async () => {
+        setLoading(true);
+        try {
+          const response = await fetch('/api/about');
+          const data = await response.json();
+          setAboutData(data);
+        } catch (error) {
+          console.error('Error fetching about data:', error);
+          // Fallback data
+          setAboutData({
+            title: "About Me",
+            description: "I'm a passionate full-stack developer with expertise in modern web technologies.",
+            experience: "3+ Years",
+            projects: "25+",
+            technologies: "15+",
+            name: "Naveen Agarwal",
+            email: "naveen@example.com",
+            phone: "+1 (555) 123-4567",
+            location: "San Francisco, CA",
+            profileImageUrl: "/Naveen.jpg",
+            bio: "I'm a passionate frontend developer with expertise in creating modern, responsive web applications using cutting-edge technologies like React, Tailwind CSS, and the MERN stack.",
+            resumeUrl: "/Naveen Agarwal - Frontend.pdf",
+            frontendResumeUrl: "/Naveen Agarwal - Frontend.pdf",
+            backendResumeUrl: "/NaveenAgarwal_Backend.pdf"
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchAboutData();
+    }
+  }, [personalData]);
+
+  const resumes = displayData ? [
     {
       name: "Main Resume",
-      url: personalData.resumeUrl || "/Naveen Agarwal - Frontend.pdf"
+      url: displayData.resumeUrl || "/Naveen Agarwal - Frontend.pdf",
+      format: "pdf"
     },
     {
       name: "Frontend Resume", 
-      url: personalData.frontendResumeUrl || "/Naveen Agarwal - Frontend.pdf"
+      url: displayData.frontendResumeUrl || "/Naveen Agarwal - Frontend.pdf",
+      format: "pdf"
     },
     {
       name: "Backend Resume",
-      url: personalData.backendResumeUrl || "/NaveenAgarwal_Backend.pdf"
+      url: displayData.backendResumeUrl || "/NaveenAgarwal_Backend.pdf",
+      format: "pdf"
     }
   ] : [];
 
@@ -97,11 +140,18 @@ const About = ({ personalData }) => {
     };
   }, [isOpen]);
 
-  const handleDownloadResume = (url, name) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = name;
-    link.click();
+  const handleDownloadResume = (resume) => {
+    if (resume.format === 'view') {
+      window.open(resume.url, '_blank');
+    } else {
+      const link = document.createElement('a');
+      link.href = resume.url;
+      link.download = `${resume.name.toLowerCase().replace(/\s+/g, '-')}.${resume.format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    setIsOpen(false);
   };
 
   const Progress = ({ value, animated = false }) => (
@@ -115,6 +165,22 @@ const About = ({ personalData }) => {
       />
     </div>
   );
+
+  // Loading state
+  if (loading) {
+    return (
+      <section id="about" className="py-16 sm:py-20 bg-gray-800 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-700 rounded w-48 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-700 rounded w-96 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="about" ref={aboutRef} className="py-16 sm:py-20 bg-gray-800 relative overflow-hidden">
@@ -130,11 +196,11 @@ const About = ({ personalData }) => {
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-            About Me
+            {displayData.title || "About Me"}
           </h2>
           <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-6 sm:mb-8 rounded-full"></div>
           <p className="text-base sm:text-lg lg:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed px-4">
-            Get to know more about my journey, skills, and passion for creating amazing web experiences
+            {displayData.description || "Get to know more about my journey, skills, and passion for creating amazing web experiences"}
           </p>
         </div>
 
@@ -148,7 +214,7 @@ const About = ({ personalData }) => {
               <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 mx-auto rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 p-1 shadow-2xl">
                 <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-800">
                   <img 
-                    src={displayData.profileImageUrl || "/Naveen.jpg"}
+                    src={displayData.profileImageUrl || displayData.image || "/Naveen.jpg"}
                     alt={displayData.name || "Naveen Agarwal"}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
@@ -195,8 +261,8 @@ const About = ({ personalData }) => {
                 </div>
               </div>
               
-              {/* Enhanced Resume Download */}
-              <div className="relative mt-4 sm:mt-6 resume-dropdown-container">
+              {/* Enhanced Resume Download - Fixed for mobile */}
+              <div className="relative mt-4 sm:mt-6 resume-dropdown-container z-[100]">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
                   className="group w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium
@@ -211,20 +277,17 @@ const About = ({ personalData }) => {
                 </button>
 
                 {/* Enhanced Dropdown - Fixed positioning for mobile */}
-                <div className={`absolute left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden z-50
-                  transition-all duration-300 transform origin-top ${
+                <div className={`relative left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden
+                  transition-all duration-300 transform origin-top z-[100] ${
                   isOpen 
                     ? 'opacity-100 scale-100 translate-y-0' 
                     : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
                 }`}>
-                  <div className="p-2 max-h-48 overflow-y-auto">
+                  <div className="p-2 max-h-64 sm:max-h-48 overflow-y-auto">
                     {resumes.map((resume, index) => (
                       <button
                         key={resume.name}
-                        onClick={() => {
-                          handleDownloadResume(resume.url, resume.name);
-                          setIsOpen(false);
-                        }}
+                        onClick={() => handleDownloadResume(resume)}
                         className={`w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-xl 
                           transition-all duration-200 flex items-center gap-2 sm:gap-3 group transform text-sm sm:text-base
                           ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
@@ -247,18 +310,66 @@ const About = ({ personalData }) => {
           <div className={`space-y-6 sm:space-y-8 transform transition-all duration-1000 delay-400 ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}>
-            {/* Bio */}
+            {/* Bio with Stats */}
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 lg:p-8 hover:bg-white/10 transition-all duration-300">
               <h3 className="text-xl sm:text-2xl font-semibold text-white mb-4 sm:mb-6 flex items-center gap-2">
-                <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+                <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
                 My Story
               </h3>
-              <div className="space-y-3 sm:space-y-4 text-gray-300 leading-relaxed">
+              <div className="space-y-4 sm:space-y-6 text-gray-300 leading-relaxed">
                 <p className="text-sm sm:text-base lg:text-lg">
                   {displayData.bio || "I'm a passionate frontend developer with expertise in creating modern, responsive web applications using cutting-edge technologies like React, Tailwind CSS, and the MERN stack. With a strong foundation in both frontend and backend development, I specialize in building seamless user experiences that are both visually appealing and highly functional."}
                 </p>
+                
+                {/* Stats Grid */}
+                {(displayData.experience || displayData.projects || displayData.technologies) && (
+                  <div className="grid grid-cols-3 gap-4 py-4 border-t border-white/10">
+                    <div className="text-center">
+                      <div className="text-xl sm:text-2xl font-bold text-blue-400">
+                        {displayData.experience || "3+"}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-400">Years Experience</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl sm:text-2xl font-bold text-purple-400">
+                        {displayData.projects || "25+"}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-400">Projects</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl sm:text-2xl font-bold text-green-400">
+                        {displayData.technologies || "15+"}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-400">Technologies</div>
+                    </div>
+                  </div>
+                )}
+                
                 <p className="text-gray-400 text-sm sm:text-base">
                   When I'm not coding, I enjoy exploring new technologies, contributing to open-source projects, and staying updated with the latest trends in web development and artificial intelligence.
+                </p>
+              </div>
+            </div>
+
+            {/* Skills Highlights Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-white/10 transition-all duration-300">
+                <div className="flex items-center mb-3">
+                  <Code className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400 mr-2" />
+                  <h4 className="font-semibold text-white text-sm sm:text-base">Frontend</h4>
+                </div>
+                <p className="text-gray-400 text-xs sm:text-sm">
+                  React, Next.js, TypeScript, Tailwind CSS
+                </p>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-white/10 transition-all duration-300">
+                <div className="flex items-center mb-3">
+                  <Coffee className="h-5 w-5 sm:h-6 sm:w-6 text-green-400 mr-2" />
+                  <h4 className="font-semibold text-white text-sm sm:text-base">Backend</h4>
+                </div>
+                <p className="text-gray-400 text-xs sm:text-sm">
+                  Node.js, Express, MongoDB
                 </p>
               </div>
             </div>
@@ -266,7 +377,7 @@ const About = ({ personalData }) => {
             {/* Skills Progress Bars */}
             <div ref={skillsRef} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 lg:p-8 hover:bg-white/10 transition-all duration-300">
               <h3 className="text-xl sm:text-2xl font-semibold text-white mb-4 sm:mb-6 flex items-center gap-2">
-                <div className="w-1 h-6 sm:h-8 bg-gradient-to-b from-green-500 to-cyan-500 rounded-full"></div>
+                <Award className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
                 Technical Skills
               </h3>
               <div className="grid gap-4 sm:gap-6">
