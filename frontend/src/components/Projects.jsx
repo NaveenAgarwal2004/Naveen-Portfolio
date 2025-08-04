@@ -12,60 +12,19 @@ const Projects = () => {
 
   // Sample projects data (replace with your API call)
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setProjects([
-        {
-          id: 1,
-          title: "AI Chat Application",
-          description: "A modern chat application powered by AI with real-time messaging, smart responses, and beautiful UI design.",
-          image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop",
-          category: "AI",
-          techStack: ["React", "Node.js", "OpenAI", "Socket.io", "MongoDB"],
-          githubUrl: "https://github.com/example/ai-chat",
-          liveUrl: "https://ai-chat-demo.vercel.app",
-          featured: true,
-          date: "2024"
-        },
-        {
-          id: 2,
-          title: "E-Commerce Platform",
-          description: "Full-stack e-commerce solution with payment integration, admin dashboard, and responsive design.",
-          image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop",
-          category: "Web",
-          techStack: ["React", "Express", "PostgreSQL", "Stripe", "AWS"],
-          githubUrl: "https://github.com/example/ecommerce",
-          liveUrl: "https://ecommerce-demo.vercel.app",
-          featured: true,
-          date: "2024"
-        },
-        {
-          id: 3,
-          title: "Task Management App",
-          description: "Collaborative task management tool with drag-and-drop functionality and team collaboration features.",
-          image: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=600&h=400&fit=crop",
-          category: "Web",
-          techStack: ["React", "Firebase", "Material-UI", "Framer Motion"],
-          githubUrl: "https://github.com/example/task-manager",
-          liveUrl: "https://task-manager-demo.vercel.app",
-          featured: false,
-          date: "2023"
-        },
-        {
-          id: 4,
-          title: "Weather AI Predictor",
-          description: "Machine learning powered weather prediction app with interactive visualizations and location-based forecasts.",
-          image: "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=600&h=400&fit=crop",
-          category: "AI",
-          techStack: ["Python", "TensorFlow", "React", "D3.js", "Flask"],
-          githubUrl: "https://github.com/example/weather-ai",
-          liveUrl: "https://weather-ai-demo.vercel.app",
-          featured: false,
-          date: "2023"
-        }
-      ]);
-      setLoading(false);
-    }, 1000);
+    setLoading(true);
+    import('../../services/api').then(({ adminAPI }) => {
+      adminAPI.getProjects()
+        .then(response => {
+          if (response.data.success) {
+            setProjects(response.data.data);
+          } else {
+            setError('Failed to load projects');
+          }
+        })
+        .catch(() => setError('Failed to load projects'))
+        .finally(() => setLoading(false));
+    });
   }, []);
 
   const filters = ['All', 'AI', 'Web'];

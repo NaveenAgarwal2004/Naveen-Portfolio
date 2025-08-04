@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Lock, Mail, LogIn, Shield, Sparkles } from 'lucide-react';
+import { authAPI } from '../../services/api';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -25,13 +26,21 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // Simulate login process
-    setTimeout(() => {
-      console.log('Login attempt:', formData);
+    try {
+      const response = await authAPI.login(formData);
+      if (response.data.success) {
+        localStorage.setItem('authToken', response.data.token);
+        window.location.href = '/admin/dashboard';
+      } else {
+        setError(response.data.message || 'Login failed');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed');
+    } finally {
       setIsLoading(false);
-      // Here you would normally handle the actual login logic
-    }, 2000);
+    }
   };
 
 

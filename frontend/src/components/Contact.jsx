@@ -15,8 +15,7 @@ const Contact = () => {
   const contactRef = useRef(null);
   const formRef = useRef(null);
 
-  // Sample personal data
-  const personalData = {
+  const [personalData, setPersonalData] = useState({
     email: "naveen@example.com",
     phone: "+1 (555) 123-4567",
     location: "San Francisco, CA",
@@ -26,7 +25,32 @@ const Contact = () => {
       twitter: "https://twitter.com/naveen_dev",
       email: "naveen@example.com"
     }
-  };
+  });
+
+  useEffect(() => {
+    import('../../services/api').then(({ portfolioAPI }) => {
+      portfolioAPI.getPersonal()
+        .then(response => {
+          if (response.data.success) {
+            const data = response.data.data;
+            setPersonalData({
+              email: data.email || "naveen@example.com",
+              phone: data.phone || "+1 (555) 123-4567",
+              location: data.location || "San Francisco, CA",
+              socialLinks: {
+                github: data.socialLinks?.github || "https://github.com/NaveenAgarwal2004",
+                linkedin: data.socialLinks?.linkedin || "https://linkedin.com/in/naveen-agarwal",
+                twitter: data.socialLinks?.twitter || "https://twitter.com/naveen_dev",
+                email: data.socialLinks?.email || "naveen@example.com"
+              }
+            });
+          }
+        })
+        .catch(() => {
+          // Fallback to mock data if API fails
+        });
+    });
+  }, []);
 
   // Intersection Observers
   useEffect(() => {
