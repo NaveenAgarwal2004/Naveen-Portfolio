@@ -10,7 +10,6 @@ const Projects = () => {
   const [error, setError] = useState(null);
   const projectsRef = useRef(null);
 
-  // Sample projects data (replace with your API call)
   useEffect(() => {
     setLoading(true);
     import('../services/api').then(({ adminAPI }) => {

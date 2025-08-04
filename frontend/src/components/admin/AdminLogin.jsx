@@ -26,7 +26,11 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
+    // Fix: define setError state
+    if (typeof setError !== 'function') {
+      console.error('setError is not defined');
+    }
+    setError && setError(null);
 
     try {
       const response = await authAPI.login(formData);
@@ -34,10 +38,10 @@ const AdminLogin = () => {
         localStorage.setItem('authToken', response.data.token);
         window.location.href = '/admin/dashboard';
       } else {
-        setError(response.data.message || 'Login failed');
+        setError && setError(response.data.message || 'Login failed');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError && setError(err.response?.data?.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
