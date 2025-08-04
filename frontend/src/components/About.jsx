@@ -107,7 +107,7 @@ const About = ({ personalData }) => {
         <div className="absolute bottom-1/4 -right-20 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <div className={`text-center mb-12 sm:mb-16 transform transition-all duration-1000 ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'

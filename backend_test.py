@@ -14,7 +14,7 @@ from datetime import datetime
 BACKEND_URL = "https://faddc90b-2180-456b-822d-9f2d0f3283f9.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-# Admin credentials for backend .env
+# Admin credentials from backend .env
 ADMIN_EMAIL = "admin@naveen-portfolio.com"
 ADMIN_PASSWORD = "N@veenDev#2025"
 
