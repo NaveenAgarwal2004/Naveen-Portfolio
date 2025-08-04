@@ -11,6 +11,7 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setMounted(true);
