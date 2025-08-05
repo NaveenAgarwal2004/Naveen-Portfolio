@@ -45,27 +45,19 @@ const TechStack = ({ techStackData }) => {
       return;
     }
 
-    // Sample data
-    setTimeout(() => {
-      setTechStack([
-        { id: 1, name: "React", icon: "Component", color: "#61DAFB" },
-        { id: 2, name: "JavaScript", icon: "FileCode", color: "#F7DF1E" },
-        { id: 3, name: "TypeScript", icon: "FileCode", color: "#3178C6" },
-        { id: 4, name: "Node.js", icon: "Server", color: "#339933" },
-        { id: 5, name: "Python", icon: "FileCode", color: "#3776AB" },
-        { id: 6, name: "MongoDB", icon: "Database", color: "#47A248" },
-        { id: 7, name: "PostgreSQL", icon: "Database", color: "#336791" },
-        { id: 8, name: "Express", icon: "Server", color: "#000000" },
-        { id: 9, name: "Tailwind", icon: "Palette", color: "#06B6D4" },
-        { id: 10, name: "Next.js", icon: "Layout", color: "#000000" },
-        { id: 11, name: "Git", icon: "GitBranch", color: "#F05032" },
-        { id: 12, name: "AWS", icon: "Layers", color: "#FF9900" },
-        { id: 13, name: "Docker", icon: "Layers", color: "#0DB7ED" },
-        { id: 14, name: "Firebase", icon: "Database", color: "#FFCA28" },
-        { id: 15, name: "GraphQL", icon: "Zap", color: "#E10098" }
-      ]);
-      setLoading(false);
-    }, 800);
+    setLoading(true);
+    import('../services/api').then(({ portfolioAPI }) => {
+      portfolioAPI.getTechStack()
+        .then(response => {
+          if (response.data.success) {
+            setTechStack(response.data.data);
+          } else {
+            setTechStack([]);
+          }
+        })
+        .catch(() => setTechStack([]))
+        .finally(() => setLoading(false));
+    });
   }, [techStackData]);
 
   // Intersection Observers

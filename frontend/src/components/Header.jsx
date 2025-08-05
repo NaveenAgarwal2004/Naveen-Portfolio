@@ -29,7 +29,7 @@ const Header = () => {
   }, []);
 
   const resumes = [
-    { name: "Main Resume", url: "/Naveen Agarwal - Frontend.pdf" },
+    { name: "Main Resume", url: "/NaveenAgarwal__Resume.pdf" },
     { name: "Frontend Resume", url: "/Naveen Agarwal - Frontend.pdf" },
     { name: "Backend Resume", url: "/NaveenAgarwal_Backend.pdf" }
   ];
