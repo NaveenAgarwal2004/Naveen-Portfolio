@@ -331,6 +331,7 @@ const AdminProjectNew = () => {
                         variant="outline"
                         className="border-gray-600 text-gray-300 hover:bg-gray-700 cursor-pointer w-full sm:w-auto text-sm"
                         disabled={uploadingImage}
+                        onClick={() => document.getElementById('project-image').click()}
                       >
                         {uploadingImage ? (
                           <>

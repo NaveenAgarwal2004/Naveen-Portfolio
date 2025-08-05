@@ -54,7 +54,7 @@ const About = ({ personalData }) => {
   const resumes = displayData ? [
     {
       name: "Main Resume",
-      url: displayData.resumeUrl || "/Naveen Agarwal - Frontend.pdf",
+      url: displayData.resumeUrl || "/NaveenAgarwal__Resume.pdf",
       format: "pdf"
     },
     {

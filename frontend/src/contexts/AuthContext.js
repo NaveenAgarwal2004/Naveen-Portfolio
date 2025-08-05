@@ -29,11 +29,21 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Verify token on app load
+  // Verify token on app load - only for admin routes
   useEffect(() => {
     const verifyToken = async () => {
+      const currentPath = window.location.pathname;
+      
+      // Only verify token for admin routes
+      if (!currentPath.startsWith('/admin')) {
+        setLoading(false);
+        setIsAuthenticated(false);
+        return;
+      }
+
       if (!token) {
         setLoading(false);
+        setIsAuthenticated(false);
         return;
       }
 
