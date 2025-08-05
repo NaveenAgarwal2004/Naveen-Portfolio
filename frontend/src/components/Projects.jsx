@@ -12,8 +12,8 @@ const Projects = () => {
 
   useEffect(() => {
     setLoading(true);
-    import('../services/api').then(({ adminAPI }) => {
-      adminAPI.getProjects()
+    import('../services/api').then(({ portfolioAPI }) => {
+      portfolioAPI.getProjects()
         .then(response => {
           if (response.data.success) {
             setProjects(response.data.data);
