@@ -259,29 +259,63 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Bottom Footer */}
-          <div className={`py-4 sm:py-6 border-t border-gray-800/50 flex flex-col items-center gap-4 sm:gap-6 md:flex-row md:justify-between md:items-center transform transition-all duration-1000 delay-600 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+          {/* Bottom Footer - FIXED RESPONSIVE VERSION */}
+          <div className={`py-6 border-t border-gray-800/50 transform transition-all duration-1000 delay-600 ${
+            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}>
-            <div className="flex items-center gap-2 text-gray-400 text-xs sm:text-sm md:text-sm mb-4 md:mb-0 text-center md:text-left">
-          <span>© {currentYear} Naveen Agarwal. Made with</span>
-          <Heart className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 animate-pulse" />
-          <span>and lots of coffee.</span>
-        </div>
-            
-            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span>All systems operational</span>
-          </div>
-              <button
-            onClick={scrollToTop}
-            className="group bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 text-gray-400 hover:text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium
-            transition-all duration-200 hover:scale-105 flex items-center gap-2 hover:bg-white/10"
-          >
-            <ArrowUp className="h-3 w-3 sm:h-4 sm:w-4 group-hover:scale-110 transition-transform duration-200" />
-            <span>Back to Top</span>
-          </button>
+            {/* Mobile Layout (stacked) */}
+            <div className="flex flex-col space-y-4 md:hidden">
+              {/* Copyright text - mobile */}
+              <div className="flex flex-wrap items-center justify-center gap-1 text-gray-400 text-xs">
+                <span>© {currentYear} Naveen Agarwal.</span>
+                <div className="flex items-center gap-1">
+                  <span>Made with</span>
+                  <Heart className="h-3 w-3 text-red-500 animate-pulse" />
+                  <span>and lots of coffee.</span>
+                </div>
+              </div>
+              
+              {/* Status and button - mobile */}
+              <div className="flex flex-col items-center space-y-3">
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span>All systems operational</span>
+                </div>
+                <button
+                  onClick={scrollToTop}
+                  className="group bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 text-gray-400 hover:text-white px-4 py-2 rounded-xl text-xs font-medium
+                  transition-all duration-200 hover:scale-105 flex items-center gap-2 hover:bg-white/10"
+                >
+                  <ArrowUp className="h-3 w-3 group-hover:scale-110 transition-transform duration-200" />
+                  <span>Back to Top</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop Layout (horizontal) */}
+            <div className="hidden md:flex md:justify-between md:items-center">
+              {/* Copyright text - desktop */}
+              <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <span>© {currentYear} Naveen Agarwal. Made with</span>
+                <Heart className="h-4 w-4 text-red-500 animate-pulse" />
+                <span>and lots of coffee.</span>
+              </div>
+              
+              {/* Status and button - desktop */}
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span>All systems operational</span>
+                </div>
+                <button
+                  onClick={scrollToTop}
+                  className="group bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 text-gray-400 hover:text-white px-4 py-2 rounded-xl text-sm font-medium
+                  transition-all duration-200 hover:scale-105 flex items-center gap-2 hover:bg-white/10"
+                >
+                  <ArrowUp className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                  <span>Back to Top</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
