@@ -11,21 +11,38 @@ import {
   GitBranch, 
   Github,
   Layout,
-  Sparkles
+  Sparkles,
+  Code,
+  Settings,
+  Smartphone,
+  Monitor,
+  Globe,
+  Shield,
+  Cpu,
+  HardDrive
 } from 'lucide-react';
 
 const iconMap = {
-  FileCode,
-  Palette,
-  Zap,
-  Component,
-  Server,
-  Database,
-  Layers,
-  Wind,
-  GitBranch,
+  FileCode, 
+  Palette, 
+  Zap, 
+  Component, 
+  Server, 
+  Database, 
+  Layers, 
+  Wind, 
+  GitBranch, 
   Github,
-  Layout
+  Layout,
+  Sparkles,
+  Code,
+  Settings,
+  Smartphone,
+  Monitor,
+  Globe,
+  Shield,
+  Cpu,
+  HardDrive
 };
 
 const TechStack = ({ techStackData }) => {

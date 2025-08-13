@@ -17,39 +17,57 @@ const About = ({ personalData }) => {
   // Fetch about data from API if no personalData provided
   useEffect(() => {
     if (!personalData) {
-      const fetchAboutData = async () => {
-        setLoading(true);
-        try {
-          const response = await fetch('/api/about');
-          const data = await response.json();
-          setAboutData(data);
-        } catch (error) {
-          console.error('Error fetching about data:', error);
-          // Fallback data
-          setAboutData({
-            title: "About Me",
-            description: "I'm a passionate full-stack developer with expertise in modern web technologies.",
-            experience: "3+ Years",
-            projects: "25+",
-            technologies: "15+",
-            name: "Naveen Agarwal",
-            email: "naveen@example.com",
-            phone: "+1 (555) 123-4567",
-            location: "San Francisco, CA",
-            profileImageUrl: "/Naveen.jpg",
-            bio: "I'm a passionate frontend developer with expertise in creating modern, responsive web applications using cutting-edge technologies like React, Tailwind CSS, and the MERN stack.",
-            resumeUrl: "/Naveen Agarwal - Frontend.pdf",
-            frontendResumeUrl: "/Naveen Agarwal - Frontend.pdf",
-            backendResumeUrl: "/NaveenAgarwal_Backend.pdf"
-          });
-        } finally {
-          setLoading(false);
-        }
-      };
-
       fetchAboutData();
     }
   }, [personalData]);
+
+  // Listen for personal data updates
+  useEffect(() => {
+    const handlePersonalDataUpdate = () => {
+      console.log('Personal data updated, refreshing...');
+      fetchAboutData();
+    };
+
+    window.addEventListener('personalDataUpdated', handlePersonalDataUpdate);
+    
+    return () => {
+      window.removeEventListener('personalDataUpdated', handlePersonalDataUpdate);
+    };
+  }, []);
+
+  const fetchAboutData = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/portfolio/personal');
+      const result = await response.json();
+      if (result.success) {
+        setAboutData(result.data);
+      } else {
+        throw new Error('Failed to fetch personal data');
+      }
+    } catch (error) {
+      console.error('Error fetching about data:', error);
+      // Fallback data
+      setAboutData({
+        title: "About Me",
+        tagline: "Get to know more about my journey, skills, and passion for creating amazing web experiences",
+        experience: "3+ Years",
+        projects: "25+",
+        technologies: "15+",
+        name: "Naveen Agarwal",
+        email: "naveen@example.com",
+        phone: "+1 (555) 123-4567",
+        location: "San Francisco, CA",
+        profileImageUrl: "/Naveen.jpg",
+        bio: "I'm a passionate frontend developer with expertise in creating modern, responsive web applications using cutting-edge technologies like React, Tailwind CSS, and the MERN stack.",
+        resumeUrl: "/NaveenAgarwal__Resume.pdf",
+        frontendResumeUrl: "/Naveen Agarwal - Frontend.pdf",
+        backendResumeUrl: "/NaveenAgarwal_Backend.pdf"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const resumes = displayData ? [
     {

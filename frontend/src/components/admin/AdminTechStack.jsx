@@ -106,12 +106,25 @@ const AdminTechStack = () => {
     });
   };
 
+  const validateLogoUrl = (url) => {
+    if (!url) return true;
+    try {
+      const urlObj = new URL(url);
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
   const validateForm = () => {
     const errors = {};
     if (!formData.name.trim()) errors.name = 'Name is required';
     if (!formData.icon) errors.icon = 'Icon is required';
     if (!formData.color) errors.color = 'Color is required';
     if (!formData.category) errors.category = 'Category is required';
+    if (formData.logoUrl && !validateLogoUrl(formData.logoUrl)) {
+      errors.logoUrl = 'Please enter a valid URL (http:// or https://)';
+    }
     
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -415,14 +428,42 @@ const AdminTechStack = () => {
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                           Logo URL (Optional)
                         </label>
-                        <input
-                          type="url"
-                          name="logoUrl"
-                          value={formData.logoUrl}
-                          onChange={handleFormChange}
-                          placeholder="https://example.com/logo.png"
-                          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
+                        <div className="flex gap-2">
+                          <input
+                            type="url"
+                            name="logoUrl"
+                            value={formData.logoUrl}
+                            onChange={handleFormChange}
+                            placeholder="https://example.com/logo.png"
+                            className={`w-full px-4 py-3 bg-gray-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                              formErrors.logoUrl ? 'border-red-500' : 'border-gray-600'
+                            }`}
+                          />
+                          {formData.logoUrl && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const img = new Image();
+                                img.onload = () => toast({ 
+                                  title: 'Logo URL is valid!', 
+                                  description: 'Image loaded successfully.' 
+                                });
+                                img.onerror = () => toast({ 
+                                  title: 'Invalid URL', 
+                                  description: 'Could not load image from this URL.', 
+                                  variant: 'destructive' 
+                                });
+                                img.src = formData.logoUrl;
+                              }}
+                              className="text-sm whitespace-nowrap"
+                            >
+                              Test
+                            </Button>
+                          )}
+                        </div>
+                        {formErrors.logoUrl && <p className="text-red-400 text-sm mt-1">{formErrors.logoUrl}</p>}
                       </div>
                     </CardContent>
                   )}
