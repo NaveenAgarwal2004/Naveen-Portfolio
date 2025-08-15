@@ -8,7 +8,6 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
-
 // Import routes
 const authRoutes = require('./routes/auth');
 const portfolioRoutes = require('./routes/portfolio');
@@ -24,7 +23,7 @@ app.set('trust proxy', true);
 app.use(helmet());
 app.use(compression());
 
-// CORS configuration
+// CORS configuration - FIXED for CORS issues
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -54,7 +53,8 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-bypass-rate-limit'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-bypass-rate-limit', 'Cache-Control', 'Pragma', 'Expires'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));
@@ -100,24 +100,7 @@ mongoose.connect(process.env.MONGO_URL, {
   process.exit(1);
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    success: true, 
-    message: 'Portfolio API is running',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Simple health check for Render
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Health check endpoints for Render
+// Health check endpoints
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
