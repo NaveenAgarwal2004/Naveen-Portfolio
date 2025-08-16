@@ -163,13 +163,17 @@ export const adminAPI = {
   deleteTechStack: (id) => apiClient.delete(`/admin/tech-stack/${id}`),
   
   // File Uploads with retry
-  uploadResume: (file) => {
+  uploadResume: (type, file) => {
     const formData = new FormData();
-    formData.append('resume', file);
-    return apiClient.post('/admin/upload/resume', formData, {
+    formData.append('file', file);
+    return apiClient.post(`/admin/resume/upload/${type}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
+  
+  deleteResume: (type) => apiClient.delete(`/admin/resume/${type}`),
+  
+  getResumes: () => apiClient.get('/admin/resume/urls'),
   
   uploadFrontendResume: (file) => {
     const formData = new FormData();

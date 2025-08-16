@@ -21,6 +21,7 @@ import ProtectedRoute from './components/admin/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import { portfolioAPI } from './services/api';
+import ResumeSection from './components/ResumeSection';
 
 // SEO Component
 const SEO = ({ title, description, keywords }) => {
@@ -151,6 +152,7 @@ const Home = () => {
         <About personalData={portfolioData?.personal} statsData={portfolioData?.stats} />
         <TechStack techStackData={portfolioData?.techStack} />
         <Projects projectsData={portfolioData?.projects} />
+        <ResumeSection />
         <Contact />
       </main>
       <Footer personalData={portfolioData?.personal} />

@@ -477,6 +477,125 @@ router.post('/upload/tech-logo', uploadTechLogo.single('techLogo'), async (req, 
   }
 });
 
+// POST /api/admin/upload/resume/:type - Upload resume (frontend/backend/general)
+router.post('/upload/resume/:type', uploadResume.single('file'), async (req, res) => {
+  try {
+    const type = req.params.type;
+    
+    if (!['frontend', 'backend', 'general'].includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid resume type. Must be frontend, backend, or general'
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    let personal = await Personal.findOne();
+    
+    if (!personal) {
+      personal = new Personal({
+        name: 'Naveen Agarwal',
+        title: 'Front-End Web Developer',
+        tagline: 'Building modern, responsive web experiences',
+        bio: 'Passionate Front-End Developer',
+        email: 'naveen.agarwal.dev@gmail.com'
+      });
+    }
+
+    // Delete old resume if exists
+    const oldResume = personal[`${type}Resume`];
+    if (oldResume && oldResume.public_id) {
+      try {
+        await deleteFromCloudinary(oldResume.public_id, 'raw');
+      } catch (deleteError) {
+        console.error('Error deleting old resume:', deleteError);
+      }
+    }
+
+    // Update with new resume
+
+    
+    personal[`${type}Resume`] = {
+      public_id: req.file.public_id,
+      url: req.file.secure_url
+    };
+    await personal.save();
+
+    res.json({
+      success: true,
+      message: `${type} resume uploaded successfully`,
+      data: {
+        url: req.file.secure_url,
+        publicId: req.file.public_id
+      }
+    });
+  } catch (error) {
+    console.error('Resume upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload resume'
+    });
+  }
+});
+
+// DELETE /api/admin/resume/:type - Delete specific resume
+router.delete('/resume/:type', async (req, res) => {
+  try {
+    const type = req.params.type;
+    
+    if (!['frontend', 'backend', 'general'].includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid resume type'
+      });
+    }
+
+    const personal = await Personal.findOne();
+    if (!personal) {
+      return res.status(404).json({
+        success: false,
+        message: 'Personal info not found'
+      });
+    }
+
+    const resume = personal[`${type}Resume`];
+    if (!resume || !resume.public_id) {
+      return res.status(404).json({
+        success: false,
+        message: `${type} resume not found`
+      });
+    }
+
+    // Delete from Cloudinary
+    try {
+      await deleteFromCloudinary(resume.public_id, 'raw');
+    } catch (deleteError) {
+      console.error('Error deleting resume from Cloudinary:', deleteError);
+    }
+
+    // Remove from database
+    personal[`${type}Resume`] = { public_id: '', url: '' };
+    await personal.save();
+
+    res.json({
+      success: true,
+      message: `${type} resume deleted successfully`
+    });
+  } catch (error) {
+    console.error('Error deleting resume:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete resume'
+    });
+  }
+});
+
 // ============= TECH STACK MANAGEMENT =============
 
 // GET /api/admin/tech-stack - Get all tech stack items

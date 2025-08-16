@@ -5,13 +5,11 @@ const TechStack = require('../models/TechStack');
 
 const router = express.Router();
 
-// GET /api/portfolio/personal - Get personal information
+// ================= GET PERSONAL INFO =================
 router.get('/personal', async (req, res) => {
   try {
-    // Always get the personal data from the database
     const personal = await Personal.findOne();
-    
-    // If no personal data exists, return default data
+
     if (!personal) {
       const defaultData = {
         name: 'Naveen Agarwal',
@@ -38,97 +36,64 @@ router.get('/personal', async (req, res) => {
           email: 'mailto:naveenagarwal7624@gmail.com'
         }
       };
-      return res.json({
-        success: true,
-        data: defaultData
-      });
+      return res.json({ success: true, data: defaultData });
     }
-    
-    // If we have personal data, return it with a fallback for profile image
+
     const result = {
       ...personal.toObject(),
-      profileImageUrl: personal.profileImageUrl || '/Naveen.jpg'
+      profileImageUrl: personal.profileImageUrl || '/Naveen.jpg',
+      frontendResume: personal.frontendResume || { public_id: '', url: '' },
+      backendResume: personal.backendResume || { public_id: '', url: '' },
+      generalResume: personal.generalResume || { public_id: '', url: '' }
     };
-    
-    res.json({
-      success: true,
-      data: result
-    });
+
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error('Error fetching personal data:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch personal information'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch personal information' });
   }
 });
 
-// GET /api/portfolio/projects - Get all projects
+// ================= GET PROJECTS =================
 router.get('/projects', async (req, res) => {
   try {
     const { category } = req.query;
-    
     let query = {};
     if (category && category !== 'All') {
       query.category = category;
     }
 
-    const projects = await Project.find(query)
-      .sort({ featured: -1, order: 1, createdAt: -1 });
-
-    res.json({
-      success: true,
-      data: projects
-    });
+    const projects = await Project.find(query).sort({ featured: -1, order: 1, createdAt: -1 });
+    res.json({ success: true, data: projects });
   } catch (error) {
     console.error('Error fetching projects:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch projects'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch projects' });
   }
 });
 
-// GET /api/portfolio/projects/featured - Get featured projects
+// ================= GET FEATURED PROJECTS =================
 router.get('/projects/featured', async (req, res) => {
   try {
-    const projects = await Project.find({ featured: true })
-      .sort({ order: 1, createdAt: -1 })
-      .limit(3);
-
-    res.json({
-      success: true,
-      data: projects
-    });
+    const projects = await Project.find({ featured: true }).sort({ order: 1, createdAt: -1 }).limit(3);
+    res.json({ success: true, data: projects });
   } catch (error) {
     console.error('Error fetching featured projects:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch featured projects'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch featured projects' });
   }
 });
 
-// GET /api/portfolio/tech-stack - Get tech stack
+// ================= GET TECH STACK =================
 router.get('/tech-stack', async (req, res) => {
   try {
-    const techStack = await TechStack.find()
-      .sort({ category: 1, order: 1, name: 1 });
-
-    res.json({
-      success: true,
-      data: techStack
-    });
+    const techStack = await TechStack.find().sort({ category: 1, order: 1, name: 1 });
+    res.json({ success: true, data: techStack });
   } catch (error) {
     console.error('Error fetching tech stack:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch tech stack'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch tech stack' });
   }
 });
 
-// GET /api/portfolio/stats - Get portfolio statistics
+// ================= GET PORTFOLIO STATS =================
 router.get('/stats', async (req, res) => {
   try {
     const [totalProjects, aiProjects, webProjects, techCount] = await Promise.all([
@@ -151,10 +116,54 @@ router.get('/stats', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching stats:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch statistics'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch statistics' });
+  }
+});
+
+// ================= VIEW RESUME INLINE =================
+router.get('/resume/:type', async (req, res) => {
+  try {
+    const { type } = req.params;
+    if (!['frontend', 'backend', 'general'].includes(type)) {
+      return res.status(400).json({ success: false, message: 'Invalid resume type' });
+    }
+
+    const personal = await Personal.findOne();
+    if (!personal) return res.status(404).json({ success: false, message: 'Personal information not found' });
+
+    const resume = personal[`${type}Resume`];
+    if (!resume || !resume.url) {
+      return res.status(404).json({ success: false, message: `${type} resume not found` });
+    }
+
+    res.redirect(resume.url);
+  } catch (error) {
+    console.error('Error fetching resume:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch resume' });
+  }
+});
+
+// ================= DOWNLOAD RESUME =================
+router.get('/resume/:type/download', async (req, res) => {
+  try {
+    const { type } = req.params;
+    if (!['frontend', 'backend', 'general'].includes(type)) {
+      return res.status(400).json({ success: false, message: 'Invalid resume type' });
+    }
+
+    const personal = await Personal.findOne();
+    if (!personal) return res.status(404).json({ success: false, message: 'Personal information not found' });
+
+    const resume = personal[`${type}Resume`];
+    if (!resume || !resume.url) {
+      return res.status(404).json({ success: false, message: `${type} resume not found` });
+    }
+
+    const downloadUrl = resume.url.replace('/upload/', '/upload/fl_attachment/');
+    res.redirect(downloadUrl);
+  } catch (error) {
+    console.error('Error downloading resume:', error);
+    res.status(500).json({ success: false, message: 'Failed to download resume' });
   }
 });
 

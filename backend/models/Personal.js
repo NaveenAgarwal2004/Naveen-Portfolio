@@ -42,29 +42,17 @@ const personalSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  resumeUrl: {
-    type: String,
-    default: ''
+  frontendResume: {
+    public_id: String,
+    url: String
   },
-  resumePublicId: {
-    type: String,
-    default: ''
+  backendResume: {
+    public_id: String,
+    url: String
   },
-  frontendResumeUrl: {
-    type: String,
-    default: ''
-  },
-  frontendResumePublicId: {
-    type: String,
-    default: ''
-  },
-  backendResumeUrl: {
-    type: String,
-    default: ''
-  },
-  backendResumePublicId: {
-    type: String,
-    default: ''
+  generalResume: {
+    public_id: String,
+    url: String
   },
   skills: [{
     name: {

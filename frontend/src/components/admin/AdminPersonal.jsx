@@ -1,20 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  User, 
-  Save, 
-  Upload, 
-  Eye, 
-  EyeOff,
-  Github,
-  Linkedin,
-  Twitter,
-  Mail,
-  Phone,
-  MapPin,
-  FileText,
-  Image as ImageIcon,
-  ChevronDown,
-  ChevronUp
+  User, Save, Upload, Eye, EyeOff,
+  Github, Linkedin, Twitter, Mail, Phone, MapPin,
+  FileText, Image as ImageIcon,
+  ChevronDown, ChevronUp
 } from 'lucide-react';
 import { adminAPI } from '../../services/api';
 import { useToast } from '../../hooks/use-toast';
@@ -31,12 +20,10 @@ const AdminPersonal = () => {
     phone: '',
     location: '',
     profileImageUrl: '',
-    resumeUrl: '',
-    frontendResumeUrl: '',
-    backendResumeUrl: '',
-    skills: [
-      { name: '', level: 50 }
-    ],
+    frontendResume: { url: '', public_id: '' },
+    backendResume: { url: '', public_id: '' },
+    generalResume: { url: '', public_id: '' },
+    skills: [{ name: '', level: 50 }],
     socialLinks: {
       github: '',
       linkedin: '',
@@ -44,6 +31,7 @@ const AdminPersonal = () => {
       twitter: ''
     }
   });
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
@@ -58,21 +46,24 @@ const AdminPersonal = () => {
     social: false,
     files: false
   });
+
   const { toast } = useToast();
 
+  // ✅ Fetch both personal data & resume URLs on mount
   useEffect(() => {
     fetchPersonalData();
+    fetchResumeUrls();
   }, []);
 
   const fetchPersonalData = async () => {
     setLoading(true);
     try {
       const response = await adminAPI.getPersonal();
-      
       if (response.data.success) {
         const data = response.data.data;
-        
-        setFormData({
+
+        setFormData(prev => ({
+          ...prev,
           name: data.name || '',
           title: data.title || '',
           tagline: data.tagline || '',
@@ -81,9 +72,9 @@ const AdminPersonal = () => {
           phone: data.phone || '',
           location: data.location || '',
           profileImageUrl: data.profileImageUrl || '',
-          resumeUrl: data.resumeUrl || '',
-          frontendResumeUrl: data.frontendResumeUrl || '',
-          backendResumeUrl: data.backendResumeUrl || '',
+          frontendResume: data.frontendResume || { url: '', public_id: '' },
+          backendResume: data.backendResume || { url: '', public_id: '' },
+          generalResume: data.generalResume || { url: '', public_id: '' },
           skills: data.skills && data.skills.length > 0 ? data.skills : [{ name: '', level: 50 }],
           socialLinks: {
             github: data.socialLinks?.github || '',
@@ -91,13 +82,12 @@ const AdminPersonal = () => {
             email: data.socialLinks?.email || '',
             twitter: data.socialLinks?.twitter || ''
           }
-        });
-        
+        }));
+
         setOriginalData(data);
       }
     } catch (error) {
       console.error('❌ Error fetching personal data:', error);
-      console.error('❌ Error details:', error.response?.data);
       toast({
         title: 'Error',
         description: 'Failed to fetch personal information.',
@@ -105,6 +95,90 @@ const AdminPersonal = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchResumeUrls = async () => {
+    try {
+      const response = await adminAPI.getResumes();
+      if (response.data.success) {
+        setFormData(prev => ({
+          ...prev,
+          frontendResume: response.data.data.frontendResume,
+          backendResume: response.data.data.backendResume,
+          generalResume: response.data.data.generalResume
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching resume URLs:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch resume URLs.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDelete = async (type) => {
+    try {
+      await adminAPI.deleteResume(type);
+      toast({
+        title: 'Resume Deleted',
+        description: `Your ${type} resume has been deleted successfully.`,
+      });
+      fetchResumeUrls();
+    } catch (error) {
+      console.error('Error deleting resume:', error);
+      toast({
+        title: 'Delete Failed',
+        description: `Failed to delete ${type} resume.`,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleResumeUpload = async (e, resumeType) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      toast({
+        title: 'Invalid File',
+        description: 'Please upload a PDF file.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'File Too Large',
+        description: 'Resume file must be less than 5MB.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploadingResume(true);
+    try {
+      const response = await adminAPI.uploadResume(resumeType, file);
+      if (response.data.success) {
+        toast({
+          title: 'Resume Uploaded',
+          description: `Your ${resumeType} resume has been uploaded successfully.`,
+        });
+        fetchResumeUrls();
+      }
+    } catch (error) {
+      console.error('Resume upload error:', error);
+      toast({
+        title: 'Upload Failed',
+        description: `Failed to upload ${resumeType} resume.`,
+        variant: 'destructive',
+      });
+    } finally {
+      setUploadingResume(false);
+      e.target.value = ''; // clear file input
     }
   };
 
@@ -249,89 +323,6 @@ const AdminPersonal = () => {
     }
   };
 
-  const handleResumeUpload = async (e, resumeType = 'main') => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.type !== 'application/pdf') {
-      toast({
-        title: 'Invalid File',
-        description: 'Please upload a PDF file.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: 'File Too Large',
-        description: 'Resume file must be less than 5MB.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setUploadingResume(true);
-    try {
-      let response;
-      if (resumeType === 'frontend') {
-        response = await adminAPI.uploadFrontendResume(file);
-      } else if (resumeType === 'backend') {
-        response = await adminAPI.uploadBackendResume(file);
-      } else {
-        response = await adminAPI.uploadResume(file);
-      }
-      
-      if (response.data.success) {
-        let updatedData = {};
-        if (resumeType === 'frontend') {
-          updatedData.frontendResumeUrl = response.data.data.url;
-          setFormData(prev => ({
-            ...prev,
-            frontendResumeUrl: response.data.data.url
-          }));
-        } else if (resumeType === 'backend') {
-          updatedData.backendResumeUrl = response.data.data.url;
-          setFormData(prev => ({
-            ...prev,
-            backendResumeUrl: response.data.data.url
-          }));
-        } else if (resumeType === 'main') {
-          updatedData.resumeUrl = response.data.data.url;
-          setFormData(prev => ({
-            ...prev,
-            resumeUrl: response.data.data.url
-          }));
-        }
-        // Save updated resume URLs to backend
-        try {
-          await adminAPI.updatePersonal(updatedData);
-          toast({
-            title: 'Resume Uploaded',
-            description: `Your ${resumeType} resume has been uploaded and saved successfully.`,
-          });
-        } catch (saveError) {
-          console.error('Error saving updated resume URL:', saveError);
-          toast({
-            title: 'Save Failed',
-            description: 'Failed to save resume URL after upload.',
-            variant: 'destructive',
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Resume upload error:', error);
-      toast({
-        title: 'Upload Failed',
-        description: `Failed to upload ${resumeType} resume.`,
-        variant: 'destructive',
-      });
-    } finally {
-      setUploadingResume(false);
-      // Clear the file input
-      e.target.value = '';
-    }
-  };
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -622,140 +613,176 @@ const AdminPersonal = () => {
                     Resumes/CVs
                   </label>
                   <div className="space-y-4">
-                    {/* Main Resume */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-300">Main Resume</span>
-                        {formData.resumeUrl && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => window.open(formData.resumeUrl, '_blank')}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                          >
-                            View
-                          </Button>
+                  {/* General Resume */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-300">General Resume</span>
+                      <div className="flex gap-2">
+                        {formData.generalResume.url && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(formData.generalResume.url, '_blank')}
+                              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                            >
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete('general')}
+                              className="border-red-600 text-red-300 hover:bg-red-700"
+                            >
+                              Delete
+                            </Button>
+                          </>
                         )}
                       </div>
-                      <div>
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          onChange={(e) => handleResumeUpload(e, 'main')}
-                          className="hidden"
-                          id="resume-upload"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
-                          disabled={uploadingResume}
-                          onClick={() => document.getElementById('resume-upload').click()}
-                        >
-                          {uploadingResume ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="h-4 w-4 mr-2" />
-                              {formData.resumeUrl ? 'Replace Resume' : 'Upload Resume'}
-                            </>
-                          )}
-                        </Button>
-                      </div>
                     </div>
+                    <div>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => handleResumeUpload(e, 'general')}
+                        className="hidden"
+                        id="general-resume-upload"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
+                        disabled={uploadingResume}
+                        onClick={() => document.getElementById('general-resume-upload').click()}
+                      >
+                        {uploadingResume ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            {formData.generalResume.url ? 'Replace Resume' : 'Upload Resume'}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
 
-                    {/* Frontend Resume */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-300">Frontend Resume</span>
-                        {formData.frontendResumeUrl && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => window.open(formData.frontendResumeUrl, '_blank')}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                          >
-                            View
-                          </Button>
+                  {/* Frontend Resume */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-300">Frontend Resume</span>
+                      <div className="flex gap-2">
+                        {formData.frontendResume.url && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(formData.frontendResume.url, '_blank')}
+                              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                            >
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete('frontend')}
+                              className="border-red-600 text-red-300 hover:bg-red-700"
+                            >
+                              Delete
+                            </Button>
+                          </>
                         )}
                       </div>
-                      <div>
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          onChange={(e) => handleResumeUpload(e, 'frontend')}
-                          className="hidden"
-                          id="frontend-resume-upload"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
-                          disabled={uploadingResume}
-                          onClick={() => document.getElementById('frontend-resume-upload').click()}
-                        >
-                          {uploadingResume ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="h-4 w-4 mr-2" />
-                              {formData.frontendResumeUrl ? 'Replace Resume' : 'Upload Resume'}
-                            </>
-                          )}
-                        </Button>
-                      </div>
                     </div>
+                    <div>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => handleResumeUpload(e, 'frontend')}
+                        className="hidden"
+                        id="frontend-resume-upload"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
+                        disabled={uploadingResume}
+                        onClick={() => document.getElementById('frontend-resume-upload').click()}
+                      >
+                        {uploadingResume ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            {formData.frontendResume.url ? 'Replace Resume' : 'Upload Resume'}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
 
-                    {/* Backend Resume */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-300">Backend Resume</span>
-                        {formData.backendResumeUrl && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => window.open(formData.backendResumeUrl, '_blank')}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                          >
-                            View
-                          </Button>
+                  {/* Backend Resume */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-300">Backend Resume</span>
+                      <div className="flex gap-2">
+                        {formData.backendResume.url && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(formData.backendResume.url, '_blank')}
+                              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                            >
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete('backend')}
+                              className="border-red-600 text-red-300 hover:bg-red-700"
+                            >
+                              Delete
+                            </Button>
+                          </>
                         )}
                       </div>
-                      <div>
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          onChange={(e) => handleResumeUpload(e, 'backend')}
-                          className="hidden"
-                          id="backend-resume-upload"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
-                          disabled={uploadingResume}
-                          onClick={() => document.getElementById('backend-resume-upload').click()}
-                        >
-                          {uploadingResume ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="h-4 w-4 mr-2" />
-                              {formData.backendResumeUrl ? 'Replace Resume' : 'Upload Resume'}
-                            </>
-                          )}
-                        </Button>
-                      </div>
                     </div>
+                    <div>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => handleResumeUpload(e, 'backend')}
+                        className="hidden"
+                        id="backend-resume-upload"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
+                        disabled={uploadingResume}
+                        onClick={() => document.getElementById('backend-resume-upload').click()}
+                      >
+                        {uploadingResume ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            {formData.backendResume.url ? 'Replace Resume' : 'Upload Resume'}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                   </div>
                 </div>
               </CardContent>
