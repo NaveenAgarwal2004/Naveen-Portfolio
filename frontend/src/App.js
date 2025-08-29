@@ -17,11 +17,13 @@ import AdminProjectEdit from './components/admin/AdminProjectEdit';
 import AdminPersonal from './components/admin/AdminPersonal';
 import AdminTechStack from './components/admin/AdminTechStack';
 import AdminMessages from './components/admin/AdminMessages';
+import AdminCertificates from './components/admin/AdminCertificates';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import { portfolioAPI } from './services/api';
 import ResumeSection from './components/ResumeSection';
+import CertificatesSection from './components/CertificatesSection';
 
 // SEO Component
 const SEO = ({ title, description, keywords }) => {
@@ -153,6 +155,7 @@ const Home = () => {
         <TechStack techStackData={portfolioData?.techStack} />
         <Projects projectsData={portfolioData?.projects} />
         <ResumeSection />
+        <CertificatesSection />
         <Contact />
       </main>
       <Footer personalData={portfolioData?.personal} />
@@ -195,6 +198,9 @@ function App() {
               
               {/* Tech Stack Management */}
               <Route path="tech-stack" element={<AdminTechStack />} />
+              
+              {/* Certificates Management */}
+              <Route path="certificates" element={<AdminCertificates />} />
               
               {/* Messages Management */}
               <Route path="messages" element={<AdminMessages />} />

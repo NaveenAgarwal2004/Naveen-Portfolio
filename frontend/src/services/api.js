@@ -127,6 +127,50 @@ export const contactAPI = {
   }
 };
 
+// ============= RESUME APIs - FIXED =============
+
+export const resumeAPI = {
+  // Get resume URLs (public)
+  getResumes: () => apiClient.get('/resume/urls'),
+  
+  // Upload resume (admin only) - FIXED to properly pass resume type
+  uploadResume: (type, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.post(`/admin/resume/upload/${type}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  
+  // Delete resume (admin only)
+  deleteResume: (type) => apiClient.delete(`/admin/resume/${type}`)
+};
+
+// ============= CERTIFICATES APIs - NEW =============
+
+export const certificatesAPI = {
+  // Get all certificates (public)
+  getCertificates: () => apiClient.get('/certificates'),
+  
+  // Add certificate (admin only)
+  addCertificate: (certificateData) => apiClient.post('/admin/certificates', certificateData),
+  
+  // Update certificate (admin only)
+  updateCertificate: (id, certificateData) => apiClient.put(`/admin/certificates/${id}`, certificateData),
+  
+  // Delete certificate (admin only)
+  deleteCertificate: (id) => apiClient.delete(`/admin/certificates/${id}`),
+  
+  // Upload certificate logo (admin only)
+  uploadCertificateLogo: (id, file) => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    return apiClient.post(`/admin/certificates/${id}/logo`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+};
+
 // ============= AUTH APIs =============
 
 export const authAPI = {
@@ -140,7 +184,7 @@ export const authAPI = {
   logout: () => apiClient.post('/auth/logout')
 };
 
-// ============= ADMIN APIs =============
+// ============= ADMIN APIs - UPDATED =============
 
 export const adminAPI = {
   // Dashboard with retry
@@ -162,35 +206,19 @@ export const adminAPI = {
   updateTechStack: (id, techData) => apiClient.put(`/admin/tech-stack/${id}`, techData),
   deleteTechStack: (id) => apiClient.delete(`/admin/tech-stack/${id}`),
   
-  // File Uploads with retry
-  uploadResume: (type, file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return apiClient.post(`/admin/resume/upload/${type}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
+  // Resume Management - FIXED APIs
+  uploadResume: (type, file) => resumeAPI.uploadResume(type, file),
+  deleteResume: (type) => resumeAPI.deleteResume(type),
+  getResumes: () => resumeAPI.getResumes(),
   
-  deleteResume: (type) => apiClient.delete(`/admin/resume/${type}`),
+  // Certificates Management - NEW
+  getCertificates: () => certificatesAPI.getCertificates(),
+  addCertificate: (certificateData) => certificatesAPI.addCertificate(certificateData),
+  updateCertificate: (id, certificateData) => certificatesAPI.updateCertificate(id, certificateData),
+  deleteCertificate: (id) => certificatesAPI.deleteCertificate(id),
+  uploadCertificateLogo: (id, file) => certificatesAPI.uploadCertificateLogo(id, file),
   
-  getResumes: () => apiClient.get('/admin/resume/urls'),
-  
-  uploadFrontendResume: (file) => {
-    const formData = new FormData();
-    formData.append('frontendResume', file);
-    return apiClient.post('/admin/upload/frontend-resume', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  
-  uploadBackendResume: (file) => {
-    const formData = new FormData();
-    formData.append('backendResume', file);
-    return apiClient.post('/admin/upload/backend-resume', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  
+  // File Uploads - LEGACY (keeping for backward compatibility but updated)
   uploadProfileImage: (file) => {
     const formData = new FormData();
     formData.append('profileImage', file);

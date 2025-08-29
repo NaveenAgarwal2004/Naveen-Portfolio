@@ -161,13 +161,18 @@ const AdminPersonal = () => {
 
     setUploadingResume(true);
     try {
-      const response = await adminAPI.uploadResume('general', file);
+      // FIXED: Use the correct resume type instead of hardcoded 'general'
+      const response = await adminAPI.uploadResume(resumeType, file);
       if (response.data.success) {
         toast({
           title: 'Resume Uploaded',
           description: `Your ${resumeType} resume has been uploaded successfully.`,
         });
-        fetchResumeUrls();
+        // Refresh resume URLs to get the latest data
+        await fetchResumeUrls();
+        
+        // Refresh personal data to ensure consistency
+        await fetchPersonalData();
       }
     } catch (error) {
       console.error('Resume upload error:', error);

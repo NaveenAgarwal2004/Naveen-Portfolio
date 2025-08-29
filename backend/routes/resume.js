@@ -20,22 +20,32 @@ const upload = multer({
   }
 });
 
-// Upload resume endpoint
+// Upload resume endpoint - FIXED to properly handle resume types
 router.post('/upload/:type', auth, upload.single('file'), async (req, res) => {
   try {
     const { type } = req.params;
     
+    // Validate resume type
     if (!['frontend', 'backend', 'general'].includes(type)) {
-      return res.status(400).json({ error: 'Invalid resume type' });
+      return res.status(400).json({ 
+        success: false,
+        message: 'Invalid resume type. Must be frontend, backend, or general' 
+      });
     }
 
     if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+      return res.status(400).json({ 
+        success: false,
+        message: 'No file uploaded' 
+      });
     }
 
     const personal = await Personal.findOne();
     if (!personal) {
-      return res.status(404).json({ error: 'Personal info not found' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Personal info not found' 
+      });
     }
 
     // Delete old resume if exists
@@ -64,7 +74,7 @@ router.post('/upload/:type', auth, upload.single('file'), async (req, res) => {
       ).end(req.file.buffer);
     });
 
-    // Update database
+    // Update database with correct resume type
     personal[`${type}Resume`] = {
       public_id: result.public_id,
       url: result.secure_url
@@ -75,33 +85,46 @@ router.post('/upload/:type', auth, upload.single('file'), async (req, res) => {
       success: true,
       message: `${type} resume uploaded successfully`,
       data: {
+        type: type,
         url: result.secure_url,
         public_id: result.public_id
       }
     });
   } catch (error) {
     console.error('Resume upload error:', error);
-    res.status(500).json({ error: 'Failed to upload resume' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to upload resume' 
+    });
   }
 });
 
-// Delete resume endpoint
+// Delete resume endpoint - FIXED
 router.delete('/:type', auth, async (req, res) => {
   try {
     const { type } = req.params;
     
     if (!['frontend', 'backend', 'general'].includes(type)) {
-      return res.status(400).json({ error: 'Invalid resume type' });
+      return res.status(400).json({ 
+        success: false,
+        message: 'Invalid resume type' 
+      });
     }
 
     const personal = await Personal.findOne();
     if (!personal) {
-      return res.status(404).json({ error: 'Personal info not found' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Personal info not found' 
+      });
     }
 
     const resume = personal[`${type}Resume`];
     if (!resume || !resume.public_id) {
-      return res.status(404).json({ error: `${type} resume not found` });
+      return res.status(404).json({ 
+        success: false,
+        message: `${type} resume not found` 
+      });
     }
 
     // Delete from Cloudinary
@@ -117,16 +140,22 @@ router.delete('/:type', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('Resume delete error:', error);
-    res.status(500).json({ error: 'Failed to delete resume' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to delete resume' 
+    });
   }
 });
 
-// Get resume URLs
+// Get resume URLs - ENHANCED with better response format
 router.get('/urls', async (req, res) => {
   try {
     const personal = await Personal.findOne();
     if (!personal) {
-      return res.status(404).json({ error: 'Personal info not found' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Personal info not found' 
+      });
     }
 
     res.json({
@@ -139,7 +168,10 @@ router.get('/urls', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching resume URLs:', error);
-    res.status(500).json({ error: 'Failed to fetch resume URLs' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to fetch resume URLs' 
+    });
   }
 });
 

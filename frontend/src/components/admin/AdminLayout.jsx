@@ -6,6 +6,7 @@ import {
   User, 
   Code, 
   MessageSquare, 
+  Award,
   LogOut,
   Menu,
   X,
@@ -63,6 +64,12 @@ const AdminLayout = () => {
       href: '/admin/tech-stack',
       icon: Code,
       current: location.pathname === '/admin/tech-stack'
+    },
+    {
+      name: 'Certificates',
+      href: '/admin/certificates',
+      icon: Award,
+      current: location.pathname === '/admin/certificates'
     },
     {
       name: 'Messages',

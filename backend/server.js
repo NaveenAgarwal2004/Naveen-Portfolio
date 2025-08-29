@@ -14,6 +14,7 @@ const portfolioRoutes = require('./routes/portfolio');
 const adminRoutes = require('./routes/admin');
 const contactRoutes = require('./routes/contact');
 const resumeRoutes = require('./routes/resume');
+const certificatesRoutes = require('./routes/certificates'); // NEW
 const testPersonalRoutes = require('./routes/testPersonal');
 
 const app = express();
@@ -62,7 +63,6 @@ app.use(cors({
 }));
 
 // Rate limiting for non-contact routes
-// We'll apply this middleware to specific routes instead of globally
 const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
@@ -80,14 +80,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/auth', generalRateLimiter, authRoutes);
 app.use('/api/portfolio', generalRateLimiter, portfolioRoutes);
 app.use('/api/resume', generalRateLimiter, resumeRoutes);
-// Note: Admin routes don't have rate limiting applied
-app.use('/api/admin', adminRoutes);
+app.use('/api/certificates', generalRateLimiter, certificatesRoutes); // NEW - Public certificates endpoint
 
-// Other existing routes...
+// Admin routes (no rate limiting for admin operations)
+app.use('/api/admin', adminRoutes);
 app.use('/api/admin/resume', resumeRoutes);
+app.use('/api/admin/certificates', certificatesRoutes); // NEW - Admin certificates endpoint
+
+// Other existing routes
 app.use('/api/test-personal', testPersonalRoutes);
-// Note: Contact routes have their own specific rate limiting, so we don't apply the general rate limiter here
-app.use('/api/contact', contactRoutes);
+app.use('/api/contact', contactRoutes); // Contact has its own rate limiting
 
 // Logging middleware
 if (process.env.NODE_ENV !== 'production') {
@@ -95,10 +97,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGO_URL)
 .then(() => {
   console.log('Connected to MongoDB');
 })
@@ -242,7 +241,7 @@ process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
   server.close(() => {
     console.log('Server closed.');
-    mongoose.connection.close(() => {
+    mongoose.connection.close().then(() => {
       console.log('MongoDB connection closed.');
       process.exit(0);
     });
