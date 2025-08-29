@@ -161,7 +161,7 @@ const AdminPersonal = () => {
 
     setUploadingResume(true);
     try {
-      const response = await adminAPI.uploadResume(resumeType, file);
+      const response = await adminAPI.uploadResume('general', file);
       if (response.data.success) {
         toast({
           title: 'Resume Uploaded',

@@ -14,6 +14,7 @@ const portfolioRoutes = require('./routes/portfolio');
 const adminRoutes = require('./routes/admin');
 const contactRoutes = require('./routes/contact');
 const resumeRoutes = require('./routes/resume');
+const testPersonalRoutes = require('./routes/testPersonal');
 
 const app = express();
 
@@ -81,8 +82,10 @@ app.use('/api/portfolio', generalRateLimiter, portfolioRoutes);
 app.use('/api/resume', generalRateLimiter, resumeRoutes);
 // Note: Admin routes don't have rate limiting applied
 app.use('/api/admin', adminRoutes);
-// Mount resume routes under admin as well for consistency
+
+// Other existing routes...
 app.use('/api/admin/resume', resumeRoutes);
+app.use('/api/test-personal', testPersonalRoutes);
 // Note: Contact routes have their own specific rate limiting, so we don't apply the general rate limiter here
 app.use('/api/contact', contactRoutes);
 

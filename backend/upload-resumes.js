@@ -13,7 +13,7 @@ cloudinary.config({
 // Files to handle
 const files = [
   {
-    file: path.resolve(__dirname, "Naveen_Agarwal_-_Frontend.pdf"),
+    file: path.resolve(__dirname, "Naveen Agarwal - Frontend.pdf"),
     public_id: "naveen-agarwal-frontend"
   },
   {
@@ -21,7 +21,7 @@ const files = [
     public_id: "naveen-agarwal-backend"
   },
   {
-    file: path.resolve(__dirname, "NaveenAgarwal___Resume.pdf"),
+    file: path.resolve(__dirname, "NaveenAgarwal__Resume.pdf"),
     public_id: "naveen-agarwal-resume"
   }
 ];

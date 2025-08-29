@@ -19,18 +19,64 @@ const ResumeSection = () => {
   const fetchResumes = async () => {
     try {
       setError('');
-      const response = await fetch('/api/portfolio/personal');
-      const data = await response.json();
+      
+      // Try the dedicated resume endpoint first
+      let response = await fetch('/api/resume/urls');
+      
+      if (!response.ok) {
+        // If resume endpoint fails, fall back to portfolio personal endpoint
+        response = await fetch('/api/portfolio/personal');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      }
+      
+      // Check content type
+      const contentType = response.headers.get('content-type');
+      console.log('Content-Type:', contentType);
+      
+      if (contentType && !contentType.includes('application/json') && !contentType.includes('text/plain')) {
+        throw new Error('Invalid response format: expected JSON, got ' + contentType);
+      }
+      
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError, 'Response text:', responseText);
+        throw new Error('Failed to parse JSON response: ' + parseError.message);
+      }
+      
       if (!data.success) throw new Error(data.message || 'Failed to fetch resumes');
       
+      let frontendUrl = '';
+      let backendUrl = '';
+      let generalUrl = '';
+      
+      // Handle different response formats
+      if (data.data.frontendResume && data.data.frontendResume.url) {
+        // Resume endpoint format
+        frontendUrl = data.data.frontendResume.url;
+        backendUrl = data.data.backendResume.url;
+        generalUrl = data.data.generalResume.url;
+      } else {
+        // Portfolio personal endpoint format
+        frontendUrl = data.data.frontendResumeUrl || '';
+        backendUrl = data.data.backendResumeUrl || '';
+        generalUrl = data.data.resumeUrl || '';
+      }
+      
       setResumes({
-        frontend: { url: data.data.frontendResumeUrl || '', public_id: '' },
-        backend: { url: data.data.backendResumeUrl || '', public_id: '' },
-        general: { url: data.data.resumeUrl || '', public_id: '' }
+        frontend: { url: frontendUrl, public_id: '' },
+        backend: { url: backendUrl, public_id: '' },
+        general: { url: generalUrl, public_id: '' }
       });
     } catch (err) {
       setError('⚠️ Unable to load resumes. Please try again later.');
-      console.error(err);
+      console.error('Resume fetch error:', err);
     } finally {
       setLoading(false);
     }
