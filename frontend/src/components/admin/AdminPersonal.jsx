@@ -1404,7 +1404,7 @@ const AdminPersonal = () => {
                       <input
                         type="file"
                         accept=".pdf"
-                        onChange={(e) => handleResumeUpload(e, 'main')}
+                        onChange={(e) => handleResumeUpload(e, 'general')}
                         className="hidden"
                         id="resume-upload-desktop"
                       />

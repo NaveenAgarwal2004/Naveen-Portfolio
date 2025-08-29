@@ -180,7 +180,7 @@ const ResumeSection = () => {
             variant="outline"
             onClick={fetchResumes}
             disabled={loading}
-            className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-400"
+            className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-400 hover:bg-gray-700"
           >
             <RefreshCcw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh Resumes

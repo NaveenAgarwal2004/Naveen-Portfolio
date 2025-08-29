@@ -239,6 +239,8 @@ const Header = () => {
     { id: 'about', label: 'About', icon: User },
     { id: 'tech-stack', label: 'Skills', icon: Code },
     { id: 'projects', label: 'Projects', icon: Briefcase },
+    {id : 'resumes', label: 'Resume', icon: Menu },
+    {id : 'certificates', label: 'Certificates', icon: Download },
     { id: 'contact', label: 'Contact', icon: Mail }
   ];
 

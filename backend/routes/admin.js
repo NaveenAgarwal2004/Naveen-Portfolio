@@ -222,7 +222,11 @@ router.put('/personal', personalValidation, handleValidationErrors, async (req, 
       }
       
       // Update all other fields
-      Object.assign(personal, updateData);
+      Object.keys(updateData).forEach(key => {
+        if (key !== 'skills') { // Don't overwrite skills as we already handled it
+          personal[key] = updateData[key];
+        }
+      });
     }
 
     await personal.save();
