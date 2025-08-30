@@ -221,8 +221,8 @@ const getPDFDownloadUrl = (url) => {
   
   // Add fl_attachment flag to force download with proper headers
   if (url.includes('cloudinary.com')) {
-    // Insert fl_attachment into the URL
-    return url.replace('/upload/', '/upload/fl_attachment/');
+    // Insert fl_attachment after the version number
+    return url.replace('/upload/v', '/upload/fl_attachment/v');
   }
   return url;
 };
@@ -233,7 +233,7 @@ const getPDFViewUrl = (url) => {
   
   // Remove any attachment flags for inline viewing
   if (url.includes('cloudinary.com')) {
-    return url.replace('/fl_attachment/', '/');
+    return url.replace('/fl_attachment/v', '/v');
   }
   return url;
 };
