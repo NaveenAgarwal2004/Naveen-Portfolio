@@ -62,6 +62,34 @@ const techLogoStorage = new CloudinaryStorage({
   },
 });
 
+// NEW: Configure storage for certificate images (actual certificate documents)
+const certificateImageStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'portfolio/certificates/images',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'pdf'],
+    transformation: [
+      { width: 1200, height: 900, crop: 'fit', quality: 'auto' },
+      { fetch_format: 'auto' }
+    ],
+    public_id: (req, file) => `certificate-image-${Date.now()}`,
+  },
+});
+
+// ENHANCED: Configure storage for certificate logos (issuer logos)
+const certificateLogoStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'portfolio/certificates/logos',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'svg'],
+    transformation: [
+      { width: 200, height: 200, crop: 'fit', quality: 'auto' },
+      { fetch_format: 'auto' }
+    ],
+    public_id: (req, file) => `certificate-logo-${Date.now()}`,
+  },
+});
+
 // Create multer upload instances
 const uploadResume = multer({
   storage: resumeStorage,
@@ -111,6 +139,32 @@ const uploadTechLogo = multer({
   }
 });
 
+// NEW: Certificate image upload (for actual certificate documents)
+const uploadCertificateImage = multer({
+  storage: certificateImageStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit for certificate images
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files and PDFs are allowed for certificate images'), false);
+    }
+  }
+});
+
+// ENHANCED: Certificate logo upload (for issuer logos)
+const uploadCertificateLogo = multer({
+  storage: certificateLogoStorage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit for logos
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed for certificate logos'), false);
+    }
+  }
+});
+
 // Helper function to delete file from Cloudinary
 const deleteFromCloudinary = async (publicId, resourceType = 'image') => {
   try {
@@ -124,11 +178,46 @@ const deleteFromCloudinary = async (publicId, resourceType = 'image') => {
   }
 };
 
+// NEW: Helper function to optimize image transformations
+const getOptimizedImageUrl = (publicId, options = {}) => {
+  const {
+    width = 800,
+    height = 600,
+    quality = 'auto',
+    format = 'auto',
+    crop = 'fit'
+  } = options;
+
+  return cloudinary.url(publicId, {
+    width,
+    height,
+    quality,
+    fetch_format: format,
+    crop,
+    secure: true
+  });
+};
+
+// NEW: Helper function to generate multiple image sizes
+const generateImageVariants = (publicId) => {
+  return {
+    thumbnail: getOptimizedImageUrl(publicId, { width: 150, height: 150, crop: 'fill' }),
+    small: getOptimizedImageUrl(publicId, { width: 400, height: 300 }),
+    medium: getOptimizedImageUrl(publicId, { width: 800, height: 600 }),
+    large: getOptimizedImageUrl(publicId, { width: 1200, height: 900 }),
+    original: cloudinary.url(publicId, { secure: true })
+  };
+};
+
 module.exports = {
   cloudinary,
   uploadResume,
   uploadProfileImage,
   uploadProjectImage,
   uploadTechLogo,
-  deleteFromCloudinary
+  uploadCertificateImage, // NEW
+  uploadCertificateLogo, // ENHANCED
+  deleteFromCloudinary,
+  getOptimizedImageUrl, // NEW
+  generateImageVariants // NEW
 };

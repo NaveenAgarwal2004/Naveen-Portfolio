@@ -25,6 +25,7 @@
   "dependencies": {
     "axios": "^1.11.0",
     "bcryptjs": "^2.4.3",
+    "cjs": "^0.0.11",
     "cloudinary": "^1.41.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",

@@ -55,7 +55,7 @@ const personalSchema = new mongoose.Schema({
     public_id: { type: String, default: '' },
     url: { type: String, default: '' }
   },
-  // New certificates field
+  // Enhanced certificates field with image support and advanced features
   certificates: [{
     title: {
       type: String,
@@ -86,13 +86,52 @@ const personalSchema = new mongoose.Schema({
       type: String,
       trim: true
     },
+    // Certificate image (actual certificate document/image)
+    certificateImage: {
+      public_id: { type: String, default: '' },
+      url: { type: String, default: '' }
+    },
+    // Issuer logo
     logo: {
       public_id: { type: String, default: '' },
       url: { type: String, default: '' }
     },
+    // New fields for enhanced functionality
+    tags: [{
+      type: String,
+      trim: true
+    }],
+    priority: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    isPublic: {
+      type: Boolean,
+      default: true
+    },
     isActive: {
       type: Boolean,
       default: true
+    },
+    // Metadata
+    difficulty: {
+      type: String,
+      enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'],
+      default: 'Intermediate'
+    },
+    duration: {
+      type: String,
+      trim: true // e.g., "3 months", "6 weeks"
+    },
+    score: {
+      type: String,
+      trim: true // e.g., "95%", "Pass", "Distinction"
+    },
+    verificationStatus: {
+      type: String,
+      enum: ['Verified', 'Pending', 'Expired', 'Invalid'],
+      default: 'Verified'
     }
   }],
   skills: [{
@@ -117,5 +156,12 @@ const personalSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Index for better query performance
+personalSchema.index({ 'certificates.issueDate': -1 });
+personalSchema.index({ 'certificates.expiryDate': 1 });
+personalSchema.index({ 'certificates.tags': 1 });
+personalSchema.index({ 'certificates.isPublic': 1 });
+personalSchema.index({ 'certificates.isActive': 1 });
 
 module.exports = mongoose.model('Personal', personalSchema);

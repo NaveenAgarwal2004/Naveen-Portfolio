@@ -127,13 +127,13 @@ export const contactAPI = {
   }
 };
 
-// ============= RESUME APIs - FIXED =============
+// ============= RESUME APIs =============
 
 export const resumeAPI = {
   // Get resume URLs (public)
   getResumes: () => apiClient.get('/resume/urls'),
   
-  // Upload resume (admin only) - FIXED to properly pass resume type
+  // Upload resume (admin only)
   uploadResume: (type, file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -146,11 +146,17 @@ export const resumeAPI = {
   deleteResume: (type) => apiClient.delete(`/admin/resume/${type}`)
 };
 
-// ============= CERTIFICATES APIs - NEW =============
+// ============= ENHANCED CERTIFICATES APIs =============
 
 export const certificatesAPI = {
-  // Get all certificates (public)
-  getCertificates: () => apiClient.get('/certificates'),
+  // Get all public certificates with enhanced filtering
+  getCertificates: (params = {}) => apiClient.get('/certificates', { params }),
+  
+  // Get certificate statistics (public)
+  getCertificateStats: () => apiClient.get('/certificates/stats'),
+  
+  // Get all certificates for admin (includes private ones)
+  getAllCertificates: () => apiClient.get('/certificates/admin/all'),
   
   // Add certificate (admin only)
   addCertificate: (certificateData) => apiClient.post('/admin/certificates', certificateData),
@@ -161,14 +167,43 @@ export const certificatesAPI = {
   // Delete certificate (admin only)
   deleteCertificate: (id) => apiClient.delete(`/admin/certificates/${id}`),
   
-  // Upload certificate logo (admin only)
+  // Upload certificate image (admin only) - NEW
+  uploadCertificateImage: (id, file) => {
+    const formData = new FormData();
+    formData.append('certificateImage', file);
+    return apiClient.post(`/admin/certificates/${id}/image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  
+  // Upload certificate logo (admin only) - ENHANCED
   uploadCertificateLogo: (id, file) => {
     const formData = new FormData();
     formData.append('logo', file);
     return apiClient.post(`/admin/certificates/${id}/logo`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-  }
+  },
+  
+  // Bulk operations (admin only) - NEW
+  bulkOperation: (action, certificateIds, data = {}) => {
+    return apiClient.post('/admin/certificates/bulk', {
+      action,
+      certificateIds,
+      data
+    });
+  },
+  
+  // Export certificates (admin only) - NEW
+  exportCertificates: (format = 'json') => {
+    return apiClient.get('/admin/certificates/export', {
+      params: { format },
+      responseType: format === 'csv' ? 'blob' : 'json'
+    });
+  },
+  
+  // Get available tags (admin only) - NEW
+  getTags: () => apiClient.get('/admin/certificates/tags')
 };
 
 // ============= AUTH APIs =============
@@ -206,19 +241,23 @@ export const adminAPI = {
   updateTechStack: (id, techData) => apiClient.put(`/admin/tech-stack/${id}`, techData),
   deleteTechStack: (id) => apiClient.delete(`/admin/tech-stack/${id}`),
   
-  // Resume Management - FIXED APIs
+  // Resume Management
   uploadResume: (type, file) => resumeAPI.uploadResume(type, file),
   deleteResume: (type) => resumeAPI.deleteResume(type),
   getResumes: () => resumeAPI.getResumes(),
   
-  // Certificates Management - NEW
-  getCertificates: () => certificatesAPI.getCertificates(),
+  // Enhanced Certificates Management
+  getCertificates: () => certificatesAPI.getAllCertificates(),
   addCertificate: (certificateData) => certificatesAPI.addCertificate(certificateData),
   updateCertificate: (id, certificateData) => certificatesAPI.updateCertificate(id, certificateData),
   deleteCertificate: (id) => certificatesAPI.deleteCertificate(id),
+  uploadCertificateImage: (id, file) => certificatesAPI.uploadCertificateImage(id, file), // NEW
   uploadCertificateLogo: (id, file) => certificatesAPI.uploadCertificateLogo(id, file),
+  bulkCertificateOperation: (action, ids, data) => certificatesAPI.bulkOperation(action, ids, data), // NEW
+  exportCertificates: (format) => certificatesAPI.exportCertificates(format), // NEW
+  getCertificateTags: () => certificatesAPI.getTags(), // NEW
   
-  // File Uploads - LEGACY (keeping for backward compatibility but updated)
+  // File Uploads - LEGACY (keeping for backward compatibility)
   uploadProfileImage: (file) => {
     const formData = new FormData();
     formData.append('profileImage', file);
