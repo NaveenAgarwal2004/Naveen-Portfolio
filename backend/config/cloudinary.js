@@ -9,14 +9,48 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Configure storage for resume uploads
+// FIXED: Configure storage for resume uploads with proper PDF handling
 const resumeStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'portfolio/resumes',
     allowed_formats: ['pdf'],
-    resource_type: 'raw',
-    public_id: (req, file) => `naveen-agarwal-resume-${Date.now()}`,
+    resource_type: 'image', // Changed from 'raw' to 'image' for proper PDF handling
+    format: 'pdf', // Explicitly set format
+    flags: 'attachment', // This ensures proper download headers
+    public_id: (req, file) => {
+      // Clean filename and add timestamp
+      const originalName = file.originalname.replace(/\.[^/.]+$/, '');
+      const cleanName = originalName.replace(/[^a-zA-Z0-9-_]/g, '_');
+      return `${cleanName}_${Date.now()}`;
+    },
+    // Add these for better PDF handling
+    transformation: [
+      { page: 1 }, // For PDF preview if needed
+      { quality: 'auto:best' },
+      { flags: 'attachment' }
+    ]
+  },
+});
+
+// Alternative: If the above doesn't work, use this configuration
+const resumeStorageAlternative = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: 'portfolio/resumes',
+      resource_type: 'auto', // Let Cloudinary detect the type
+      format: 'pdf',
+      public_id: `naveen-resume-${Date.now()}`,
+      // Use raw delivery type for PDFs
+      type: 'upload',
+      access_mode: 'public',
+      // Add content disposition for proper downloads
+      context: {
+        caption: file.originalname,
+        alt: 'Resume PDF'
+      }
+    };
   },
 });
 
@@ -62,7 +96,7 @@ const techLogoStorage = new CloudinaryStorage({
   },
 });
 
-// NEW: Configure storage for certificate images (actual certificate documents)
+// Configure storage for certificate images
 const certificateImageStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -76,7 +110,7 @@ const certificateImageStorage = new CloudinaryStorage({
   },
 });
 
-// ENHANCED: Configure storage for certificate logos (issuer logos)
+// Configure storage for certificate logos
 const certificateLogoStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -95,7 +129,11 @@ const uploadResume = multer({
   storage: resumeStorage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf') {
+    // More robust PDF validation
+    const isPDF = file.mimetype === 'application/pdf' || 
+                  file.originalname.toLowerCase().endsWith('.pdf');
+    
+    if (isPDF) {
       cb(null, true);
     } else {
       cb(new Error('Only PDF files are allowed for resume uploads'), false);
@@ -139,10 +177,9 @@ const uploadTechLogo = multer({
   }
 });
 
-// NEW: Certificate image upload (for actual certificate documents)
 const uploadCertificateImage = multer({
   storage: certificateImageStorage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit for certificate images
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
       cb(null, true);
@@ -152,10 +189,9 @@ const uploadCertificateImage = multer({
   }
 });
 
-// ENHANCED: Certificate logo upload (for issuer logos)
 const uploadCertificateLogo = multer({
   storage: certificateLogoStorage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit for logos
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -169,7 +205,8 @@ const uploadCertificateLogo = multer({
 const deleteFromCloudinary = async (publicId, resourceType = 'image') => {
   try {
     const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: resourceType
+      resource_type: resourceType,
+      invalidate: true // Clear CDN cache
     });
     return result;
   } catch (error) {
@@ -178,7 +215,30 @@ const deleteFromCloudinary = async (publicId, resourceType = 'image') => {
   }
 };
 
-// NEW: Helper function to optimize image transformations
+// ENHANCED: Helper function to generate proper PDF download URL
+const getPDFDownloadUrl = (url) => {
+  if (!url) return '';
+  
+  // Add fl_attachment flag to force download with proper headers
+  if (url.includes('cloudinary.com')) {
+    // Insert fl_attachment into the URL
+    return url.replace('/upload/', '/upload/fl_attachment/');
+  }
+  return url;
+};
+
+// ENHANCED: Helper function to generate PDF view URL (for inline viewing)
+const getPDFViewUrl = (url) => {
+  if (!url) return '';
+  
+  // Remove any attachment flags for inline viewing
+  if (url.includes('cloudinary.com')) {
+    return url.replace('/fl_attachment/', '/');
+  }
+  return url;
+};
+
+// Helper function to optimize image transformations
 const getOptimizedImageUrl = (publicId, options = {}) => {
   const {
     width = 800,
@@ -198,7 +258,7 @@ const getOptimizedImageUrl = (publicId, options = {}) => {
   });
 };
 
-// NEW: Helper function to generate multiple image sizes
+// Helper function to generate multiple image sizes
 const generateImageVariants = (publicId) => {
   return {
     thumbnail: getOptimizedImageUrl(publicId, { width: 150, height: 150, crop: 'fill' }),
@@ -209,15 +269,54 @@ const generateImageVariants = (publicId) => {
   };
 };
 
+// ENHANCED: Upload PDF with proper handling
+const uploadPDFToCloudinary = async (buffer, filename, folder = 'portfolio/resumes') => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'image', // Use 'image' for PDFs to get proper handling
+        folder: folder,
+        public_id: filename,
+        format: 'pdf',
+        flags: 'attachment', // Ensures proper Content-Disposition header
+        access_mode: 'public',
+        type: 'upload'
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary upload error:', error);
+          reject(error);
+        } else {
+          // Return both view and download URLs
+          resolve({
+            public_id: result.public_id,
+            url: result.secure_url,
+            viewUrl: getPDFViewUrl(result.secure_url),
+            downloadUrl: getPDFDownloadUrl(result.secure_url),
+            format: result.format,
+            resource_type: result.resource_type,
+            bytes: result.bytes
+          });
+        }
+      }
+    );
+    
+    uploadStream.end(buffer);
+  });
+};
+
 module.exports = {
   cloudinary,
   uploadResume,
   uploadProfileImage,
   uploadProjectImage,
   uploadTechLogo,
-  uploadCertificateImage, // NEW
-  uploadCertificateLogo, // ENHANCED
+  uploadCertificateImage,
+  uploadCertificateLogo,
   deleteFromCloudinary,
-  getOptimizedImageUrl, // NEW
-  generateImageVariants // NEW
+  getOptimizedImageUrl,
+  generateImageVariants,
+  getPDFDownloadUrl, // NEW
+  getPDFViewUrl, // NEW
+  uploadPDFToCloudinary // NEW
 };
