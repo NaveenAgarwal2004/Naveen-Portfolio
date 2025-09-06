@@ -1,19 +1,3 @@
-      // Create singleton instance
-const emailService = new EmailService();
-
-// Export both class and instance methods for backward compatibility
-module.exports = {
-  // Backward compatibility exports
-  sendContactEmail: emailService.sendContactEmail.bind(emailService),
-  sendAutoReply: emailService.sendAutoReply.bind(emailService),
-  
-  // New enhanced functionality
-  EmailService,
-  emailService,
-  processContactForm: emailService.processContactForm.bind(emailService),
-  healthCheck: emailService.healthCheck.bind(emailService),
-  getConfig: emailService.getConfig.bind(emailService)
-};
 const nodemailer = require('nodemailer');
 const Personal = require('./../models/Personal');
 
@@ -156,34 +140,23 @@ class EmailService {
   generateAutoReplyTemplate({ name, profileImageUrl }) {
     return `
       <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 24px; border-radius: 14px; background: #ffffff; box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
-        
-        <!-- Header with Logo -->
         <div style="background: linear-gradient(135deg, #4f46e5, #3b82f6); padding: 30px 20px 20px; border-radius: 12px 12px 0 0; text-align: center; color: #fff;">
-          
-          <!-- Profile Picture -->
           <img src="${profileImageUrl}" 
             alt="Naveen Agarwal" 
             style="width: 90px; height: 90px; border-radius: 50%; border: 3px solid #fff; margin-bottom: 15px; object-fit: cover;" />
-          
           <h1 style="margin: 0; font-size: 22px;">✨ Thanks for Your Message!</h1>
         </div>
-
-        <!-- Body -->
         <div style="padding: 25px; color: #333;">
           <p style="font-size: 16px; line-height: 1.6; margin-bottom: 15px;">
             Hi <strong>${this.sanitizeHtml(name)}</strong>, 👋
           </p>
-          
           <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 15px;">
             I truly appreciate you reaching out through my portfolio website. 🙌  
             Your message has been received, and I'll personally get back to you within <strong>24–48 hours</strong>.
           </p>
-          
           <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 20px;">
             Meanwhile, feel free to check out my projects or connect with me directly using the links below.
           </p>
-
-          <!-- Action Buttons -->
           <div style="text-align: center; margin: 30px 0;">
             <a href="${this.portfolioUrl}" target="_blank" 
               style="display: inline-block; margin: 8px; padding: 12px 24px; font-size: 15px; font-weight: 600; color: #fff; background: #4f46e5; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: all 0.3s ease;">
@@ -194,31 +167,23 @@ class EmailService {
               💼 Connect on LinkedIn
             </a>
           </div>
-
-          <!-- Quick Response Options -->
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
             <p style="font-size: 14px; color: #374151; margin: 0; line-height: 1.5;">
               <strong>💡 Quick Tip:</strong> For urgent inquiries, feel free to connect with me directly on LinkedIn for faster response times.
             </p>
           </div>
-
-          <!-- Closing -->
           <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 10px;">
             Looking forward to connecting soon! 🚀
           </p>
-          
           <p style="font-weight: bold; font-size: 15px; margin-top: 20px; color: #374151;">
             Best regards,<br/>
             <span style="color: #4f46e5;">Naveen Agarwal</span>
           </p>
         </div>
-
-        <!-- Footer -->
         <div style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 15px;">
           ⚡ This is an automated response from Naveen Agarwal's portfolio system.<br/>
           <span style="color: #6b7280;">Sent on ${new Date().toLocaleDateString()}</span>
         </div>
-
       </div>
     `;
   }
@@ -233,9 +198,7 @@ class EmailService {
    */
   async sendContactEmail({ name, email, message }) {
     try {
-      // Validate input parameters
       this.validateEmailParams({ name, email, message }, ['name', 'email', 'message']);
-
       const mailOptions = {
         from: `"${this.sanitizeHtml(name)}" <${process.env.EMAIL_USER}>`,
         to: this.adminEmail,
@@ -243,22 +206,16 @@ class EmailService {
         subject: `New Contact Message from ${name} - Portfolio`,
         html: this.generateAdminEmailTemplate({ name, email, message })
       };
-
       const result = await this.transporter.sendMail(mailOptions);
-      
       console.log('✅ Admin notification sent successfully:', result.messageId);
       return { 
         success: true, 
         messageId: result.messageId,
         message: 'Contact email sent successfully'
       };
-
     } catch (error) {
       console.error('❌ Failed to send admin email:', error);
-      
-      // Return more specific error information
-      const errorMessage = error.message || 'Failed to send contact email';
-      throw new Error(`Admin email failed: ${errorMessage}`);
+      throw new Error(`Admin email failed: ${error.message || 'Failed to send contact email'}`);
     }
   }
 
@@ -271,12 +228,8 @@ class EmailService {
    */
   async sendAutoReply({ name, email }) {
     try {
-      // Validate input parameters
       this.validateEmailParams({ name, email }, ['name', 'email']);
-
-      // Get profile information
       const profileInfo = await this.getProfileInfo();
-
       const mailOptions = {
         from: `"Naveen Agarwal" <${process.env.EMAIL_USER}>`,
         to: email,
@@ -286,14 +239,12 @@ class EmailService {
           name, 
           profileImageUrl: profileInfo.profileImageUrl 
         }),
-        // Headers for better delivery
         headers: {
           'X-Auto-Response-Suppress': 'DR, RN, NRN, OOF, AutoReply',
           'X-Mailer': 'Naveen Portfolio System',
           'Auto-Submitted': 'auto-replied',
           'Return-Path': process.env.EMAIL_USER
         },
-        // Delivery options
         dsn: {
           id: `autoreply-${Date.now()}`,
           return: 'headers',
@@ -301,9 +252,7 @@ class EmailService {
           recipient: email
         }
       };
-
       const result = await this.transporter.sendMail(mailOptions);
-      
       console.log('✅ Auto-reply sent successfully:', result.messageId);
       return { 
         success: true, 
@@ -311,11 +260,8 @@ class EmailService {
         message: 'Auto-reply sent successfully',
         recipientEmail: email
       };
-
     } catch (error) {
       console.error('⚠️ Failed to send auto-reply:', error);
-      
-      // Don't throw error for auto-reply failures, just log and return failure status
       return { 
         success: false, 
         error: error.message || 'Failed to send auto-reply',
@@ -331,36 +277,24 @@ class EmailService {
    */
   async processContactForm(contactData) {
     const { name, email, message } = contactData;
-    
     try {
       console.log(`📧 Processing contact form submission from ${name} (${email})`);
-
-      // Send admin notification (critical - must succeed)
       const adminResult = await this.sendContactEmail({ name, email, message });
-      
-      // Add 3-second delay to avoid rate limiting
       console.log('⏳ Waiting 3 seconds before sending auto-reply...');
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Send auto-reply (non-critical - can fail gracefully)
       const autoReplyResult = await this.sendAutoReply({ name, email });
-
       const response = {
         success: adminResult.success,
         adminEmail: adminResult,
         autoReply: autoReplyResult,
         timestamp: new Date().toISOString()
       };
-
-      // Log success/failure summary
       if (adminResult.success && autoReplyResult.success) {
         console.log('✅ Contact form processed successfully - both emails sent');
       } else if (adminResult.success && !autoReplyResult.success) {
         console.log('⚠️ Contact form processed - admin email sent, auto-reply failed');
       }
-
       return response;
-
     } catch (error) {
       console.error('❌ Contact form processing failed:', error);
       throw new Error(`Contact form processing failed: ${error.message}`);
@@ -373,17 +307,11 @@ class EmailService {
    */
   async healthCheck() {
     try {
-      // Verify email credentials are configured
       if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         throw new Error('EMAIL_USER or EMAIL_PASS not configured');
       }
-
-      // Test email connection
       await this.transporter.verify();
-      
-      // Test database connection by attempting to fetch profile info
       await this.getProfileInfo();
-      
       console.log('✅ Email service health check passed');
       return true;
     } catch (error) {
@@ -406,3 +334,17 @@ class EmailService {
     };
   }
 }
+
+// Create singleton instance
+const emailService = new EmailService();
+
+// Export both class and instance methods for backward compatibility
+module.exports = {
+  sendContactEmail: emailService.sendContactEmail.bind(emailService),
+  sendAutoReply: emailService.sendAutoReply.bind(emailService),
+  EmailService,
+  emailService,
+  processContactForm: emailService.processContactForm.bind(emailService),
+  healthCheck: emailService.healthCheck.bind(emailService),
+  getConfig: emailService.getConfig.bind(emailService)
+};
