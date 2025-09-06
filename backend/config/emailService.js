@@ -406,20 +406,3 @@ class EmailService {
     };
   }
 }
-
-// Create singleton instance
-const emailService = new EmailService();
-
-// Export both class and instance methods for backward compatibility
-module.exports = {
-  // Backward compatibility exports
-  sendContactEmail: emailService.sendContactEmail.bind(emailService),
-  sendAutoReply: emailService.sendAutoReply.bind(emailService),
-  
-  // New enhanced functionality
-  EmailService,
-  emailService,
-  processContactForm: emailService.processContactForm.bind(emailService),
-  healthCheck: emailService.healthCheck.bind(emailService),
-  getConfig: emailService.getConfig.bind(emailService)
-};
