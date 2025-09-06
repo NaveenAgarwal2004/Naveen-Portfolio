@@ -99,6 +99,7 @@ const Footer = () => {
     { label: 'About', id: 'about' },
     { label: 'Skills', id: 'tech-stack' },
     { label: 'Projects', id: 'projects' },
+    {label: 'Resumes' , id: 'resumes'},
     { label: 'Certificates', id: 'certificates' },
     { label: 'Contact', id: 'contact' }
   ];
