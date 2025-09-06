@@ -295,12 +295,7 @@ module.exports = {
   processContactForm: emailService.processContactForm.bind(emailService),
   healthCheck: emailService.healthCheck.bind(emailService),
   getConfig: emailService.getConfig.bind(emailService)
-};      requireTLS: true,
-      tls: {
-        ciphers: 'SSLv3',
-        rejectUnauthorized: false
-      }
-    });
+};
 
     // Verify connection at startup
     this.verifyConnection();
