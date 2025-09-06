@@ -1,7 +1,7 @@
 const express = require('express');
 const { validationResult } = require('express-validator');
 const Contact = require('../models/Contact');
-const { sendContactEmail, sendAutoReply } = require('../config/resend');
+const { sendContactEmail, sendAutoReply } = require('../config/emailService');
 const { contactValidation, handleValidationErrors } = require('../middleware/validation');
 const rateLimit = require('express-rate-limit');
 
@@ -83,25 +83,31 @@ router.post('/', contactLimiter, contactValidation, handleValidationErrorsWithDe
     // 📧 Send admin notification
     try {
       console.log('📧 Sending admin notification...');
-      await sendContactEmail({ name, email, message });
-      console.log('✅ Admin notification sent');
+      const adminResult = await sendContactEmail({ name, email, message });
+      console.log('✅ Admin notification sent:', adminResult.messageId);
     } catch (emailError) {
       console.error('❌ Failed to send admin email:', emailError);
+      // If admin email fails, return error since it's critical
+      return res.status(500).json({
+        success: false,
+        message: 'Error sending email'
+      });
     }
 
     // 🤖 Send auto-reply
     try {
       console.log('🤖 Sending auto-reply...');
-      await sendAutoReply({ name, email });
-      console.log('✅ Auto-reply sent');
+      const autoReplyResult = await sendAutoReply({ name, email });
+      console.log('✅ Auto-reply sent:', autoReplyResult.messageId);
     } catch (replyError) {
       console.error('❌ Failed to send auto-reply:', replyError);
+      // Auto-reply failure doesn't affect success since admin email worked
     }
 
     // 🎉 Final Response
     res.status(201).json({
       success: true,
-      message: 'Thank you for your message! I will get back to you soon.',
+      message: 'Message sent successfully!',
       data: {
         id: contact._id,
         timestamp: contact.createdAt
@@ -122,7 +128,7 @@ router.post('/', contactLimiter, contactValidation, handleValidationErrorsWithDe
 
     res.status(500).json({
       success: false,
-      message: 'Failed to submit contact form. Please try again later.'
+      message: 'Error sending email'
     });
   }
 });
