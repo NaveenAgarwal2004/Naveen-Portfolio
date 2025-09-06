@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Download, Home, User, Briefcase, Mail, Code, ChevronDown, X, Menu } from 'lucide-react';
+import { Download, Home, User, Briefcase, Mail, Code, ChevronDown, X, Menu, Award, FileText } from 'lucide-react';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useDebounce } from '../hooks/useDebounce';
 
@@ -32,7 +32,7 @@ const ResumeDropdown = ({
   resumes = []
 }) => (
   <div 
-    className={`absolute ${position}-0 mt-2 w-64 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 transform origin-top-${position} ${
+    className={`absolute ${position}-0 mt-2 w-64 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 transform origin-top-${position} z-[200] ${
       isOpen 
         ? 'opacity-100 scale-100 translate-y-0' 
         : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
@@ -46,13 +46,18 @@ const ResumeDropdown = ({
         <button
           key={option.name}
           onClick={() => onDownload(option)}
-          className="w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-xl transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+          className={`w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-xl transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+            isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
+          }`}
+          style={{
+            transitionDelay: isOpen ? `${index * 50}ms` : '0ms'
+          }}
           role="menuitem"
           tabIndex={isOpen ? 0 : -1}
         >
-          <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200" />
-          <span className="font-medium">{option.name}</span>
-          <Download className="h-4 w-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200 shrink-0" />
+          <span className="font-medium flex-1">{option.name}</span>
+          <Download className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
         </button>
       ))}
     </div>
@@ -239,8 +244,7 @@ const Header = () => {
     { id: 'about', label: 'About', icon: User },
     { id: 'tech-stack', label: 'Skills', icon: Code },
     { id: 'projects', label: 'Projects', icon: Briefcase },
-    {id : 'resumes', label: 'Resume', icon: Menu },
-    {id : 'certificates', label: 'Certificates', icon: Download },
+    { id: 'certificates', label: 'Certificates', icon: Award },
     { id: 'contact', label: 'Contact', icon: Mail }
   ];
 
@@ -318,7 +322,7 @@ const Header = () => {
               >
                 <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 <span className="relative z-10 flex items-center gap-2">
-                  <Download className="h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                   Resume
                   <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${
                     isResumeOpen ? 'rotate-180' : ''
@@ -405,7 +409,7 @@ const Header = () => {
                 >
                   <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                   <span className="relative z-10 flex items-center gap-2">
-                    <Download className="h-4 w-4" />
+                    <FileText className="h-4 w-4" />
                     Download Resume
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform duration-300 relative z-10 ${
@@ -421,15 +425,17 @@ const Header = () => {
                       <button
                         key={option.name}
                         onClick={() => handleResumeDownload(option)}
-                        className="w-full text-left px-4 py-2.5 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-lg transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+                        className={`w-full text-left px-4 py-2.5 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-lg transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+                          isMobileResumeOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
+                        }`}
                         style={{ 
                           transitionDelay: isMobileResumeOpen ? `${index * 100}ms` : '0ms' 
                         }}
                         tabIndex={isMobileResumeOpen ? 0 : -1}
                       >
                         <div className="w-1.5 h-1.5 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200" />
-                        <span className="text-sm">{option.name}</span>
-                        <Download className="h-3 w-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                        <span className="text-sm flex-1">{option.name}</span>
+                        <Download className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                       </button>
                     ))}
                   </div>
