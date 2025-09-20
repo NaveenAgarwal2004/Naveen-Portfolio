@@ -286,8 +286,8 @@ const Header = () => {
             </button>
           </div>
 
-          {/* Desktop Navigation - More responsive breakpoints */}
-          <nav className="hidden lg:flex items-center space-x-6" role="navigation">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8" role="navigation">
             {navItems.map((item, index) => (
               <button
                 key={item.id}
@@ -311,48 +311,20 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Tablet Navigation - Compressed version for medium screens */}
-          <nav className="hidden md:flex lg:hidden items-center space-x-4" role="navigation">
-            {navItems.slice(0, 5).map((item, index) => (
-              <button
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                className={`relative text-xs font-medium transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 rounded-lg px-2 py-1.5 ${
-                  activeSection === item.id 
-                    ? 'text-blue-400' 
-                    : 'text-gray-300 hover:text-white'
-                }`}
-                aria-current={activeSection === item.id ? 'page' : undefined}
-              >
-                <span className="relative z-10">{item.label}</span>
-                <div className={`absolute inset-0 bg-blue-500/20 rounded-lg transition-transform duration-300 -z-10 ${
-                  activeSection === item.id ? 'scale-100' : 'scale-0 group-hover:scale-100'
-                }`} />
-              </button>
-            ))}
-            {/* More button for remaining items */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-300 hover:text-white px-2 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
-            >
-              More
-            </button>
-          </nav>
-
-          {/* Desktop Resume Button - Hidden on tablet */}
-          <div className="hidden lg:flex items-center">
+          {/* Desktop Resume Button */}
+          <div className="hidden md:flex items-center">
             <div className="relative" ref={resumeDropdownRef}>
               <button
                 id="resume-button"
                 onClick={() => setIsResumeOpen(!isResumeOpen)}
-                className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-5 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+                className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50"
                 aria-expanded={isResumeOpen}
                 aria-haspopup="menu"
               >
                 <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 <span className="relative z-10 flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  <span className="hidden xl:inline">Resume</span>
+                  Resume
                   <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${
                     isResumeOpen ? 'rotate-180' : ''
                   }`} />
@@ -382,17 +354,17 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu - Improved responsiveness */}
+        {/* Mobile Menu */}
         <div 
           id="mobile-menu"
           ref={mobileMenuRef}
-          className={`md:hidden fixed inset-x-0 top-16 mx-4 overflow-hidden transition-all duration-500 ease-out z-40 ${
-            isOpen ? 'max-h-[80vh] opacity-100' : 'max-h-0 opacity-0'
+          className={`md:hidden overflow-hidden transition-all duration-500 ease-out ${
+            isOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
           }`}
           role="menu"
           aria-hidden={!isOpen}
         >
-          <div className="px-3 py-4 space-y-2 bg-gray-900/98 backdrop-blur-xl rounded-2xl border border-gray-800/50 shadow-2xl max-h-[70vh] overflow-y-auto">
+          <div className="px-2 pt-4 pb-6 space-y-2 bg-gray-900/95 backdrop-blur-xl rounded-2xl mt-4 border border-gray-800/50 shadow-2xl">
             {/* Navigation Items */}
             {navItems.map((item, index) => {
               const Icon = item.icon;
@@ -400,13 +372,13 @@ const Header = () => {
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium w-full text-left transition-all duration-300 hover:scale-[1.02] transform focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium w-full text-left transition-all duration-300 hover:scale-105 transform focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
                     activeSection === item.id
                       ? 'text-white bg-blue-500/20 border border-blue-500/30'
                       : 'text-gray-300 hover:text-white hover:bg-blue-500/10'
                   } ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
                   style={{ 
-                    transitionDelay: isOpen ? `${index * 50}ms` : '0ms' 
+                    transitionDelay: isOpen ? `${index * 100}ms` : '0ms' 
                   }}
                   role="menuitem"
                   tabIndex={isOpen ? 0 : -1}
@@ -423,15 +395,15 @@ const Header = () => {
             })}
 
             {/* Mobile Resume Section */}
-            <div className="pt-3 border-t border-gray-800/50">
+            <div className="pt-4 border-t border-gray-800/50">
               <div className="relative z-10">
                 <button
                   onClick={() => setIsMobileResumeOpen(!isMobileResumeOpen)}
                   className={`group w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-3 rounded-xl font-medium 
-                    transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-between overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50
+                    transition-all duration-300 transform hover:scale-105 flex items-center justify-between overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50
                     ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
                   style={{
-                    transitionDelay: isOpen ? `${navItems.length * 50}ms` : '0ms'
+                    transitionDelay: isOpen ? `${navItems.length * 100}ms` : '0ms'
                   }}
                   aria-expanded={isMobileResumeOpen}
                   tabIndex={isOpen ? 0 : -1}
@@ -446,19 +418,19 @@ const Header = () => {
                   }`} />
                 </button>
 
-                <div className={`mt-2 bg-gray-800/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${
-                  isMobileResumeOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+                <div className={`mt-2 bg-gray-900/95 backdrop-blur-xl border border-gray-800/50 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${
+                  isMobileResumeOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
                 }`}>
-                  <div className="py-2 px-2">
+                  <div className="py-2">
                     {resumes.map((option, index) => (
                       <button
                         key={option.name}
                         onClick={() => handleResumeDownload(option)}
-                        className={`w-full text-left px-3 py-2.5 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-lg transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+                        className={`w-full text-left px-4 py-2.5 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-lg transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
                           isMobileResumeOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
                         }`}
                         style={{ 
-                          transitionDelay: isMobileResumeOpen ? `${index * 50}ms` : '0ms' 
+                          transitionDelay: isMobileResumeOpen ? `${index * 100}ms` : '0ms' 
                         }}
                         tabIndex={isMobileResumeOpen ? 0 : -1}
                       >
