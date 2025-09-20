@@ -3,6 +3,37 @@ import { Download, Home, User, Briefcase, Mail, Code, ChevronDown, X, Menu, Awar
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useDebounce } from '../hooks/useDebounce';
 
+// Configuration object for easier maintenance
+const headerConfig = {
+  animations: {
+    duration: 300,
+    staggerDelay: 100,
+    scrollThreshold: 50
+  },
+  breakpoints: {
+    mobile: 768
+  },
+  zIndex: {
+    header: 50,
+    dropdown: 200,
+    mobileMenu: 40
+  }
+};
+
+// Performance: Throttle function for scroll events
+const throttle = (func, limit) => {
+  let inThrottle;
+  return function() {
+    const args = arguments;
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  }
+};
+
 const AnimatedHamburgerIcon = ({ isOpen, className = "" }) => (
   <div className={`w-6 h-6 flex flex-col justify-center items-center ${className}`}>
     <div 
@@ -71,12 +102,14 @@ const Header = () => {
   const [isMobileResumeOpen, setIsMobileResumeOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [visibleSections, setVisibleSections] = useState(new Set());
   
   const headerRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const resumeDropdownRef = useRef(null);
   
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery(`(max-width: ${headerConfig.breakpoints.mobile}px)`);
   const debouncedScrolled = useDebounce(isScrolled, 100);
 
   useEffect(() => {
@@ -85,37 +118,72 @@ const Header = () => {
 
   // Enhanced scroll detection with throttling
   useEffect(() => {
-    let ticking = false;
-    
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 50);
-          
-          // Update active section based on scroll position
-          const sections = ['hero', 'about', 'tech-stack', 'projects', 'resumes', 'certificates', 'contact'];
-          const currentSection = sections.find(section => {
-            const element = document.getElementById(section);
-            if (element) {
-              const rect = element.getBoundingClientRect();
-              return rect.top <= 100 && rect.bottom >= 100;
-            }
-            return false;
-          });
-          
-          if (currentSection && currentSection !== activeSection) {
-            setActiveSection(currentSection);
-          }
-          
-          ticking = false;
-        });
-        ticking = true;
+    const handleScroll = throttle(() => {
+      setIsScrolled(window.scrollY > headerConfig.animations.scrollThreshold);
+      
+      // Update active section based on scroll position
+      const sections = ['hero', 'about', 'tech-stack', 'projects', 'resumes', 'certificates', 'contact'];
+      const currentSection = sections.find(section => {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          return rect.top <= 100 && rect.bottom >= 100;
+        }
+        return false;
+      });
+      
+      if (currentSection && currentSection !== activeSection) {
+        setActiveSection(currentSection);
       }
-    };
+    }, 16); // ~60fps
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [activeSection]);
+
+  // Intersection Observer for better section detection
+  useEffect(() => {
+    const navItems = [
+      { id: 'hero' }, { id: 'about' }, { id: 'tech-stack' }, 
+      { id: 'projects' }, { id: 'resumes' }, { id: 'certificates' }, { id: 'contact' }
+    ];
+
+    const observers = navItems.map(item => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setVisibleSections(prev => {
+            const newSet = new Set(prev);
+            if (entry.isIntersecting) {
+              newSet.add(item.id);
+            } else {
+              newSet.delete(item.id);
+            }
+            return newSet;
+          });
+        },
+        { threshold: 0.3, rootMargin: '-100px 0px -50% 0px' }
+      );
+      
+      const element = document.getElementById(item.id);
+      if (element) observer.observe(element);
+      
+      return observer;
+    });
+    
+    return () => observers.forEach(observer => observer.disconnect());
+  }, []);
+
+  // Update active section based on intersection observer
+  useEffect(() => {
+    if (visibleSections.size > 0) {
+      // Get the first visible section as active
+      const sectionsOrder = ['hero', 'about', 'tech-stack', 'projects', 'resumes', 'certificates', 'contact'];
+      const visibleInOrder = sectionsOrder.find(section => visibleSections.has(section));
+      if (visibleInOrder && visibleInOrder !== activeSection) {
+        setActiveSection(visibleInOrder);
+      }
+    }
+  }, [visibleSections, activeSection]);
 
   // Enhanced click outside detection
   useEffect(() => {
@@ -143,13 +211,22 @@ const Header = () => {
     };
   }, [isOpen, isResumeOpen, isMobileResumeOpen]);
 
-  // Keyboard navigation
+  // Enhanced keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setIsOpen(false);
         setIsResumeOpen(false);
         setIsMobileResumeOpen(false);
+      }
+      
+      // Enhanced keyboard navigation for resume dropdown
+      if (event.key === 'Enter' || event.key === ' ') {
+        const activeElement = document.activeElement;
+        if (activeElement?.id === 'resume-button') {
+          event.preventDefault();
+          setIsResumeOpen(!isResumeOpen);
+        }
       }
       
       if (event.key === 'Tab' && isOpen) {
@@ -175,19 +252,28 @@ const Header = () => {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, isResumeOpen]);
 
-  // Prevent body scroll when mobile menu is open
+  // Better scroll prevention for mobile menu
   useEffect(() => {
     if (isOpen && isMobile) {
+      // Store original scroll position
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
+      
+      return () => {
+        // Restore scroll position
+        const scrollY = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      };
     }
-    
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
   }, [isOpen, isMobile]);
 
   const resumes = [
@@ -196,30 +282,54 @@ const Header = () => {
     { name: "Backend Resume", url: "/NaveenAgarwal_Backend.pdf", format: "pdf" }
   ];
 
-  const handleResumeDownload = useCallback((option) => {
+  // Enhanced resume download with error handling
+  const handleResumeDownload = useCallback(async (option) => {
+    setIsDownloading(true);
+    
     try {
       if (option.format === 'view') {
         window.open(option.url, '_blank', 'noopener,noreferrer');
       } else {
-        const link = document.createElement('a');
-        link.href = option.url;
-        link.download = `naveen-agarwal-${option.name.toLowerCase().replace(/\s+/g, '-')}.${option.format}`;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Check if file exists first
+        try {
+          const response = await fetch(option.url, { method: 'HEAD' });
+          if (response.ok) {
+            const link = document.createElement('a');
+            link.href = option.url;
+            link.download = `naveen-agarwal-${option.name.toLowerCase().replace(/\s+/g, '-')}.${option.format}`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Analytics tracking
+            if (window.gtag) {
+              window.gtag('event', 'resume_download', {
+                'resume_type': option.name,
+                'event_category': 'engagement'
+              });
+            }
+          } else {
+            throw new Error('File not found');
+          }
+        } catch (fetchError) {
+          console.warn('Direct download failed, opening in new tab:', fetchError);
+          window.open(option.url, '_blank', 'noopener,noreferrer');
+        }
       }
     } catch (error) {
       console.error('Download failed:', error);
       // Fallback: open in new tab
       window.open(option.url, '_blank', 'noopener,noreferrer');
+    } finally {
+      setIsDownloading(false);
+      setIsResumeOpen(false);
+      setIsMobileResumeOpen(false);
+      setIsOpen(false);
     }
-    
-    setIsResumeOpen(false);
-    setIsMobileResumeOpen(false);
-    setIsOpen(false);
   }, []);
 
+  // Enhanced scroll to section with analytics
   const scrollToSection = useCallback((sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -236,6 +346,14 @@ const Header = () => {
       
       // Update active section immediately for better UX
       setActiveSection(sectionId);
+      
+      // Analytics tracking
+      if (window.gtag) {
+        window.gtag('event', 'navigation_click', {
+          'section': sectionId,
+          'event_category': 'navigation'
+        });
+      }
     }
   }, []);
 
@@ -257,6 +375,13 @@ const Header = () => {
             <div className="text-xl font-bold text-white">
               Naveen<span className="text-blue-500">.</span>
             </div>
+            {/* Loading skeleton for navigation */}
+            <div className="hidden md:flex items-center space-x-6">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="w-12 h-4 bg-gray-700/50 rounded animate-pulse"></div>
+              ))}
+            </div>
+            <div className="w-20 h-8 bg-gray-700/50 rounded-lg animate-pulse"></div>
           </div>
         </div>
       </header>
@@ -317,14 +442,17 @@ const Header = () => {
               <button
                 id="resume-button"
                 onClick={() => setIsResumeOpen(!isResumeOpen)}
-                className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+                className={`group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+                  isDownloading ? 'opacity-75 cursor-not-allowed' : ''
+                }`}
+                disabled={isDownloading}
                 aria-expanded={isResumeOpen}
                 aria-haspopup="menu"
               >
                 <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 <span className="relative z-10 flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  Resume
+                  {isDownloading ? 'Downloading...' : 'Resume'}
                   <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${
                     isResumeOpen ? 'rotate-180' : ''
                   }`} />
@@ -397,28 +525,8 @@ const Header = () => {
             {/* Mobile Resume Section */}
             <div className="pt-4 border-t border-gray-800/50">
               <div className="relative z-10">
-                <button
-                  onClick={() => setIsMobileResumeOpen(!isMobileResumeOpen)}
-                  className={`group w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-3 rounded-xl font-medium 
-                    transition-all duration-300 transform hover:scale-105 flex items-center justify-between overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50
-                    ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
-                  style={{
-                    transitionDelay: isOpen ? `${navItems.length * 100}ms` : '0ms'
-                  }}
-                  aria-expanded={isMobileResumeOpen}
-                  tabIndex={isOpen ? 0 : -1}
-                >
-                  <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                  <span className="relative z-10 flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Download Resume
-                  </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-300 relative z-10 ${
-                    isMobileResumeOpen ? 'rotate-180' : ''
-                  }`} />
-                </button>
-
-                <div className={`mt-2 bg-gray-900/95 backdrop-blur-xl border border-gray-800/50 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${
+                {/* Show dropdown above button when open to prevent cutoff */}
+                <div className={`${isMobileResumeOpen ? 'mb-2' : ''} bg-gray-900/95 backdrop-blur-xl border border-gray-800/50 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${
                   isMobileResumeOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
                 }`}>
                   <div className="py-2">
@@ -441,9 +549,35 @@ const Header = () => {
                     ))}
                   </div>
                 </div>
+
+                <button
+                  onClick={() => setIsMobileResumeOpen(!isMobileResumeOpen)}
+                  className={`group w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-3 rounded-xl font-medium 
+                    transition-all duration-300 transform hover:scale-105 flex items-center justify-between overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50
+                    ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
+                  style={{
+                    transitionDelay: isOpen ? `${navItems.length * 100}ms` : '0ms'
+                  }}
+                  aria-expanded={isMobileResumeOpen}
+                  tabIndex={isOpen ? 0 : -1}
+                >
+                  <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Download Resume
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-300 relative z-10 ${
+                    isMobileResumeOpen ? 'rotate-180' : ''
+                  }`} />
+                </button>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* ARIA live region for screen readers */}
+        <div aria-live="polite" className="sr-only">
+          {activeSection && `Currently viewing ${activeSection.replace('-', ' ')} section`}
         </div>
       </div>
     </header>
