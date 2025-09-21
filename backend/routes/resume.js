@@ -62,35 +62,34 @@ router.post('/upload/:type', auth, upload.single('file'), async (req, res) => {
       });
     }
 
-    const personal = await Personal.findOne();
-    if (!personal) {
-      // Create personal record if it doesn't exist
-      const newPersonal = new Personal({
-        name: 'Naveen Agarwal',
-        email: 'naveenagarwal7624@gmail.com',
-        frontendResume: { public_id: '', url: '' },
-        backendResume: { public_id: '', url: '' },
-        generalResume: { public_id: '', url: '' }
-      });
-      await newPersonal.save();
-      personal = newPersonal;
-    }
+    let personal = await Personal.findOne();
+if (!personal) {
+  // Create personal record if it doesn't exist
+  personal = new Personal({
+    name: 'Naveen Agarwal',
+    email: 'naveenagarwal7624@gmail.com',
+    frontendResume: { public_id: '', url: '' },
+    backendResume: { public_id: '', url: '' },
+    generalResume: { public_id: '', url: '' }
+  });
+  await personal.save();
+}
 
     // Delete old resume if exists
     const oldResume = personal[`${type}Resume`];
-    if (oldResume && oldResume.public_id) {
-      try {
-        // Try deleting with both resource types to ensure cleanup
-        await deleteFromCloudinary(oldResume.public_id, 'image');
-      } catch (error) {
-        console.error('Error deleting old resume (trying raw):', error);
-        try {
-          await deleteFromCloudinary(oldResume.public_id, 'raw');
-        } catch (rawError) {
-          console.error('Error deleting old resume (raw):', rawError);
-        }
-      }
+if (oldResume && oldResume.public_id) {
+  try {
+    // Try deleting with raw resource type first (most likely for PDFs)
+    await deleteFromCloudinary(oldResume.public_id, 'raw');
+  } catch (error) {
+    console.error('Error deleting old resume (trying image):', error);
+    try {
+      await deleteFromCloudinary(oldResume.public_id, 'image');
+    } catch (imageError) {
+      console.error('Error deleting old resume (image):', imageError);
     }
+  }
+}
 
     // Generate filename
     const timestamp = Date.now();
@@ -194,43 +193,38 @@ router.post('/upload-direct/:type', auth, upload.single('file'), async (req, res
 
     // Upload with explicit PDF settings
     const result = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          resource_type: 'image', // Changed from 'raw' to 'image'
-          folder: 'portfolio/resumes',
-          public_id: `naveen_${type}_resume_${Date.now()}`,
-          format: 'pdf',
-          type: 'upload',
-          access_mode: 'public',
-          flags: 'attachment', // This is crucial for proper PDF downloads
-          context: {
-            caption: req.file.originalname,
-            alt: `${type} Resume`
-          }
-        },
-        (error, result) => {
-          if (error) {
-            console.error('Cloudinary error:', error);
-            reject(error);
-          } else {
-            resolve(result);
-          }
-        }
-      );
-      
-      uploadStream.end(req.file.buffer);
-    });
+  const uploadStream = cloudinary.uploader.upload_stream(
+    {
+      resource_type: 'raw', // Use 'raw' for proper PDF handling
+      folder: 'portfolio/resumes',
+      public_id: `naveen_${type}_resume_${Date.now()}`,
+      format: 'pdf',
+      type: 'upload',
+      access_mode: 'public'
+    },
+    (error, result) => {
+      if (error) {
+        console.error('Cloudinary error:', error);
+        reject(error);
+      } else {
+        resolve(result);
+      }
+    }
+  );
+  
+  uploadStream.end(req.file.buffer);
+});
 
     // Save with proper URLs
     personal[`${type}Resume`] = {
-      public_id: result.public_id,
-      url: result.secure_url,
-      viewUrl: result.secure_url,
-      downloadUrl: getPDFDownloadUrl(result.secure_url),
-      format: result.format || 'pdf',
-      originalName: req.file.originalname,
-      size: result.bytes
-    };
+  public_id: result.public_id,
+  url: result.secure_url,
+  viewUrl: result.secure_url,
+  downloadUrl: result.secure_url, // Raw URLs work properly for downloads
+  format: result.format || 'pdf',
+  originalName: req.file.originalname,
+  size: result.bytes
+};
     await personal.save();
 
     res.json({
@@ -400,8 +394,7 @@ router.get('/download/:type', async (req, res) => {
     }
 
     // Generate download URL with proper headers
-    const downloadUrl = resume.downloadUrl || getPDFDownloadUrl(resume.url);
-    
+const downloadUrl = resume.downloadUrl || resume.url;    
     // Set headers for download
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="Naveen_Agarwal_${type}_Resume.pdf"`);
@@ -446,7 +439,7 @@ router.get('/view/:type', async (req, res) => {
     }
 
     // Generate view URL (without attachment flag)
-    const viewUrl = resume.viewUrl || getPDFViewUrl(resume.url);
+const viewUrl = resume.viewUrl || resume.url; // For raw URLs, use the same URL
     
     // Redirect to Cloudinary view URL
     res.redirect(viewUrl);

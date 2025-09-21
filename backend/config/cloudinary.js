@@ -15,7 +15,7 @@ const resumeStorage = new CloudinaryStorage({
   params: {
     folder: 'portfolio/resumes',
     allowed_formats: ['pdf'],
-    resource_type: 'image', // Changed from 'raw' to 'image' for proper PDF handling
+    resource_type: 'raw',
     format: 'pdf', // Explicitly set format
     flags: 'attachment', // This ensures proper download headers
     public_id: (req, file) => {
@@ -39,17 +39,11 @@ const resumeStorageAlternative = new CloudinaryStorage({
   params: async (req, file) => {
     return {
       folder: 'portfolio/resumes',
-      resource_type: 'auto', // Let Cloudinary detect the type
+      resource_type: 'raw', // Use 'raw' for proper PDF handling
       format: 'pdf',
       public_id: `naveen-resume-${Date.now()}`,
-      // Use raw delivery type for PDFs
       type: 'upload',
-      access_mode: 'public',
-      // Add content disposition for proper downloads
-      context: {
-        caption: file.originalname,
-        alt: 'Resume PDF'
-      }
+      access_mode: 'public'
     };
   },
 });
@@ -274,25 +268,32 @@ const uploadPDFToCloudinary = async (buffer, filename, folder = 'portfolio/resum
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        resource_type: 'image', // Use 'image' for PDFs to get proper handling
+        resource_type: 'raw', // Use 'raw' for PDFs to get proper /raw/upload/ URLs
         folder: folder,
         public_id: filename,
         format: 'pdf',
-        flags: 'attachment', // Ensures proper Content-Disposition header
-        access_mode: 'public',
-        type: 'upload'
+        access_mode: 'public', // Ensure public access
+        type: 'upload',
+        overwrite: true, // Allow overwriting existing files
+        invalidate: true // Clear CDN cache
       },
       (error, result) => {
         if (error) {
           console.error('Cloudinary upload error:', error);
           reject(error);
         } else {
+          console.log('Upload result:', {
+            public_id: result.public_id,
+            url: result.secure_url,
+            resource_type: result.resource_type,
+            access_mode: result.access_mode
+          });
           // Return both view and download URLs
           resolve({
             public_id: result.public_id,
             url: result.secure_url,
-            viewUrl: getPDFViewUrl(result.secure_url),
-            downloadUrl: getPDFDownloadUrl(result.secure_url),
+            viewUrl: result.secure_url,
+            downloadUrl: result.secure_url, // Raw URLs are already proper for download
             format: result.format,
             resource_type: result.resource_type,
             bytes: result.bytes

@@ -35,7 +35,7 @@ const throttle = (func, limit) => {
 };
 
 const AnimatedHamburgerIcon = ({ isOpen, className = "" }) => (
-  <div className={`w-6 h-6 flex flex-col justify-center items-center ${className}`}>
+  <div className={`w-6 h-6 flex flex-col justify-center items-center cursor-pointer ${className}`}>
     <div 
       className={`w-6 h-0.5 bg-current transform transition-all duration-300 ease-in-out ${
         isOpen ? 'rotate-45 translate-y-1.5' : 'translate-y-0'
@@ -115,6 +115,14 @@ const Header = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Close mobile menu when switching to desktop
+  useEffect(() => {
+    if (!isMobile && isOpen) {
+      setIsOpen(false);
+      setIsMobileResumeOpen(false);
+    }
+  }, [isMobile, isOpen]);
 
   // Enhanced scroll detection with throttling
   useEffect(() => {
@@ -471,8 +479,11 @@ const Header = () => {
           {/* Mobile Menu Button - Responsive design */}
           <div className="md:hidden">
             <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-800/50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+              onClick={() => {
+                console.log('Mobile menu toggle clicked:', !isOpen); // Debug log
+                setIsOpen(!isOpen);
+              }}
+              className="text-gray-300 hover:text-white p-2 rounded-lg hover:bg-gray-800/50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:ring-offset-2 focus:ring-offset-gray-900"
               aria-label={isOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
