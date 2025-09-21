@@ -815,7 +815,6 @@ const CertificatesSection = () => {
                           <ExternalLink className="w-4 h-4 mr-2" />
                           Verify Certificate
                         </Button>
-                      )}
                     </div>
                   )}
                 </CardContent>

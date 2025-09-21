@@ -115,7 +115,7 @@ Please describe what you were doing when this error occurred:
               </div>
 
               {/* Error Details (Development Mode) */}
-              {(process.env.NODE_ENV === 'development' || showDetails) && this.state.error && (
+              {(import.meta.env.MODE === 'development' || showDetails) && this.state.error && (
                 <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 text-left">
                   <h3 className="text-red-400 font-semibold mb-3 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />

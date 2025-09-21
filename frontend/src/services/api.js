@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
 const API = `${BACKEND_URL}/api`;
 
 // Create axios instance with enhanced config for backend sleep issues
@@ -188,7 +188,12 @@ export const portfolioAPI = {
   getTechStack: () => apiClient.get('/portfolio/tech-stack'),
   
   // Get certificates with retry
-  getCertificates: () => apiClient.get('/certificates')
+  getCertificates: () => apiClient.get('/certificates'),
+  
+  // Get portfolio stats with retry
+  getStats: () => apiClient.get('/portfolio/stats').catch(() => 
+    ({ data: { success: true, data: { totalProjects: 0, totalTechnologies: 0, totalCertificates: 0 } } })
+  )
 };
 
 // ============= PUBLIC APIs =============
