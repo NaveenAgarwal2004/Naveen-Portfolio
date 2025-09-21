@@ -9,6 +9,11 @@ const {
   getPDFViewUrl,
   deleteFromCloudinary 
 } = require('../config/cloudinary');
+const { 
+  copyResumeToPublic, 
+  syncCloudinaryToPublic, 
+  updatePersonalWithStaticUrls 
+} = require('../services/fileService');
 
 const router = express.Router();
 
@@ -127,6 +132,19 @@ router.post('/upload/:type', auth, upload.single('file'), async (req, res) => {
     
     await personal.save();
 
+    // 🔥 NEW: Copy to public folder for About.jsx static serving
+    console.log(`📁 Copying ${type} resume to public folder for static serving...`);
+    const staticCopyResult = await copyResumeToPublic(req.file.buffer, type);
+    
+    if (staticCopyResult.success) {
+      console.log(`✅ Static copy successful: ${staticCopyResult.staticUrl}`);
+      
+      // Update personal data with static URL (for About.jsx)
+      await updatePersonalWithStaticUrls(Personal);
+    } else {
+      console.warn(`⚠️ Static copy failed: ${staticCopyResult.error}`);
+    }
+
     res.json({
       success: true,
       message: `${type} resume uploaded successfully`,
@@ -220,13 +238,27 @@ router.post('/upload-direct/:type', auth, upload.single('file'), async (req, res
     personal[`${type}Resume`] = {
       public_id: result.public_id,
       url: result.secure_url,
-      viewUrl: getPDFViewUrl(result.secure_url),
-      downloadUrl: getPDFDownloadUrl(result.secure_url),
+      viewUrl: result.viewUrl,
+      downloadUrl: result.downloadUrl,
       format: result.format || 'pdf',
       originalName: req.file.originalname,
       size: result.bytes
     };
+    
     await personal.save();
+
+    // 🔥 NEW: Copy to public folder for About.jsx static serving
+    console.log(`📁 Copying ${type} resume to public folder for static serving...`);
+    const staticCopyResult = await copyResumeToPublic(req.file.buffer, type);
+    
+    if (staticCopyResult.success) {
+      console.log(`✅ Static copy successful: ${staticCopyResult.staticUrl}`);
+      
+      // Update personal data with static URL (for About.jsx)
+      await updatePersonalWithStaticUrls(Personal);
+    } else {
+      console.warn(`⚠️ Static copy failed: ${staticCopyResult.error}`);
+    }
 
     res.json({
       success: true,
@@ -450,6 +482,71 @@ router.get('/view/:type', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to view resume'
+    });
+  }
+});
+
+// 🔥 NEW: Sync endpoint to copy existing Cloudinary files to public folder
+router.post('/sync-static', auth, async (req, res) => {
+  try {
+    const personal = await Personal.findOne();
+    if (!personal) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Personal info not found' 
+      });
+    }
+
+    const syncResults = {};
+    const resumeTypes = ['general', 'frontend', 'backend'];
+
+    for (const type of resumeTypes) {
+      const resume = personal[`${type}Resume`];
+      if (resume && resume.url) {
+        console.log(`🔄 Syncing ${type} resume from Cloudinary...`);
+        const result = await syncCloudinaryToPublic(resume.url, type);
+        syncResults[type] = result;
+      } else {
+        syncResults[type] = { success: false, error: 'No Cloudinary URL found' };
+      }
+    }
+
+    // Update personal data with static URLs
+    const updateResult = await updatePersonalWithStaticUrls(Personal);
+
+    res.json({
+      success: true,
+      message: 'Static file sync completed',
+      data: {
+        syncResults: syncResults,
+        personalDataUpdate: updateResult
+      }
+    });
+  } catch (error) {
+    console.error('Static sync error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to sync static files',
+      error: error.message
+    });
+  }
+});
+
+// 🔥 NEW: Check static files status
+router.get('/static-status', async (req, res) => {
+  try {
+    const { checkStaticFiles } = require('../services/fileService');
+    const staticStatus = checkStaticFiles();
+    
+    res.json({
+      success: true,
+      data: staticStatus
+    });
+  } catch (error) {
+    console.error('Static status check error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to check static file status' 
     });
   }
 });

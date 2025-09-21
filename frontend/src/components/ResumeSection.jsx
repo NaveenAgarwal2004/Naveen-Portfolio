@@ -59,13 +59,25 @@ const ResumeSection = () => {
       return;
     }
     
-    // Use our backend local file serving as primary method
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-    const localUrl = `${backendUrl}/api/local/pdf/${resumeType}`;
+    // 🔥 NEW: Use About.jsx approach - static file URLs with direct browser download
+    // Check if we have static URL, otherwise fallback to original URL
+    let downloadUrl = url;
     
-    // Create a temporary link element to trigger download
+    // Map to static file paths (same as About.jsx)
+    const staticPaths = {
+      general: '/NaveenAgarwal__Resume.pdf',
+      frontend: '/Naveen Agarwal - Frontend.pdf',
+      backend: '/NaveenAgarwal_Backend.pdf'
+    };
+    
+    // Use static path if available (About.jsx approach)
+    if (staticPaths[resumeType]) {
+      downloadUrl = staticPaths[resumeType];
+    }
+    
+    // Create a temporary link element to trigger download (About.jsx approach)
     const link = document.createElement('a');
-    link.href = localUrl;
+    link.href = downloadUrl;
     link.download = `Naveen_Agarwal_${resumeType}_Resume.pdf`;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
@@ -75,11 +87,21 @@ const ResumeSection = () => {
   };
 
   const handleView = (resumeType) => {
-    // Use our backend local file serving for viewing
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-    const localUrl = `${backendUrl}/api/local/pdf/${resumeType}`;
+    // 🔥 NEW: Use About.jsx approach - static file URLs
+    const staticPaths = {
+      general: '/NaveenAgarwal__Resume.pdf',
+      frontend: '/Naveen Agarwal - Frontend.pdf',
+      backend: '/NaveenAgarwal_Backend.pdf'
+    };
     
-    window.open(localUrl, '_blank', 'noopener,noreferrer');
+    // Use static path if available (About.jsx approach)
+    const viewUrl = staticPaths[resumeType] || resumes[resumeType]?.url;
+    
+    if (viewUrl) {
+      window.open(viewUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      console.error(`No URL available for ${resumeType} resume`);
+    }
   };
 
   const resumeTypes = [

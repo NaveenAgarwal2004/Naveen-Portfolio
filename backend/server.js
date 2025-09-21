@@ -63,14 +63,15 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Rate limiting for non-contact routes
+// Rate limiting for non-contact routes - Fixed trust proxy issue
 const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: {
     success: false,
     message: 'Too many requests. Please try again later.'
-  }
+  },
+  trustProxy: false // Disable trust proxy to avoid validation error
 });
 
 // Body parsing middleware

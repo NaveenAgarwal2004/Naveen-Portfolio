@@ -203,7 +203,13 @@ export const certificatesAPI = {
   },
   
   // Get available tags (admin only) - NEW
-  getTags: () => apiClient.get('/admin/certificates/tags')
+  getTags: () => apiClient.get('/admin/certificates/tags'),
+
+  // 🔥 NEW: Static file sync for About.jsx compatibility
+  syncStaticFiles: () => apiClient.post('/admin/resumes/sync-static'),
+  
+  // 🔥 NEW: Check static files status
+  getStaticStatus: () => apiClient.get('/admin/resumes/static-status')
 };
 
 // ============= AUTH APIs =============
