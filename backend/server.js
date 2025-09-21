@@ -5,10 +5,26 @@ const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const responseTime = require('response-time');
+const NodeCache = require('node-cache');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
+
+// Initialize cache with TTL (Time To Live) settings
+const cache = new NodeCache({ 
+  stdTTL: 600,      // Default TTL: 10 minutes
+  checkperiod: 120, // Check for expired keys every 2 minutes
+  useClones: false  // Don't clone cached objects for better performance
+});
+
+const { cachePortfolio, cacheCertificates, cacheStats } = require('./middleware/cache');
+
+// Performance monitoring middleware
+app.use(responseTime((req, res, time) => {
+  console.log(`${req.method} ${req.url} - ${time.toFixed(2)}ms`);
+}));
 
 // Trust proxy - important for getting real client IP when behind a proxy
 app.set('trust proxy', true);
@@ -89,7 +105,7 @@ const testPersonalRoutes = require('./routes/testPersonal');
 const pdfProxyRoutes = require('./routes/pdf-proxy');
 const localPdfRoutes = require('./routes/local-pdf');
 
-// Apply routes with rate limiting
+// Apply routes with rate limiting and caching
 app.use('/api/auth', generalRateLimiter, authRoutes);
 app.use('/api/portfolio', generalRateLimiter, portfolioRoutes);
 app.use('/api/resume', generalRateLimiter, resumeRoutes);
@@ -111,10 +127,11 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
-// Connect to MongoDB
+// Connect to MongoDB with basic optimized settings
 mongoose.connect(process.env.MONGO_URL)
   .then(() => {
-    console.log('Connected to MongoDB');
+    console.log('✅ Connected to MongoDB Atlas');
+    
     // Initialize email service after DB connection
     try {
       const { emailService } = require('./config/emailService');
@@ -124,9 +141,22 @@ mongoose.connect(process.env.MONGO_URL)
     }
   })
   .catch((error) => {
-    console.error('MongoDB connection error:', error);
+    console.error('❌ MongoDB connection error:', error);
     process.exit(1);
   });
+
+// Monitor MongoDB connection events
+mongoose.connection.on('connected', () => {
+  console.log('📡 Mongoose connected to MongoDB Atlas');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Mongoose connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('📵 Mongoose disconnected from MongoDB');
+});
 
 // Health check endpoints
 app.get('/health', (req, res) => {
@@ -143,6 +173,73 @@ app.get('/api/health', (req, res) => {
     message: 'Portfolio API is running',
     timestamp: new Date().toISOString()
   });
+});
+
+// Performance monitoring endpoints
+app.get('/api/performance', async (req, res) => {
+  try {
+    const { getDbStats } = require('./middleware/dbMonitor');
+    const { getCacheStats } = require('./middleware/cache');
+    
+    const [dbStats, cacheStats] = await Promise.all([
+      getDbStats(),
+      Promise.resolve(getCacheStats())
+    ]);
+    
+    res.json({
+      success: true,
+      data: {
+        database: dbStats,
+        cache: cacheStats,
+        server: {
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+          pid: process.pid
+        }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get performance stats',
+      error: error.message
+    });
+  }
+});
+
+// Cache management endpoint (admin only)
+app.post('/api/admin/cache/clear', async (req, res) => {
+  try {
+    const { invalidateCache } = require('./middleware/cache');
+    const { type } = req.body;
+    
+    switch(type) {
+      case 'portfolio':
+        invalidateCache.portfolio();
+        break;
+      case 'certificates':
+        invalidateCache.certificates();
+        break;
+      case 'stats':
+        invalidateCache.stats();
+        break;
+      case 'all':
+      default:
+        invalidateCache.all();
+        break;
+    }
+    
+    res.json({
+      success: true,
+      message: `Cache cleared for: ${type || 'all'}`
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to clear cache',
+      error: error.message
+    });
+  }
 });
 
 // Root endpoint
