@@ -34,175 +34,118 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Enhanced response interceptor for backend sleep handling
+// Enhanced response interceptor with exponential backoff
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const config = error.config;
+    const { config } = error;
     
-    if (!config._retryCount) {
-      config._retryCount = 1;
-    } else {
-      config._retryCount += 1;
+    // Initialize retry count
+    if (!config.__retryCount) {
+      config.__retryCount = 0;
     }
     
-    // Handle CORS and network errors specifically
+    // Check if we should retry
     const shouldRetry = 
-      !error.response || // Network error
-      error.code === 'ECONNABORTED' || // Timeout
-      error.response?.status >= 500 || // Server errors
-      error.response?.status === 0 || // CORS/network issues
-      error.message.includes('Network Error') ||
-      error.message.includes('timeout') ||
-      error.message.includes('CORS') ||
-      error.message.includes('ERR_FAILED');
-    
-    if (shouldRetry && config._retryCount <= MAX_RETRIES) {
-      console.log(`🔄 Retrying ${config.url} (${config._retryCount}/${MAX_RETRIES})`);
-      
-      // Exponential backoff with jitter for backend wake-up
-      const delay = Math.min(
-        BASE_DELAY * Math.pow(1.5, config._retryCount - 1) + Math.random() * 1000,
-        10000 // Max 10 seconds between retries
+      config.__retryCount < MAX_RETRIES && 
+      (
+        !error.response || 
+        error.response.status >= 500 ||
+        error.response.status === 408 ||
+        error.code === 'ECONNABORTED' ||
+        error.code === 'NETWORK_ERROR'
       );
-      
-      console.log(`⏳ Waiting ${Math.round(delay/1000)}s before retry...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      
-      return apiClient(config);
+    
+    if (!shouldRetry) {
+      return Promise.reject(error);
     }
     
-    // Handle 401 errors
-    if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
-      window.location.href = '/admin/login';
-    }
+    // Increment retry count
+    config.__retryCount += 1;
     
-    // Enhanced error logging
-    console.error('❌ API Error:', {
-      url: config?.url,
-      method: config?.method,
-      status: error.response?.status,
-      message: error.message,
-      retryCount: config?._retryCount,
-      timestamp: new Date().toISOString()
-    });
+    // Calculate delay with exponential backoff and jitter
+    const delay = Math.min(BASE_DELAY * Math.pow(2, config.__retryCount - 1), 30000);
+    const jitter = Math.random() * 1000;
     
-    return Promise.reject(error);
+    console.log(`Retrying request (${config.__retryCount}/${MAX_RETRIES}) after ${delay + jitter}ms...`);
+    
+    // Wait before retrying
+    await new Promise(resolve => setTimeout(resolve, delay + jitter));
+    
+    // Retry the request
+    return apiClient(config);
   }
 );
-
-// ============= PUBLIC APIs =============
-
-export const portfolioAPI = {
-  // Get personal information with retry
-  getPersonal: () => apiClient.get('/portfolio/personal'),
-  
-  // Get all projects with retry
-  getProjects: (category = '') => {
-    const params = category && category !== 'All' ? { category } : {};
-    return apiClient.get('/portfolio/projects', { params });
-  },
-  
-  // Get featured projects with retry
-  getFeaturedProjects: () => apiClient.get('/portfolio/projects/featured'),
-  
-  // Get tech stack with retry
-  getTechStack: () => apiClient.get('/portfolio/tech-stack'),
-  
-  // Get portfolio stats with retry
-  getStats: () => apiClient.get('/portfolio/stats')
-};
-
-// ============= CONTACT API =============
-
-export const contactAPI = {
-  // Submit contact form with retry
-  submitContact: (contactData) => {
-    const config = {};
-    if (process.env.NODE_ENV === 'development') {
-      config.headers = { 'x-bypass-rate-limit': 'true' };
-    }
-    return apiClient.post('/contact', contactData, config);
-  }
-};
 
 // ============= RESUME APIs =============
 
 export const resumeAPI = {
-  // Get resume URLs (public)
+  // Get resume URLs
   getResumes: () => apiClient.get('/resume/urls'),
   
-  // Upload resume (admin only)
+  // Upload resume
   uploadResume: (type, file) => {
     const formData = new FormData();
     formData.append('file', file);
-    return apiClient.post(`/admin/resume/upload/${type}`, formData, {
+    return apiClient.post(`/resume/upload/${type}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
   
-  // Delete resume (admin only)
-  deleteResume: (type) => apiClient.delete(`/admin/resume/${type}`)
+  // Delete resume
+  deleteResume: (type) => apiClient.delete(`/resume/${type}`),
+  
+  // Download resume
+  downloadResume: (type) => apiClient.get(`/resume/download/${type}`),
+  
+  // View resume
+  viewResume: (type) => apiClient.get(`/resume/view/${type}`)
 };
 
-// ============= ENHANCED CERTIFICATES APIs =============
+// ============= CERTIFICATES APIs =============
 
 export const certificatesAPI = {
-  // Get all public certificates with enhanced filtering
-  getCertificates: (params = {}) => apiClient.get('/certificates', { params }),
+  // Get all certificates with retry
+  getAllCertificates: () => apiClient.get('/certificates'),
   
-  // Get certificate statistics (public)
-  getCertificateStats: () => apiClient.get('/certificates/stats'),
-  
-  // Get all certificates for admin (includes private ones)
-  getAllCertificates: () => apiClient.get('/certificates/admin/all'),
-  
-  // Add certificate (admin only)
+  // Add certificate with retry
   addCertificate: (certificateData) => apiClient.post('/admin/certificates', certificateData),
   
-  // Update certificate (admin only)
+  // Update certificate with retry
   updateCertificate: (id, certificateData) => apiClient.put(`/admin/certificates/${id}`, certificateData),
   
-  // Delete certificate (admin only)
+  // Delete certificate with retry
   deleteCertificate: (id) => apiClient.delete(`/admin/certificates/${id}`),
   
-  // Upload certificate image (admin only) - NEW
+  // Upload certificate image
   uploadCertificateImage: (id, file) => {
     const formData = new FormData();
     formData.append('certificateImage', file);
-    return apiClient.post(`/admin/certificates/${id}/image`, formData, {
+    return apiClient.post(`/admin/certificates/${id}/upload-image`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
   
-  // Upload certificate logo (admin only) - ENHANCED
+  // Upload certificate logo
   uploadCertificateLogo: (id, file) => {
     const formData = new FormData();
-    formData.append('logo', file);
-    return apiClient.post(`/admin/certificates/${id}/logo`, formData, {
+    formData.append('certificateLogo', file);
+    return apiClient.post(`/admin/certificates/${id}/upload-logo`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
   
-  // Bulk operations (admin only) - NEW
-  bulkOperation: (action, certificateIds, data = {}) => {
-    return apiClient.post('/admin/certificates/bulk', {
-      action,
-      certificateIds,
-      data
-    });
-  },
+  // Bulk operations
+  bulkOperation: (action, ids, data = {}) => 
+    apiClient.post('/admin/certificates/bulk', { action, ids, data }),
   
-  // Export certificates (admin only) - NEW
-  exportCertificates: (format = 'json') => {
-    return apiClient.get('/admin/certificates/export', {
-      params: { format },
-      responseType: format === 'csv' ? 'blob' : 'json'
-    });
-  },
+  // Export certificates
+  exportCertificates: (format = 'json') => apiClient.get('/admin/certificates/export', {
+    params: { format },
+    responseType: format === 'csv' ? 'blob' : 'json'
+  }),
   
-  // Get available tags (admin only) - NEW
+  // Get available tags
   getTags: () => apiClient.get('/admin/certificates/tags')
 };
 
@@ -219,7 +162,49 @@ export const authAPI = {
   logout: () => apiClient.post('/auth/logout')
 };
 
-// ============= ADMIN APIs - UPDATED =============
+// ============= CONTACT APIs =============
+
+export const contactAPI = {
+  // Contact form with retry
+  submitContact: (messageData) => apiClient.post('/contact', messageData)
+};
+
+// ============= PORTFOLIO APIs (alias for PUBLIC) =============
+
+export const portfolioAPI = {
+  // Get projects with retry
+  getProjects: () => apiClient.get('/portfolio/projects'),
+  
+  // Get personal info with retry
+  getPersonal: () => apiClient.get('/portfolio/personal'),
+  
+  // Get tech stack with retry
+  getTechStack: () => apiClient.get('/portfolio/tech-stack'),
+  
+  // Get certificates with retry
+  getCertificates: () => apiClient.get('/certificates')
+};
+
+// ============= PUBLIC APIs =============
+
+export const publicAPI = {
+  // Get projects with retry
+  getProjects: () => apiClient.get('/portfolio/projects'),
+  
+  // Get personal info with retry
+  getPersonal: () => apiClient.get('/portfolio/personal'),
+  
+  // Get tech stack with retry
+  getTechStack: () => apiClient.get('/portfolio/tech-stack'),
+  
+  // Get certificates with retry
+  getCertificates: () => apiClient.get('/certificates'),
+  
+  // Contact form with retry
+  sendMessage: (messageData) => apiClient.post('/contact', messageData)
+};
+
+// ============= ADMIN APIs =============
 
 export const adminAPI = {
   // Dashboard with retry
@@ -255,11 +240,11 @@ export const adminAPI = {
   addCertificate: (certificateData) => certificatesAPI.addCertificate(certificateData),
   updateCertificate: (id, certificateData) => certificatesAPI.updateCertificate(id, certificateData),
   deleteCertificate: (id) => certificatesAPI.deleteCertificate(id),
-  uploadCertificateImage: (id, file) => certificatesAPI.uploadCertificateImage(id, file), // NEW
+  uploadCertificateImage: (id, file) => certificatesAPI.uploadCertificateImage(id, file),
   uploadCertificateLogo: (id, file) => certificatesAPI.uploadCertificateLogo(id, file),
-  bulkCertificateOperation: (action, ids, data) => certificatesAPI.bulkOperation(action, ids, data), // NEW
-  exportCertificates: (format) => certificatesAPI.exportCertificates(format), // NEW
-  getCertificateTags: () => certificatesAPI.getTags(), // NEW
+  bulkCertificateOperation: (action, ids, data) => certificatesAPI.bulkOperation(action, ids, data),
+  exportCertificates: (format) => certificatesAPI.exportCertificates(format),
+  getCertificateTags: () => certificatesAPI.getTags(),
   
   // File Uploads - LEGACY (keeping for backward compatibility)
   uploadProfileImage: (file) => {
@@ -276,19 +261,16 @@ export const adminAPI = {
     return apiClient.post('/admin/upload/project-image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-  },
-  
-  uploadTechLogo: (file) => {
-    const formData = new FormData();
-    formData.append('techLogo', file);
-    return apiClient.post('/admin/upload/tech-logo', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  
-  // Contact Messages with retry
-  getMessages: (params = {}) => apiClient.get('/admin/contact/messages', { params }),
-  updateMessageStatus: (id, status) => apiClient.put(`/admin/contact/messages/${id}/status`, { status })
+  }
 };
 
-export default apiClient;
+// Default export for backwards compatibility
+export default {
+  publicAPI,
+  portfolioAPI,
+  contactAPI,
+  adminAPI,
+  authAPI,
+  resumeAPI,
+  certificatesAPI
+};
