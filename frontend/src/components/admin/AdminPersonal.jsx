@@ -171,15 +171,15 @@ const AdminPersonal = () => {
         // Refresh resume URLs to get the latest data
         await fetchResumeUrls();
         
-        // 🔥 NEW: Trigger static file sync for About.jsx compatibility
+        // NEW: Trigger static file sync for About.jsx compatibility
         try {
-          console.log('🔄 Triggering static file sync...');
+          console.log('Triggering static file sync...');
           const syncResponse = await adminAPI.syncStaticFiles();
           if (syncResponse.data.success) {
-            console.log('✅ Static files synced successfully');
+            console.log('Static files synced successfully');
           }
         } catch (syncError) {
-          console.warn('⚠️ Static sync failed:', syncError.message);
+          console.warn('Static sync failed:', syncError.message);
           // Don't fail the whole upload process if static sync fails
         }
         

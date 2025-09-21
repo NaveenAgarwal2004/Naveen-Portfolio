@@ -246,7 +246,7 @@ export const adminAPI = {
   deleteResume: (type) => resumeAPI.deleteResume(type),
   getResumes: () => resumeAPI.getResumes(),
   
-  // 🔥 NEW: Static file sync for About.jsx compatibility
+  // Static file sync for About.jsx compatibility
   syncStaticFiles: () => apiClient.post('/resume/sync-static'),
   getStaticStatus: () => apiClient.get('/resume/static-status'),
   
