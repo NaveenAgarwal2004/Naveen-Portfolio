@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
@@ -8,22 +8,34 @@ import Projects from './components/Projects';
 import TechStack from './components/TechStack';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
-import AdminLogin from './components/admin/AdminLogin';
-import AdminLayout from './components/admin/AdminLayout';
-import AdminDashboard from './components/admin/AdminDashboard';
-import AdminProjects from './components/admin/AdminProjects';
-import AdminProjectNew from './components/admin/AdminProjectNew';
-import AdminProjectEdit from './components/admin/AdminProjectEdit';
-import AdminPersonal from './components/admin/AdminPersonal';
-import AdminTechStack from './components/admin/AdminTechStack';
-import AdminMessages from './components/admin/AdminMessages';
-import AdminCertificates from './components/admin/AdminCertificates';
-import ProtectedRoute from './components/admin/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import { portfolioAPI } from './services/api';
 import ResumeSection from './components/ResumeSection';
 import CertificatesSection from './components/CertificatesSection';
+
+// Lazy load admin components (rarely used)
+const AdminLogin = lazy(() => import('./components/admin/AdminLogin'));
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+const AdminProjects = lazy(() => import('./components/admin/AdminProjects'));
+const AdminProjectNew = lazy(() => import('./components/admin/AdminProjectNew'));
+const AdminProjectEdit = lazy(() => import('./components/admin/AdminProjectEdit'));
+const AdminPersonal = lazy(() => import('./components/admin/AdminPersonal'));
+const AdminTechStack = lazy(() => import('./components/admin/AdminTechStack'));
+const AdminMessages = lazy(() => import('./components/admin/AdminMessages'));
+const AdminCertificates = lazy(() => import('./components/admin/AdminCertificates'));
+const ProtectedRoute = lazy(() => import('./components/admin/ProtectedRoute'));
+
+// Loading component for Suspense fallback
+const AdminLoadingSpinner = () => (
+  <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+      <p className="text-gray-400">Loading admin panel...</p>
+    </div>
+  </div>
+);
 
 // SEO Component
 const SEO = ({ title, description, keywords }) => {
@@ -174,36 +186,108 @@ function App() {
             <Route path="/" element={<Home />} />
             
             {/* Admin Routes */}
-            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route 
+              path="/admin/login" 
+              element={
+                <Suspense fallback={<AdminLoadingSpinner />}>
+                  <AdminLogin />
+                </Suspense>
+              } 
+            />
             
             {/* Protected Admin Routes */}
             <Route 
               path="/admin/*" 
               element={
-                <ProtectedRoute>
-                  <AdminLayout />
-                </ProtectedRoute>
+                <Suspense fallback={<AdminLoadingSpinner />}>
+                  <ProtectedRoute>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                </Suspense>
               }
             >
-              <Route index element={<AdminDashboard />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route 
+                index 
+                element={
+                  <Suspense fallback={<AdminLoadingSpinner />}>
+                    <AdminDashboard />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="dashboard" 
+                element={
+                  <Suspense fallback={<AdminLoadingSpinner />}>
+                    <AdminDashboard />
+                  </Suspense>
+                } 
+              />
               
               {/* Projects Management */}
-              <Route path="projects" element={<AdminProjects />} />
-              <Route path="projects/new" element={<AdminProjectNew />} />
-              <Route path="projects/edit/:id" element={<AdminProjectEdit />} />
+              <Route 
+                path="projects" 
+                element={
+                  <Suspense fallback={<AdminLoadingSpinner />}>
+                    <AdminProjects />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="projects/new" 
+                element={
+                  <Suspense fallback={<AdminLoadingSpinner />}>
+                    <AdminProjectNew />
+                  </Suspense>
+                } 
+              />
+              <Route 
+                path="projects/edit/:id" 
+                element={
+                  <Suspense fallback={<AdminLoadingSpinner />}>
+                    <AdminProjectEdit />
+                  </Suspense>
+                } 
+              />
               
               {/* Personal Info Management */}
-              <Route path="personal" element={<AdminPersonal />} />
+              <Route 
+                path="personal" 
+                element={
+                  <Suspense fallback={<AdminLoadingSpinner />}>
+                    <AdminPersonal />
+                  </Suspense>
+                } 
+              />
               
               {/* Tech Stack Management */}
-              <Route path="tech-stack" element={<AdminTechStack />} />
+              <Route 
+                path="tech-stack" 
+                element={
+                  <Suspense fallback={<AdminLoadingSpinner />}>
+                    <AdminTechStack />
+                  </Suspense>
+                } 
+              />
               
               {/* Certificates Management */}
-              <Route path="certificates" element={<AdminCertificates />} />
+              <Route 
+                path="certificates" 
+                element={
+                  <Suspense fallback={<AdminLoadingSpinner />}>
+                    <AdminCertificates />
+                  </Suspense>
+                } 
+              />
               
               {/* Messages Management */}
-              <Route path="messages" element={<AdminMessages />} />
+              <Route 
+                path="messages" 
+                element={
+                  <Suspense fallback={<AdminLoadingSpinner />}>
+                    <AdminMessages />
+                  </Suspense>
+                } 
+              />
             </Route>
           </Routes>
         </BrowserRouter>

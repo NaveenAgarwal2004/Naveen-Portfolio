@@ -27,15 +27,56 @@ export default defineConfig({
     },
   },
   
-  // Build configuration
+  // Enhanced build configuration with optimization
   build: {
     outDir: 'build', // Keep same output directory as CRA
-    sourcemap: true,
+    sourcemap: process.env.NODE_ENV === 'development',
+    target: 'es2015',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: process.env.NODE_ENV === 'production',
+        drop_debugger: true,
+      },
+    },
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 1600,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-toast'],
+        manualChunks: (id) => {
+          // Vendor chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@radix-ui') || id.includes('lucide-react')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('axios')) {
+              return 'http-vendor';
+            }
+            return 'vendor';
+          }
+          
+          // Admin chunks (lazy loaded)
+          if (id.includes('src/components/admin/')) {
+            return 'admin';
+          }
+          
+          // UI components chunk
+          if (id.includes('src/components/ui/')) {
+            return 'ui-components';
+          }
+          
+          // Services chunk
+          if (id.includes('src/services/')) {
+            return 'services';
+          }
+        },
+        // Optimize chunk names
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop().replace('.jsx', '').replace('.js', '') : 'chunk';
+          return `assets/${facadeModuleId}-[hash].js`;
         },
       },
     },
@@ -47,19 +88,26 @@ export default defineConfig({
   // Static assets configuration - keep public directory structure
   publicDir: 'public', // Same as CRA
   
-  // CSS configuration
+  // CSS configuration with optimization
   css: {
     postcss: './postcss.config.js', // Use existing PostCSS config
+    devSourcemap: false,
   },
   
-  // Optimize dependencies
+  // Enhanced dependency optimization
   optimizeDeps: {
     include: [
       'react',
       'react-dom',
+      'react-router-dom',
       'axios',
       'lucide-react',
-      'react-router-dom',
     ],
+    exclude: ['@vite/client', '@vite/env'],
+  },
+  
+  // Performance optimizations
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
   },
 })

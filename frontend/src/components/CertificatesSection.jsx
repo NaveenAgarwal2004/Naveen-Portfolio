@@ -723,6 +723,7 @@ const CertificatesSection = () => {
                   </CardHeader>
                   
                   <CardContent className="space-y-4 relative z-10">
+                    <div className="space-y-4">
                     {/* Issuer */}
                     <div className="flex items-center text-gray-300 text-sm">
                       <Building className="w-4 h-4 mr-3 text-blue-400 flex-shrink-0" />
@@ -815,8 +816,9 @@ const CertificatesSection = () => {
                           <ExternalLink className="w-4 h-4 mr-2" />
                           Verify Certificate
                         </Button>
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             );

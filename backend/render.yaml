@@ -1,0 +1,22 @@
+# Render.com deployment configuration
+services:
+  - type: web
+    name: naveen-portfolio-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8001
+      - key: MONGO_URL
+        fromDatabase:
+          name: portfolio-db
+          property: connectionString
+    autoDeploy: true
+    region: oregon
+    branch: main
+    rootDir: backend

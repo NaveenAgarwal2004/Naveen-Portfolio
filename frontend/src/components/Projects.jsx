@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Github, Filter, Star, Calendar, Code } from 'lucide-react';
+import OptimizedImage, { ImagePresets } from './ui/OptimizedImage';
 
 const Projects = () => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -82,9 +83,10 @@ const Projects = () => {
       onMouseLeave={() => setHoveredProject(null)}
     >
       <div className="relative overflow-hidden">
-        <img
+        <OptimizedImage
           src={project.image}
           alt={project.title}
+          {...(featured ? { width: 600, height: 400 } : ImagePresets.card)}
           className={`w-full object-cover transition-all duration-500 group-hover:scale-110 ${
             featured ? 'h-64 sm:h-80' : 'h-48 sm:h-56'
           }`}

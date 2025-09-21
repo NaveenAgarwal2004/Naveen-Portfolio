@@ -1,135 +1,411 @@
-# ===================
-# IDEs & Editors
-# ===================
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
+# ============================================================================
+# Naveen Portfolio - .gitignore
+# Complete ignore rules for Node.js, React, Vite, MongoDB, and deployment
+# ============================================================================
 
-# ===================
-# Node Dependencies
-# ===================
+# ============================================================================
+# Node.js Dependencies & Package Managers
+# ============================================================================
 node_modules/
 **/node_modules/
-.pnp/
+.pnp
 .pnp.js
-.yarn/install-state.gz
 .yarn/*
 !.yarn/patches
-!.yarn/plugins
+!.yarn/plugins  
 !.yarn/releases
 !.yarn/versions
-
-# ===================
-# Build Artifacts
-# ===================
-build/
-dist/
-.cache/
-.vite/
-frontend/dist/
-backend/uploads/
-
-# ===================
-# Environment Files
-# ===================
-.env
-.env.*.local
-.env.local
-.env.development
-.env.production
-frontend/.env
-backend/.env
-# Environment variables
-.env
-.env.*
-backend/.env
-
-# ===================
-# Logs & Debugging
-# ===================
+.yarn/install-state.gz
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+.npmrc
+.yarnrc
+
+# Package manager lock files (uncomment to ignore)
+/package-lock.json
+/package.json
+yarn.lock
+**/yarn.lock
+# pnpm-lock.yaml
+
+# ============================================================================
+# Environment Variables & Secrets
+# ============================================================================
+.env
+.env.*
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+frontend/.env*
+backend/.env*
+
+# Specific sensitive files
+secrets.json
+config/secrets.js
+.secrets
+credentials.json
+
+# ============================================================================
+# Build Outputs & Distribution
+# ============================================================================
+build/
+dist/
+out/
+.next/
+.nuxt/
+.cache/
+.vite/
+.temp/
+.tmp/
+frontend/build/
+frontend/dist/
+backend/build/
+backend/dist/
+
+# Vite specific
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# ============================================================================
+# Development & Runtime Files
+# ============================================================================
 *.log
-
-# ===================
-# System Files
-# ===================
-.DS_Store
-Thumbs.db
-*.pem
-
-# ===================
-# Python (for backend_test.py)
-# ===================
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-
-# ===================
-# Temporary / Backup
-# ===================
-*.tmp
-*.bak
-*.old
-*.swp
+*.pid
 *.seed
+*.pid.lock
+*.tsbuildinfo
 
-# ===================
-# Test / API Client Files
-# ===================
-thunder-client-tests.json
-curl-tests.sh
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output/
+
+# ============================================================================
+# IDE & Editor Files
+# ============================================================================
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ============================================================================
+# Operating System Files
+# ============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============================================================================
+# Database Files
+# ============================================================================
+*.db
+*.sqlite
+*.sqlite3
+*.db3
+dump.rdb
+*.rdb
+mongodump/
+
+# ============================================================================
+# Logs & Debugging
+# ============================================================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Server logs
+server.log
+optimized-server.log
+vite-dev.log
+preview.log
+basic-server.log
+test-server.log
+
+# Debug files
+.debug
+debug.log
+error.log
+access.log
+
+# ============================================================================
+# Upload & Media Files (Project Specific)
+# ============================================================================
+uploads/
+temp-uploads/
+backend/uploads/
+backend/temp/
+frontend/public/temp/
+
+# User uploaded content (if any)
+user-content/
+media/uploads/
+
+# ============================================================================
+# Testing & Quality Assurance
+# ============================================================================
+# Test results
+test-results/
+coverage/
+.nyc_output/
+junit.xml
+test-report.xml
+
+# E2E testing
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Jest
+jest.config.js
+
+# Testing artifacts
+screenshots/
+videos/
+test-screenshots/
+
+# Backend testing files
 backend_test.py
 test_result.md
+curl-tests.sh
+thunder-client-tests.json
+contracts.md
 
-# ===================
-# Archive Files
-# ===================
+# ============================================================================
+# Build Tools & Bundlers
+# ============================================================================
+# Webpack
+webpack-stats.json
+webpack.config.js.backup
+
+# Rollup
+rollup.config.js.backup
+
+# Parcel
+.parcel-cache/
+
+# Next.js
+.next/
+next-env.d.ts
+
+# Nuxt.js
+.nuxt/
+.output/
+
+# Gatsby
+.cache/
+public/
+
+# ============================================================================
+# Deployment & CI/CD
+# ============================================================================
+# Deployment artifacts
+deploy/
+deployment/
+.vercel/
+.netlify/
+.firebase/
+
+# CI/CD
+.github/workflows/*.backup
+.circleci/
+.travis.yml.backup
+
+# Docker
+.dockerignore.backup
+Dockerfile.backup
+docker-compose.yml.backup
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# ============================================================================
+# Archive & Backup Files  
+# ============================================================================
 *.zip
 *.tar
 *.tar.gz
 *.tgz
+*.rar
+*.7z
+*.bak
+*.backup
+*.old
+*.orig
+*.save
 
-# ===================
-# Resume & Asset Protection
-# ===================
-frontend/public/Naveen Agarwal - Frontend.pdf
-frontend/public/NaveenAgarwal_Backend.pdf
+# Project backups
+backup/
+backups/
+*.backup.*
 
-# ===================
-# Git Ignore Catch-all (optional)
-# ===================
-*.log
-analyze-project.js
-project-summary.txt
-backend_test.py
-
-# ===================
-# Test / API Client / Temporary Test Files
-# ===================
-# Existing
-thunder-client-tests.json
-curl-tests.sh
-backend_test.py
-test_result.md
-
-# Catch-all patterns
-*.test.js
-*.spec.js
-*.test.ts
-*.spec.ts
-*.test.jsx
-*.spec.jsx
-*.test.tsx
-*.spec.tsx
-tests/
-__tests__/
+# ============================================================================
+# Temporary & Cache Files
+# ============================================================================
 tmp/
 temp/
+.temp/
+.tmp/
+cache/
+.cache/
+
+# Node.js cache
+.npm/
+.eslintcache
+.stylelintcache
+
+# Yarn cache
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ============================================================================
+# Security & Certificates
+# ============================================================================
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+certificate.pem
+private-key.pem
+
+# SSH keys
+id_rsa
+id_rsa.pub
+known_hosts
+
+# ============================================================================
+# Analytics & Monitoring
+# ============================================================================
+.vscode/settings.json
+.monitoring/
+analytics/
+metrics/
+
+# ============================================================================
+# Documentation Generated Files
+# ============================================================================
+docs/build/
+documentation/build/
+.docusaurus/
+
+# ============================================================================
+# Miscellaneous Project Files
+# ============================================================================
+# Analysis and summary files
+analyze-project.js
+project-summary.txt
+todo.md
+TODO.md
+notes.md
+NOTES.md
+
+# Temporary scripts
+fix-*.js
+test-*.js
+debug-*.js
+temp-*.js
+re-upload-resumes.js
 simple-pdf-test.js
-fix-resume-urls.js
-fix-pdf-access.js
+update-resume-urls.js
+upload-resumes.js
+
+# Personal notes and todos
+personal-notes.md
+my-notes.txt
+scratch.md
+
+# Resume protection (uncomment if you don't want resumes in git)
+# *.pdf
+# frontend/public/*.pdf
+backend/*.pdf
+
+# ============================================================================
+# Custom Project Ignores (Add your specific files here)
+# ============================================================================
+# Add any project-specific files you want to ignore
+
+# ============================================================================
+# END OF .gitignore
+# ============================================================================
