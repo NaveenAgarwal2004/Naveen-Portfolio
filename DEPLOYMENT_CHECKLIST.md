@@ -48,19 +48,37 @@ VITE_BACKEND_URL=https://your-backend.onrender.com
 
 ### Render Environment Variables
 ```
+# Production Environment Variables for Render Deployment
+# Copy this to .env and fill in your actual values
+
+# Database
+MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority
+
+# JWT Secret (generate a strong secret)
+JWT_SECRET=your-super-secret-jwt-key-here
+
+# Email Configuration
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+EMAIL_DEBUG=false
+EMAIL_LOGGER=false
+
+# Cloudinary Configuration
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+
+# Admin Credentials
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your-secure-admin-password
+
+# App Configuration
 NODE_ENV=production
 PORT=8001
-MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/portfolio_db?retryWrites=true&w=majority
-JWT_SECRET=your-super-secure-jwt-secret-key-here
-EMAIL_USER=naveenagarwal7624@gmail.com
-EMAIL_PASS=uteo nkaw eseb trnc
-CLOUDINARY_CLOUD_NAME=dtor3nqkz
-CLOUDINARY_API_KEY=828572231347365
-CLOUDINARY_API_SECRET=YuWjfaUI0r-mkPXfznhg5j7KKMQ
-ADMIN_EMAIL=naveenagarwal7624@gmail.com
-ADMIN_PASSWORD=MySecure!2025@Portfolio
 FRONTEND_URL=https://your-vercel-app.vercel.app
 ALLOWED_ORIGINS=https://your-vercel-app.vercel.app,http://localhost:3000
+
+# Database Name
 DB_NAME=portfolio_db
 ```
 
