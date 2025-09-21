@@ -105,8 +105,14 @@ export const resumeAPI = {
 // ============= CERTIFICATES APIs =============
 
 export const certificatesAPI = {
-  // Get all certificates with retry
+  // Get all certificates with retry (multiple function names for compatibility)
+  getCertificates: () => apiClient.get('/certificates'),
   getAllCertificates: () => apiClient.get('/certificates'),
+  
+  // Get certificate stats (fallback to certificates if no stats endpoint)
+  getCertificateStats: () => apiClient.get('/certificates/stats').catch(() => 
+    ({ data: { success: false, data: {} } })
+  ),
   
   // Add certificate with retry
   addCertificate: (certificateData) => apiClient.post('/admin/certificates', certificateData),
@@ -236,7 +242,7 @@ export const adminAPI = {
   getStaticStatus: () => apiClient.get('/resume/static-status'),
   
   // Enhanced Certificates Management
-  getCertificates: () => certificatesAPI.getAllCertificates(),
+  getCertificates: () => certificatesAPI.getCertificates(),
   addCertificate: (certificateData) => certificatesAPI.addCertificate(certificateData),
   updateCertificate: (id, certificateData) => certificatesAPI.updateCertificate(id, certificateData),
   deleteCertificate: (id) => certificatesAPI.deleteCertificate(id),
