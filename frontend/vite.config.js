@@ -29,7 +29,7 @@ export default defineConfig({
   
   // Enhanced build configuration with optimization
   build: {
-    outDir: 'build', // Keep same output directory as CRA
+    outDir: 'dist', // Keep same output directory as CRA
     sourcemap: process.env.NODE_ENV === 'development',
     target: 'es2015',
     minify: 'terser',
