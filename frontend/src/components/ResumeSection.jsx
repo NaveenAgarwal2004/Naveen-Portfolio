@@ -59,25 +59,13 @@ const ResumeSection = () => {
       return;
     }
     
-    // 🔥 NEW: Use About.jsx approach - static file URLs with direct browser download
-    // Check if we have static URL, otherwise fallback to original URL
-    let downloadUrl = url;
+    // Use our backend local file serving as primary method
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+    const localUrl = `${backendUrl}/api/local/pdf/${resumeType}`;
     
-    // Map to static file paths (same as About.jsx)
-    const staticPaths = {
-      general: '/NaveenAgarwal__Resume.pdf',
-      frontend: '/Naveen Agarwal - Frontend.pdf',
-      backend: '/NaveenAgarwal_Backend.pdf'
-    };
-    
-    // Use static path if available (About.jsx approach)
-    if (staticPaths[resumeType]) {
-      downloadUrl = staticPaths[resumeType];
-    }
-    
-    // Create a temporary link element to trigger download (About.jsx approach)
+    // Create a temporary link element to trigger download
     const link = document.createElement('a');
-    link.href = downloadUrl;
+    link.href = localUrl;
     link.download = `Naveen_Agarwal_${resumeType}_Resume.pdf`;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
@@ -87,21 +75,11 @@ const ResumeSection = () => {
   };
 
   const handleView = (resumeType) => {
-    // 🔥 NEW: Use About.jsx approach - static file URLs
-    const staticPaths = {
-      general: '/NaveenAgarwal__Resume.pdf',
-      frontend: '/Naveen Agarwal - Frontend.pdf',
-      backend: '/NaveenAgarwal_Backend.pdf'
-    };
+    // Use our backend local file serving for viewing
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+    const localUrl = `${backendUrl}/api/local/pdf/${resumeType}`;
     
-    // Use static path if available (About.jsx approach)
-    const viewUrl = staticPaths[resumeType] || resumes[resumeType]?.url;
-    
-    if (viewUrl) {
-      window.open(viewUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      console.error(`No URL available for ${resumeType} resume`);
-    }
+    window.open(localUrl, '_blank', 'noopener,noreferrer');
   };
 
   const resumeTypes = [
@@ -204,6 +182,28 @@ const ResumeSection = () => {
                     <p className="text-gray-600 text-xs mt-1">Check back soon</p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="text-center mt-8">
+          <Button
+            variant="outline"
+            onClick={fetchResumes}
+            disabled={loading}
+            className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-400 hover:bg-gray-700"
+          >
+            <RefreshCcw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh Resumes
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default ResumeSection;
               </CardContent>
             </Card>
           ))}

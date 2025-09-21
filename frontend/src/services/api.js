@@ -203,13 +203,7 @@ export const certificatesAPI = {
   },
   
   // Get available tags (admin only) - NEW
-  getTags: () => apiClient.get('/admin/certificates/tags'),
-
-  // 🔥 NEW: Static file sync for About.jsx compatibility
-  syncStaticFiles: () => apiClient.post('/admin/resumes/sync-static'),
-  
-  // 🔥 NEW: Check static files status
-  getStaticStatus: () => apiClient.get('/admin/resumes/static-status')
+  getTags: () => apiClient.get('/admin/certificates/tags')
 };
 
 // ============= AUTH APIs =============
@@ -251,6 +245,10 @@ export const adminAPI = {
   uploadResume: (type, file) => resumeAPI.uploadResume(type, file),
   deleteResume: (type) => resumeAPI.deleteResume(type),
   getResumes: () => resumeAPI.getResumes(),
+  
+  // 🔥 NEW: Static file sync for About.jsx compatibility
+  syncStaticFiles: () => apiClient.post('/resume/sync-static'),
+  getStaticStatus: () => apiClient.get('/resume/static-status'),
   
   // Enhanced Certificates Management
   getCertificates: () => certificatesAPI.getAllCertificates(),
