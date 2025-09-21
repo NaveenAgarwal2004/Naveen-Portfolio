@@ -107,3 +107,31 @@ frontend/public/NaveenAgarwal_Backend.pdf
 analyze-project.js
 project-summary.txt
 backend_test.py
+
+# ===================
+# Test / API Client / Temporary Test Files
+# ===================
+# Existing
+thunder-client-tests.json
+curl-tests.sh
+backend_test.py
+test_result.md
+
+# Catch-all patterns
+*.test.js
+*.spec.js
+*.test.ts
+*.spec.ts
+*.test.jsx
+*.spec.jsx
+*.test.tsx
+*.spec.tsx
+tests/
+__tests__/
+tmp/
+temp/
+simple-pdf-test.js
+local-pdf.js
+fix-resume-urls.js
+fix-pdf-access.js
+pdf-proxy.js

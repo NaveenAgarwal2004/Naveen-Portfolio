@@ -15,7 +15,7 @@ const resumeStorage = new CloudinaryStorage({
   params: {
     folder: 'portfolio/resumes',
     allowed_formats: ['pdf'],
-    resource_type: 'raw',
+    resource_type: 'image', // Use 'image' for PDFs - works with public access
     format: 'pdf', // Explicitly set format
     flags: 'attachment', // This ensures proper download headers
     public_id: (req, file) => {
@@ -23,13 +23,7 @@ const resumeStorage = new CloudinaryStorage({
       const originalName = file.originalname.replace(/\.[^/.]+$/, '');
       const cleanName = originalName.replace(/[^a-zA-Z0-9-_]/g, '_');
       return `${cleanName}_${Date.now()}`;
-    },
-    // Add these for better PDF handling
-    transformation: [
-      { page: 1 }, // For PDF preview if needed
-      { quality: 'auto:best' },
-      { flags: 'attachment' }
-    ]
+    }
   },
 });
 
@@ -39,11 +33,12 @@ const resumeStorageAlternative = new CloudinaryStorage({
   params: async (req, file) => {
     return {
       folder: 'portfolio/resumes',
-      resource_type: 'raw', // Use 'raw' for proper PDF handling
+      resource_type: 'image', // Use 'image' for proper PDF handling with public access
       format: 'pdf',
       public_id: `naveen-resume-${Date.now()}`,
       type: 'upload',
-      access_mode: 'public'
+      access_mode: 'public',
+      flags: 'attachment' // Ensures proper Content-Disposition header
     };
   },
 });
@@ -268,14 +263,15 @@ const uploadPDFToCloudinary = async (buffer, filename, folder = 'portfolio/resum
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        resource_type: 'raw', // Use 'raw' for PDFs to get proper /raw/upload/ URLs
+        resource_type: 'image', // Use 'image' for PDFs - allows public access
         folder: folder,
         public_id: filename,
         format: 'pdf',
-        access_mode: 'public', // Ensure public access
+        access_mode: 'public',
         type: 'upload',
         overwrite: true, // Allow overwriting existing files
-        invalidate: true // Clear CDN cache
+        invalidate: true, // Clear CDN cache
+        flags: 'attachment' // Ensures proper Content-Disposition header
       },
       (error, result) => {
         if (error) {
@@ -292,8 +288,8 @@ const uploadPDFToCloudinary = async (buffer, filename, folder = 'portfolio/resum
           resolve({
             public_id: result.public_id,
             url: result.secure_url,
-            viewUrl: result.secure_url,
-            downloadUrl: result.secure_url, // Raw URLs are already proper for download
+            viewUrl: result.secure_url, // View URL is the regular URL
+            downloadUrl: result.secure_url.replace('/upload/', '/upload/fl_attachment/'), // Add attachment flag
             format: result.format,
             resource_type: result.resource_type,
             bytes: result.bytes

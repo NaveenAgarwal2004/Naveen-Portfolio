@@ -59,15 +59,27 @@ const ResumeSection = () => {
       return;
     }
     
+    // Use our backend local file serving as primary method
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+    const localUrl = `${backendUrl}/api/local/pdf/${resumeType}`;
+    
     // Create a temporary link element to trigger download
     const link = document.createElement('a');
-    link.href = url;
+    link.href = localUrl;
     link.download = `Naveen_Agarwal_${resumeType}_Resume.pdf`;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleView = (resumeType) => {
+    // Use our backend local file serving for viewing
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+    const localUrl = `${backendUrl}/api/local/pdf/${resumeType}`;
+    
+    window.open(localUrl, '_blank', 'noopener,noreferrer');
   };
 
   const resumeTypes = [
@@ -144,7 +156,7 @@ const ResumeSection = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(resumes[type].url, '_blank')}
+                        onClick={() => handleView(type)}
                         className="flex-1 border-gray-600 text-gray-300 hover:text-white hover:border-gray-400 hover:bg-gray-700"
                       >
                         <ExternalLink className="w-4 h-4 mr-1" />

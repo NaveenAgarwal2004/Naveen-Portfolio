@@ -85,6 +85,8 @@ const contactRoutes = require('./routes/contact');
 const resumeRoutes = require('./routes/resume');
 const certificatesRoutes = require('./routes/certificates');
 const testPersonalRoutes = require('./routes/testPersonal');
+const pdfProxyRoutes = require('./routes/pdf-proxy');
+const localPdfRoutes = require('./routes/local-pdf');
 
 // Apply routes with rate limiting
 app.use('/api/auth', generalRateLimiter, authRoutes);
@@ -100,6 +102,8 @@ app.use('/api/admin/certificates', certificatesRoutes);
 // Other routes
 app.use('/api/test-personal', testPersonalRoutes);
 app.use('/api/contact', contactRoutes); // Contact has its own rate limiting
+app.use('/api/proxy', pdfProxyRoutes); // PDF proxy for serving resumes
+app.use('/api/local', localPdfRoutes); // Local PDF serving (fallback)
 
 // Logging middleware
 if (process.env.NODE_ENV !== 'production') {
