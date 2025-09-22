@@ -5,19 +5,19 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  
+
   // Define global variables for compatibility
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
   },
-  
+
   // Path aliases (equivalent to CRACO webpack alias)
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  
+
   // Development server configuration
   server: {
     port: 3000,
@@ -25,8 +25,12 @@ export default defineConfig({
     hmr: {
       port: 3001, // Use different port for HMR to avoid conflicts
     },
+    // Add proper MIME type handling
+    fs: {
+      strict: false,
+    },
   },
-  
+
   // Enhanced build configuration with optimization
   build: {
     outDir: 'dist', // Keep same output directory as CRA
@@ -57,43 +61,51 @@ export default defineConfig({
             }
             return 'vendor';
           }
-          
+
           // Admin chunks (lazy loaded)
           if (id.includes('src/components/admin/')) {
             return 'admin';
           }
-          
+
           // UI components chunk
           if (id.includes('src/components/ui/')) {
             return 'ui-components';
           }
-          
+
           // Services chunk
           if (id.includes('src/services/')) {
             return 'services';
           }
         },
-        // Optimize chunk names
+        // Optimize chunk names and ensure proper file extensions
         chunkFileNames: (chunkInfo) => {
           const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop().replace('.jsx', '').replace('.js', '') : 'chunk';
           return `assets/${facadeModuleId}-[hash].js`;
         },
+        // Ensure entry files have proper extensions
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+            return 'assets/[name]-[hash][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
       },
     },
   },
-  
+
   // Environment variables (Vite automatically loads .env files)
   envPrefix: 'VITE_', // Change from REACT_APP_ to VITE_
-  
+
   // Static assets configuration - keep public directory structure
   publicDir: 'public', // Same as CRA
-  
+
   // CSS configuration with optimization
   css: {
     postcss: './postcss.config.js', // Use existing PostCSS config
     devSourcemap: false,
   },
-  
+
   // Enhanced dependency optimization
   optimizeDeps: {
     include: [
@@ -105,7 +117,7 @@ export default defineConfig({
     ],
     exclude: ['@vite/client', '@vite/env'],
   },
-  
+
   // Performance optimizations
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' }

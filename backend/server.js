@@ -329,7 +329,7 @@ app.use('/api/*', (req, res) => {
 
 // Serve static files from frontend build
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
   // Catch-all handler for React SPA - serve index.html for all non-API routes
   app.get('*', (req, res) => {
@@ -339,7 +339,7 @@ if (process.env.NODE_ENV === 'production') {
         message: 'API endpoint not found'
       });
     }
-    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
   });
 }
 
