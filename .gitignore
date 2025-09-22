@@ -405,7 +405,7 @@ backend/*.pdf
 # Custom Project Ignores (Add your specific files here)
 # ============================================================================
 # Add any project-specific files you want to ignore
-
+TODO.md
 # ============================================================================
 # END OF .gitignore
 # ============================================================================

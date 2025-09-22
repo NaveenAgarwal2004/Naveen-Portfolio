@@ -27,11 +27,13 @@ const projectValidation = [
     .isIn(['AI', 'Web'])
     .withMessage('Category must be either AI or Web'),
   body('image')
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage('Image URL is required')
-    .isURL()
-    .withMessage('Image must be a valid URL'),
+    .custom((value) => {
+      if (!value) return true; // Allow empty/undefined values
+      return require('validator').isURL(value);
+    })
+    .withMessage('Image must be a valid URL if provided'),
   body('imagePublicId')
     .optional({ checkFalsy: true })
     .trim(),
