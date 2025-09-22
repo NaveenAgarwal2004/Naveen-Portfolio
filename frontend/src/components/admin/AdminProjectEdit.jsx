@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { 
-  Edit, 
-  Save, 
-  ArrowLeft, 
-  Eye, 
-  Github, 
+import {
+  Edit,
+  Save,
+  ArrowLeft,
+  Eye,
+  Github,
   ExternalLink,
   Star,
   Trash2,
   Image as ImageIcon,
   Upload,
-  X
+  X,
+  Bug
 } from 'lucide-react';
 import { adminAPI } from '../../services/api';
 import { useToast } from '../../hooks/use-toast';
@@ -31,7 +32,12 @@ const AdminProjectEdit = () => {
     githubUrl: '',
     liveUrl: '',
     featured: false,
-    order: 0
+    order: 0,
+    // Case study fields
+    problem: '',
+    solution: '',
+    outcome: '',
+    detailedDescription: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -40,6 +46,9 @@ const AdminProjectEdit = () => {
   const [errors, setErrors] = useState({});
   const [preview, setPreview] = useState(false);
   const [originalData, setOriginalData] = useState(null);
+  const [debugMode, setDebugMode] = useState(false);
+  const [lastPayload, setLastPayload] = useState(null);
+  const [lastError, setLastError] = useState(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -64,7 +73,12 @@ const AdminProjectEdit = () => {
             githubUrl: project.githubUrl || '',
             liveUrl: project.liveUrl || '',
             featured: project.featured || false,
-            order: project.order || 0
+            order: project.order || 0,
+            // Case study fields
+            problem: project.problem || '',
+            solution: project.solution || '',
+            outcome: project.outcome || '',
+            detailedDescription: project.detailedDescription || ''
           };
           setFormData(projectData);
           setOriginalData(project);
@@ -101,7 +115,7 @@ const AdminProjectEdit = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -156,7 +170,7 @@ const AdminProjectEdit = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (!formData.category) newErrors.category = 'Category is required';
@@ -164,7 +178,7 @@ const AdminProjectEdit = () => {
     if (!formData.githubUrl.trim()) newErrors.githubUrl = 'GitHub URL is required';
     if (!formData.liveUrl.trim()) newErrors.liveUrl = 'Live URL is required';
     if (!formData.techStack.trim()) newErrors.techStack = 'At least one technology is required';
-    
+
     const urlPattern = /^https?:\/\/.+/;
     if (formData.githubUrl && !urlPattern.test(formData.githubUrl)) {
       newErrors.githubUrl = 'Please enter a valid URL starting with http:// or https://';
@@ -172,14 +186,14 @@ const AdminProjectEdit = () => {
     if (formData.liveUrl && !urlPattern.test(formData.liveUrl)) {
       newErrors.liveUrl = 'Please enter a valid URL starting with http:// or https://';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast({
         title: 'Validation Error',
@@ -191,18 +205,58 @@ const AdminProjectEdit = () => {
 
     setSaving(true);
     try {
+      // Clean and validate techStack
       const techStackArray = formData.techStack
         .split(',')
         .map(tech => tech.trim())
-        .filter(Boolean);
-      
-      const payload = { 
-        ...formData, 
+        .filter(tech => tech.length > 0);
+
+      if (techStackArray.length === 0) {
+        toast({
+          title: 'Validation Error',
+          description: 'At least one technology is required.',
+          variant: 'destructive',
+        });
+        setSaving(false);
+        return;
+      }
+
+      // Build the payload with explicit type conversion and validation
+      const payload = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        category: formData.category,
+        image: formData.image.trim(),
+        imagePublicId: formData.imagePublicId || '',
         techStack: techStackArray,
-        order: parseInt(formData.order) || 0
+        githubUrl: formData.githubUrl.trim(),
+        liveUrl: formData.liveUrl.trim(),
+        featured: Boolean(formData.featured),
+        order: parseInt(formData.order) || 0,
+        // Case study fields - only include if they have content
+        ...(formData.problem && formData.problem.trim() && { problem: formData.problem.trim() }),
+        ...(formData.solution && formData.solution.trim() && { solution: formData.solution.trim() }),
+        ...(formData.outcome && formData.outcome.trim() && { outcome: formData.outcome.trim() }),
+        ...(formData.detailedDescription && formData.detailedDescription.trim() && { 
+          detailedDescription: formData.detailedDescription.trim() 
+        })
       };
+
+      // Store payload for debugging
+      setLastPayload(payload);
       
+      if (debugMode) {
+        console.log('=== DEBUG: Project Update Payload ===');
+        console.log('Project ID:', id);
+        console.log('Payload:', JSON.stringify(payload, null, 2));
+        console.log('Payload size:', JSON.stringify(payload).length, 'bytes');
+        console.log('TechStack Array:', techStackArray);
+        console.log('Featured type:', typeof payload.featured);
+        console.log('Order type:', typeof payload.order);
+      }
+
       const response = await adminAPI.updateProject(id, payload);
+      
       if (response.data.success) {
         toast({
           title: 'Project Updated',
@@ -210,6 +264,7 @@ const AdminProjectEdit = () => {
         });
         navigate('/admin/projects');
       } else {
+        console.error('Server responded with error:', response.data);
         toast({
           title: 'Update Failed',
           description: response.data.message || 'Failed to update the project.',
@@ -218,11 +273,38 @@ const AdminProjectEdit = () => {
       }
     } catch (error) {
       console.error('Error updating project:', error);
-      toast({
-        title: 'Error',
-        description: 'An error occurred while updating the project.',
-        variant: 'destructive',
-      });
+      setLastError(error);
+      
+      // Enhanced error reporting
+      if (error.response) {
+        console.log('=== Error Response Details ===');
+        console.log('Status:', error.response.status);
+        console.log('Headers:', error.response.headers);
+        console.log('Data:', error.response.data);
+        
+        if (error.response.data?.errors) {
+          const validationErrors = error.response.data.errors;
+          console.log('Validation errors:', validationErrors);
+          
+          toast({
+            title: 'Validation Failed',
+            description: `Validation errors: ${validationErrors.map(err => err.msg).join(', ')}`,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Update Failed',
+            description: error.response.data?.message || 'Server validation failed. Check console for details.',
+            variant: 'destructive',
+          });
+        }
+      } else {
+        toast({
+          title: 'Network Error',
+          description: 'Failed to connect to server. Please try again.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setSaving(false);
     }
@@ -300,7 +382,7 @@ const AdminProjectEdit = () => {
             </Button>
           </Link>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2 md:gap-3">
@@ -312,9 +394,18 @@ const AdminProjectEdit = () => {
               Update your project details and settings.
             </p>
           </div>
-          
-          {/* Mobile Action Buttons */}
+
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full sm:w-auto">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDebugMode(!debugMode)}
+              className="border-gray-600 text-gray-300 hover:bg-gray-700 text-sm"
+            >
+              <Bug className="h-4 w-4 mr-2" />
+              {debugMode ? 'Hide Debug' : 'Debug Mode'}
+            </Button>
             <Button
               type="button"
               variant="outline"
@@ -364,6 +455,55 @@ const AdminProjectEdit = () => {
           </div>
         </div>
       </div>
+
+      {/* Debug Panel */}
+      {debugMode && (
+        <Card className="bg-gray-800 border-yellow-600">
+          <CardHeader className="p-4">
+            <CardTitle className="text-yellow-400 text-lg flex items-center gap-2">
+              <Bug className="h-5 w-5" />
+              Debug Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-white font-medium mb-2">Current Form Data:</h4>
+                <pre className="bg-gray-900 p-3 rounded text-xs overflow-auto max-h-40 text-green-400">
+                  {JSON.stringify(formData, null, 2)}
+                </pre>
+              </div>
+              
+              {lastPayload && (
+                <div>
+                  <h4 className="text-white font-medium mb-2">Last Sent Payload:</h4>
+                  <pre className="bg-gray-900 p-3 rounded text-xs overflow-auto max-h-40 text-blue-400">
+                    {JSON.stringify(lastPayload, null, 2)}
+                  </pre>
+                </div>
+              )}
+              
+              {lastError && (
+                <div>
+                  <h4 className="text-white font-medium mb-2">Last Error:</h4>
+                  <pre className="bg-gray-900 p-3 rounded text-xs overflow-auto max-h-40 text-red-400">
+                    {JSON.stringify(lastError.response?.data || lastError.message, null, 2)}
+                  </pre>
+                </div>
+              )}
+              
+              <div>
+                <h4 className="text-white font-medium mb-2">Tech Stack Validation:</h4>
+                <p className="text-sm text-gray-300">
+                  Raw: "{formData.techStack}"<br/>
+                  Parsed: {JSON.stringify(techStackArray)}<br/>
+                  Count: {techStackArray.length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Unsaved Changes Warning */}
       {hasChanges && (
@@ -421,6 +561,67 @@ const AdminProjectEdit = () => {
                 {errors.description && <p className="text-red-400 text-xs md:text-sm mt-1">{errors.description}</p>}
               </div>
 
+              {/* Case Study Fields */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-white">Case Study (Optional)</h3>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Problem Statement
+                  </label>
+                  <textarea
+                    name="problem"
+                    value={formData.problem}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="What problem does this project solve?"
+                    className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm md:text-base"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Solution Implemented
+                  </label>
+                  <textarea
+                    name="solution"
+                    value={formData.solution}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="How did you solve the problem?"
+                    className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm md:text-base"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Outcome & Results
+                  </label>
+                  <textarea
+                    name="outcome"
+                    value={formData.outcome}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="What were the results and impact?"
+                    className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm md:text-base"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Detailed Description
+                  </label>
+                  <textarea
+                    name="detailedDescription"
+                    value={formData.detailedDescription}
+                    onChange={handleChange}
+                    rows={4}
+                    placeholder="Comprehensive project description with technical details..."
+                    className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm md:text-base"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Category */}
                 <div>
@@ -466,8 +667,8 @@ const AdminProjectEdit = () => {
                 </label>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4">
                   {formData.image ? (
-                    <img 
-                      src={formData.image} 
+                    <img
+                      src={formData.image}
                       alt="Project"
                       className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover border-2 border-gray-600"
                     />
@@ -516,7 +717,7 @@ const AdminProjectEdit = () => {
               {/* Tech Stack */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Technologies Used *
+                  Technologies Used * ({techStackArray.length} items)
                 </label>
                 <input
                   type="text"
@@ -620,8 +821,8 @@ const AdminProjectEdit = () => {
                 {/* Project Image */}
                 <div className="relative">
                   {formData.image ? (
-                    <img 
-                      src={formData.image} 
+                    <img
+                      src={formData.image}
                       alt={formData.title || 'Project preview'}
                       className="w-full h-36 md:h-48 object-cover"
                       onError={(e) => {
@@ -630,7 +831,7 @@ const AdminProjectEdit = () => {
                       }}
                     />
                   ) : null}
-                  <div 
+                  <div
                     className={`w-full h-36 md:h-48 bg-gray-700 flex items-center justify-center ${formData.image ? 'hidden' : 'flex'}`}
                   >
                     <div className="text-center text-gray-400">
@@ -638,7 +839,7 @@ const AdminProjectEdit = () => {
                       <p className="text-sm">Image preview</p>
                     </div>
                   </div>
-                  
+
                   {formData.featured && (
                     <div className="absolute top-2 left-2">
                       <Badge className="bg-yellow-600 text-white text-xs">
@@ -647,7 +848,7 @@ const AdminProjectEdit = () => {
                       </Badge>
                     </div>
                   )}
-                  
+
                   {formData.category && (
                     <div className="absolute top-2 right-2">
                       <Badge variant="outline" className="bg-gray-900/80 border-gray-600 text-gray-300 text-xs">

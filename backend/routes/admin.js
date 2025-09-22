@@ -75,6 +75,15 @@ router.post('/projects', projectValidation, handleValidationErrors, async (req, 
 router.put('/projects/:id', projectValidation, handleValidationErrors, async (req, res) => {
   try {
     const { id } = req.params;
+    // Log the incoming request for debugging
+    console.log('=== Project Update Request ===');
+    console.log('Project ID:', id);
+    console.log('Request Body:', JSON.stringify(req.body, null, 2));
+    console.log('Body Type Check:');
+    console.log('- title type:', typeof req.body.title);
+    console.log('- techStack type:', typeof req.body.techStack, 'isArray:', Array.isArray(req.body.techStack));
+    console.log('- featured type:', typeof req.body.featured);
+    console.log('- order type:', typeof req.body.order);
     const updateData = req.body;
 
     const project = await Project.findByIdAndUpdate(

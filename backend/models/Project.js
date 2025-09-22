@@ -11,6 +11,38 @@ const projectSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  // Case Study Fields
+  problem: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  solution: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  outcome: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  // Enhanced Project Details
+  detailedDescription: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  demoCredentials: {
+    username: {
+      type: String,
+      default: ''
+    },
+    password: {
+      type: String,
+      default: ''
+    }
+  },
   category: {
     type: String,
     enum: ['AI', 'Web'],

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Github, Linkedin, Mail, ArrowRight, Sparkles } from 'lucide-react';
+import { ChevronDown, Github, Linkedin, Mail, ArrowRight, Sparkles, Code2, Terminal } from 'lucide-react';
+import OptimizedImage, { ImagePresets } from './ui/OptimizedImage';
 
 
 const Hero = ({ personalData }) => {
@@ -158,8 +159,17 @@ const Hero = ({ personalData }) => {
         />
       )}
 
-      {/* Fallback animated gradient background - Always shown, but shines on mobile */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900" style={{ zIndex: 0 }} />
+      {/* Enhanced background with tech image overlay */}
+      <div className="absolute inset-0" style={{ zIndex: 0 }}>
+        <OptimizedImage
+          src="https://images.unsplash.com/photo-1576272531110-2a342fe22342?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxkZXZlbG9wZXIlMjB3b3Jrc3BhY2V8ZW58MHx8fGJsdWV8MTc1ODQ2NjI0NHww&ixlib=rb-4.1.0&q=85"
+          alt="Developer workspace with coding environment"
+          {...ImagePresets.hero}
+          className="w-full h-full object-cover opacity-10"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+      </div>
 
       {/* Fallback Blobs for Mobile */}
       {isMobile && (
@@ -188,13 +198,26 @@ const Hero = ({ personalData }) => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative" style={{ zIndex: 20 }}>
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-          {/* Greeting */}
+          {/* Greeting with tech elements */}
           <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-4 sm:mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-4 sm:mb-6 group hover:bg-blue-500/15 transition-colors duration-300">
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
               <span className="text-blue-400 text-xs sm:text-sm lg:text-base font-medium">Available for work</span>
-              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400 animate-pulse" />
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400 animate-pulse group-hover:animate-spin transition-all duration-300" />
             </div>
+            
+            {/* Tech stack preview */}
+            <div className="flex justify-center items-center gap-2 mb-4 sm:mb-6">
+              <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                <Code2 className="h-3 w-3 text-green-400" />
+                <span className="text-xs text-gray-300">MERN</span>
+              </div>
+              <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                <Terminal className="h-3 w-3 text-blue-400" />
+                <span className="text-xs text-gray-300">Full Stack</span>
+              </div>
+            </div>
+            
             <p className="text-base sm:text-lg lg:text-xl text-blue-400 mb-3 sm:mb-4 font-medium">
               👋 Hello, I'm
             </p>

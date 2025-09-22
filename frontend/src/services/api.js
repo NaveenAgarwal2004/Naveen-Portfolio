@@ -265,11 +265,22 @@ export const adminAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
-  
+
   uploadProjectImage: (file) => {
     const formData = new FormData();
     formData.append('projectImage', file);
     return apiClient.post('/admin/upload/project-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
+  // SEO Management APIs
+  getSEOData: () => apiClient.get('/admin/seo'),
+  updateSEOData: (page, seoData) => apiClient.post('/admin/seo', { page, ...seoData }),
+  uploadSEOImage: (page, file) => {
+    const formData = new FormData();
+    formData.append('ogImage', file);
+    return apiClient.post(`/admin/seo/${page}/og-image`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   }

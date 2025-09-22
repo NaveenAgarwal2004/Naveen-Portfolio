@@ -10,7 +10,10 @@ import {
   LogOut,
   Menu,
   X,
-  Settings
+  Settings,
+  Search,
+  Target,
+  Palette
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAuth } from '../../contexts/AuthContext';
@@ -54,6 +57,12 @@ const AdminLayout = () => {
       current: location.pathname.startsWith('/admin/projects')
     },
     {
+      name: 'Case Studies',
+      href: '/admin/case-studies',
+      icon: Target,
+      current: location.pathname === '/admin/case-studies'
+    },
+    {
       name: 'Personal Info',
       href: '/admin/personal',
       icon: User,
@@ -70,6 +79,12 @@ const AdminLayout = () => {
       href: '/admin/certificates',
       icon: Award,
       current: location.pathname === '/admin/certificates'
+    },
+    {
+      name: 'SEO Management',
+      href: '/admin/seo',
+      icon: Search,
+      current: location.pathname === '/admin/seo'
     },
     {
       name: 'Messages',

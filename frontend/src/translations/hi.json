@@ -1,0 +1,84 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "about": "Acerca de",
+    "projects": "Proyectos",
+    "skills": "Habilidades",
+    "timeline": "Cronología",
+    "contact": "Contacto"
+  },
+  "hero": {
+    "greeting": "👋 Hola, soy",
+    "title": "Desarrollador MERN Stack",
+    "subtitle": "Creando experiencias web modernas con React, Node.js y tecnologías de vanguardia",
+    "availableForWork": "Disponible para trabajar",
+    "downloadResume": "Descargar CV",
+    "viewProjects": "Ver Proyectos",
+    "scrollDown": "Desplazarse hacia abajo"
+  },
+  "about": {
+    "title": "Sobre Mí",
+    "subtitle": "Desarrollador apasionado especializado en tecnologías modernas",
+    "downloadResume": "Descargar CV",
+    "yearsExperience": "Años de Experiencia",
+    "projectsCompleted": "Proyectos Completados",
+    "technologiesUsed": "Tecnologías Utilizadas"
+  },
+  "projects": {
+    "title": "Proyectos Destacados",
+    "subtitle": "Una selección de mis trabajos más recientes e impactantes",
+    "allProjects": "Todos los Proyectos",
+    "webDevelopment": "Desarrollo Web",
+    "aiProjects": "Proyectos de IA",
+    "viewDemo": "Ver Demo",
+    "viewCode": "Ver Código",
+    "viewCaseStudy": "Ver Caso de Estudio",
+    "hideCaseStudy": "Ocultar Detalles",
+    "problem": "Problema",
+    "solution": "Solución",
+    "outcome": "Resultado"
+  },
+  "skills": {
+    "title": "Habilidades Técnicas",
+    "subtitle": "Tecnologías y herramientas que utilizo para crear soluciones excepcionales"
+  },
+  "timeline": {
+    "title": "Mi Trayectoria",
+    "subtitle": "Sigue mis hitos profesionales y educativos, desde la graduación hasta la construcción de proyectos innovadores"
+  },
+  "contact": {
+    "title": "Trabajemos Juntos",
+    "subtitle": "¿Tienes un proyecto en mente? Me encantaría saber de ti",
+    "name": "Nombre",
+    "email": "Correo Electrónico",
+    "subject": "Asunto",
+    "message": "Mensaje",
+    "send": "Enviar Mensaje",
+    "sending": "Enviando...",
+    "successMessage": "¡Mensaje enviado exitosamente!",
+    "errorMessage": "Error al enviar el mensaje. Inténtalo de nuevo."
+  },
+  "footer": {
+    "rightsReserved": "Todos los derechos reservados",
+    "builtWith": "Construido con"
+  },
+  "chat": {
+    "title": "Asistente de IA",
+    "placeholder": "Pregúntame sobre mis proyectos, habilidades o experiencia...",
+    "send": "Enviar",
+    "thinking": "Pensando...",
+    "error": "Lo siento, ocurrió un error. Inténtalo de nuevo.",
+    "welcome": "¡Hola! Soy el asistente de IA del portafolio. Puedo responder preguntas sobre la experiencia, proyectos y habilidades. ¿En qué puedo ayudarte?"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar",
+    "close": "Cerrar",
+    "open": "Abrir",
+    "more": "Más",
+    "less": "Menos",
+    "readMore": "Leer Más",
+    "readLess": "Leer Menos"
+  }
+}

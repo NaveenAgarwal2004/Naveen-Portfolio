@@ -1,6 +1,8 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { Analytics } from '@vercel/analytics/react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -8,11 +10,16 @@ import Projects from './components/Projects';
 import TechStack from './components/TechStack';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import InteractiveTimeline from './components/InteractiveTimeline';
+import AIFabChatAssistant from './components/AIFabChatAssistant';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { Toaster } from './components/ui/toaster';
 import { portfolioAPI } from './services/api';
 import ResumeSection from './components/ResumeSection';
 import CertificatesSection from './components/CertificatesSection';
+import MetaTags from './components/SEO/MetaTags';
 
 // Lazy load admin components (rarely used)
 const AdminLogin = lazy(() => import('./components/admin/AdminLogin'));
@@ -25,6 +32,8 @@ const AdminPersonal = lazy(() => import('./components/admin/AdminPersonal'));
 const AdminTechStack = lazy(() => import('./components/admin/AdminTechStack'));
 const AdminMessages = lazy(() => import('./components/admin/AdminMessages'));
 const AdminCertificates = lazy(() => import('./components/admin/AdminCertificates'));
+const AdminSEO = lazy(() => import('./components/admin/AdminSEO'));
+const AdminCaseStudies = lazy(() => import('./components/admin/AdminCaseStudies'));
 const ProtectedRoute = lazy(() => import('./components/admin/ProtectedRoute'));
 
 // Loading component for Suspense fallback
@@ -52,6 +61,14 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [portfolioData, setPortfolioData] = useState(null);
   const [error, setError] = useState(null);
+  
+  // SEO data state - moved to top to fix hooks order
+  const [seoData, setSeoData] = useState({
+    title: 'Portfolio - MERN Stack Developer',
+    description: 'Passionate MERN Stack Developer specializing in React.js, Node.js, MongoDB, and Express.js.',
+    keywords: 'MERN Stack Developer, React Developer, Node.js Developer, Full Stack, JavaScript, MongoDB',
+    author: 'Portfolio Developer'
+  });
 
   const fetchPortfolioData = async (useCache = true) => {
     try {
@@ -135,6 +152,41 @@ const Home = () => {
     };
   }, []);
 
+  // Fetch SEO data - FIXED: Use proper API endpoint and error handling
+  useEffect(() => {
+    const fetchSEOData = async () => {
+      try {
+        // Get backend URL from environment or use default
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
+        const response = await fetch(`${backendUrl}/api/seo/home`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setSeoData({
+              title: data.data.title || seoData.title,
+              description: data.data.description || seoData.description,
+              keywords: data.data.keywords || seoData.keywords,
+              author: portfolioData?.personal?.name || seoData.author,
+              image: data.data.ogImage || undefined,
+              twitterHandle: data.data.twitterHandle || undefined
+            });
+          }
+        } else {
+          console.warn('SEO endpoint not available, using default data');
+        }
+      } catch (error) {
+        console.warn('Could not fetch SEO data, using defaults:', error.message);
+        // Don't throw error, just use default SEO data
+      }
+    };
+
+    // Only fetch SEO data if portfolio data is available
+    if (portfolioData) {
+      fetchSEOData();
+    }
+  }, [portfolioData]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -147,19 +199,9 @@ const Home = () => {
     );
   }
 
-  const seoData = portfolioData?.personal ? {
-    title: `${portfolioData.personal.name} - ${portfolioData.personal.title} | Portfolio`,
-    description: portfolioData.personal.tagline,
-    keywords: `${portfolioData.personal.name}, Front-End Developer, React Developer, MERN Stack, Portfolio, JavaScript, Web Development, AI Projects, Tailwind CSS`
-  } : {
-    title: "Naveen Agarwal - Front-End Web Developer | Portfolio",
-    description: "Front-End Web Developer specializing in React.js, Tailwind CSS, and MERN Stack",
-    keywords: "Front-End Developer, React Developer, Portfolio, JavaScript, Web Development"
-  };
-
   return (
     <div className="min-h-screen bg-gray-900 text-white overflow-x-hidden md:overflow-visible">
-      <SEO {...seoData} />
+      <MetaTags {...seoData} />
       <Header />
       <main className="px-4 sm:px-6 lg:px-8 w-full max-w-full md:max-w-full mx-auto">
         <Hero personalData={portfolioData?.personal} />
@@ -178,121 +220,148 @@ const Home = () => {
 
 function App() {
   return (
-    <div className="App">
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            
-            {/* Admin Routes */}
-            <Route 
-              path="/admin/login" 
-              element={
-                <Suspense fallback={<AdminLoadingSpinner />}>
-                  <AdminLogin />
-                </Suspense>
-              } 
-            />
-            
-            {/* Protected Admin Routes */}
-            <Route 
-              path="/admin/*" 
-              element={
-                <Suspense fallback={<AdminLoadingSpinner />}>
-                  <ProtectedRoute>
-                    <AdminLayout />
-                  </ProtectedRoute>
-                </Suspense>
-              }
-            >
-              <Route 
-                index 
-                element={
-                  <Suspense fallback={<AdminLoadingSpinner />}>
-                    <AdminDashboard />
-                  </Suspense>
-                } 
-              />
-              <Route 
-                path="dashboard" 
-                element={
-                  <Suspense fallback={<AdminLoadingSpinner />}>
-                    <AdminDashboard />
-                  </Suspense>
-                } 
-              />
-              
-              {/* Projects Management */}
-              <Route 
-                path="projects" 
-                element={
-                  <Suspense fallback={<AdminLoadingSpinner />}>
-                    <AdminProjects />
-                  </Suspense>
-                } 
-              />
-              <Route 
-                path="projects/new" 
-                element={
-                  <Suspense fallback={<AdminLoadingSpinner />}>
-                    <AdminProjectNew />
-                  </Suspense>
-                } 
-              />
-              <Route 
-                path="projects/edit/:id" 
-                element={
-                  <Suspense fallback={<AdminLoadingSpinner />}>
-                    <AdminProjectEdit />
-                  </Suspense>
-                } 
-              />
-              
-              {/* Personal Info Management */}
-              <Route 
-                path="personal" 
-                element={
-                  <Suspense fallback={<AdminLoadingSpinner />}>
-                    <AdminPersonal />
-                  </Suspense>
-                } 
-              />
-              
-              {/* Tech Stack Management */}
-              <Route 
-                path="tech-stack" 
-                element={
-                  <Suspense fallback={<AdminLoadingSpinner />}>
-                    <AdminTechStack />
-                  </Suspense>
-                } 
-              />
-              
-              {/* Certificates Management */}
-              <Route 
-                path="certificates" 
-                element={
-                  <Suspense fallback={<AdminLoadingSpinner />}>
-                    <AdminCertificates />
-                  </Suspense>
-                } 
-              />
-              
-              {/* Messages Management */}
-              <Route 
-                path="messages" 
-                element={
-                  <Suspense fallback={<AdminLoadingSpinner />}>
-                    <AdminMessages />
-                  </Suspense>
-                } 
-              />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </div>
+    <HelmetProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <div className="App">
+            <AuthProvider>
+              <BrowserRouter>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Home />} />
+                
+                  {/* Admin Login Route - Must come BEFORE /admin/* */}
+                  <Route 
+                    path="/admin/login" 
+                    element={
+                      <Suspense fallback={<AdminLoadingSpinner />}>
+                        <AdminLogin />
+                      </Suspense>
+                    } 
+                  />
+                  
+                  {/* Protected Admin Routes */}
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <Suspense fallback={<AdminLoadingSpinner />}>
+                        <ProtectedRoute>
+                          <AdminLayout />
+                        </ProtectedRoute>
+                      </Suspense>
+                    }
+                  >
+                    <Route 
+                      index 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminDashboard />
+                        </Suspense>
+                      } 
+                    />
+                    <Route 
+                      path="dashboard" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminDashboard />
+                        </Suspense>
+                      } 
+                    />
+                    
+                    {/* Projects Management */}
+                    <Route 
+                      path="projects" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminProjects />
+                        </Suspense>
+                      } 
+                    />
+                    <Route 
+                      path="projects/new" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminProjectNew />
+                        </Suspense>
+                      } 
+                    />
+                    <Route 
+                      path="projects/edit/:id" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminProjectEdit />
+                        </Suspense>
+                      } 
+                    />
+                    
+                    {/* Personal Info Management */}
+                    <Route 
+                      path="personal" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminPersonal />
+                        </Suspense>
+                      } 
+                    />
+                    
+                    {/* Tech Stack Management */}
+                    <Route 
+                      path="tech-stack" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminTechStack />
+                        </Suspense>
+                      } 
+                    />
+                    
+                    {/* Certificates Management */}
+                    <Route 
+                      path="certificates" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminCertificates />
+                        </Suspense>
+                      } 
+                    />
+                    
+                    {/* Case Studies Management */}
+                    <Route 
+                      path="case-studies" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminCaseStudies />
+                        </Suspense>
+                      } 
+                    />
+                    
+                    {/* SEO Management */}
+                    <Route 
+                      path="seo" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminSEO />
+                        </Suspense>
+                      } 
+                    />
+                    
+                    {/* Messages Management */}
+                    <Route 
+                      path="messages" 
+                      element={
+                        <Suspense fallback={<AdminLoadingSpinner />}>
+                          <AdminMessages />
+                        </Suspense>
+                      } 
+                    />
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+            </AuthProvider>
+            <Analytics />
+          </div>
+        </LanguageProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 

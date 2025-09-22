@@ -13,6 +13,128 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
+// FIXED: Project validation rules with proper optional fields and array handling
+const projectValidation = [
+  body('title')
+    .trim()
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Title must be between 2 and 200 characters'),
+  body('description')
+    .trim()
+    .isLength({ min: 10, max: 1000 })
+    .withMessage('Description must be between 10 and 1000 characters'),
+  body('category')
+    .isIn(['AI', 'Web'])
+    .withMessage('Category must be either AI or Web'),
+  body('image')
+    .trim()
+    .notEmpty()
+    .withMessage('Image URL is required')
+    .isURL()
+    .withMessage('Image must be a valid URL'),
+  body('imagePublicId')
+    .optional({ checkFalsy: true })
+    .trim(),
+  body('githubUrl')
+    .trim()
+    .notEmpty()
+    .withMessage('GitHub URL is required')
+    .isURL()
+    .withMessage('GitHub URL must be a valid URL'),
+  body('liveUrl')
+    .trim()
+    .notEmpty()
+    .withMessage('Live URL is required')
+    .isURL()
+    .withMessage('Live URL must be a valid URL'),
+  body('techStack')
+    .isArray({ min: 1 })
+    .withMessage('Tech stack must be an array with at least one item')
+    .custom((techStack) => {
+      // Ensure all tech stack items are valid strings
+      if (!Array.isArray(techStack)) {
+        throw new Error('Tech stack must be an array');
+      }
+      for (let i = 0; i < techStack.length; i++) {
+        if (typeof techStack[i] !== 'string' || techStack[i].trim().length === 0) {
+          throw new Error(`Tech stack item at index ${i} must be a non-empty string`);
+        }
+      }
+      return true;
+    }),
+  body('featured')
+    .optional()
+    .isBoolean()
+    .withMessage('Featured must be a boolean'),
+  body('order')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Order must be a non-negative integer')
+    .toInt(),
+  // ADDED: Case study fields validation (optional)
+  body('problem')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 2000 })
+    .withMessage('Problem description must be less than 2000 characters'),
+  body('solution')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 2000 })
+    .withMessage('Solution description must be less than 2000 characters'),
+  body('outcome')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 2000 })
+    .withMessage('Outcome description must be less than 2000 characters'),
+  body('detailedDescription')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 3000 })
+    .withMessage('Detailed description must be less than 3000 characters'),
+  // ADDED: Demo credentials (optional)
+  body('demoCredentials.username')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Demo username must be less than 100 characters'),
+  body('demoCredentials.password')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Demo password must be less than 100 characters')
+];
+
+// SEO validation rules
+const seoValidation = [
+  body('page')
+    .isIn(['home', 'about', 'projects', 'contact'])
+    .withMessage('Page must be one of: home, about, projects, contact'),
+  body('title')
+    .trim()
+    .isLength({ min: 10, max: 60 })
+    .withMessage('Title must be between 10 and 60 characters'),
+  body('description')
+    .trim()
+    .isLength({ min: 50, max: 160 })
+    .withMessage('Description must be between 50 and 160 characters'),
+  body('keywords')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage('Keywords must be less than 200 characters'),
+  body('twitterHandle')
+    .optional({ checkFalsy: true })
+    .trim()
+    .matches(/^@?[a-zA-Z0-9_]{1,15}$/)
+    .withMessage('Twitter handle must be valid (1-15 characters, letters, numbers, underscore)'),
+  body('canonicalUrl')
+    .optional({ checkFalsy: true })
+    .trim()
+    .custom((value) => !value || require('validator').isURL(value))
+    .withMessage('Canonical URL must be a valid URL')
+];
+
 // Auth validation rules
 const loginValidation = [
   body('email')
@@ -40,48 +162,6 @@ const contactValidation = [
     .withMessage('Message must be between 10 and 1000 characters')
 ];
 
-// Project validation rules
-const projectValidation = [
-  body('title')
-    .trim()
-    .isLength({ min: 2, max: 200 })
-    .withMessage('Title must be between 2 and 200 characters'),
-  body('description')
-    .trim()
-    .isLength({ min: 10, max: 1000 })
-    .withMessage('Description must be between 10 and 1000 characters'),
-  body('category')
-    .isIn(['AI', 'Web'])
-    .withMessage('Category must be either AI or Web'),
-  body('image')
-    .optional()
-    .trim()
-    .custom((value) => !value || require('validator').isURL(value))
-    .withMessage('Image must be a valid URL'),
-  body('imagePublicId')
-    .optional()
-    .trim()
-    .custom((value) => !value || value.trim().length > 0)
-    .withMessage('Image public ID must be a string'),
-  body('githubUrl')
-    .isURL()
-    .withMessage('GitHub URL must be a valid URL'),
-  body('liveUrl')
-    .isURL()
-    .withMessage('Live URL must be a valid URL'),
-  body('techStack')
-    .isArray({ min: 1 })
-    .withMessage('Tech stack must be an array with at least one item'),
-  body('featured')
-    .optional()
-    .isBoolean()
-    .withMessage('Featured must be a boolean'),
-  body('order')
-    .optional()
-    .isInt({ min: 0 })
-    .withMessage('Order must be a non-negative integer')
-];
-
 // Personal info validation rules
 const personalValidation = [
   body('name')
@@ -105,7 +185,7 @@ const personalValidation = [
     .withMessage('Please provide a valid email')
     .normalizeEmail(),
   body('phone')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .custom((value) => {
       if (!value) return true;
@@ -115,25 +195,10 @@ const personalValidation = [
     })
     .withMessage('Please provide a valid phone number'),
   body('profileImageUrl')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .custom((value) => !value || require('validator').isURL(value))
     .withMessage('Profile image must be a valid URL'),
-  body('resumeUrl')
-    .optional()
-    .trim()
-    .custom((value) => !value || require('validator').isURL(value))
-    .withMessage('Resume must be a valid URL'),
-  body('resumePublicId')
-    .optional()
-    .trim()
-    .custom((value) => !value || value.trim().length > 0)
-    .withMessage('Resume public ID must be a string'),
-  body('profileImagePublicId')
-    .optional()
-    .trim()
-    .custom((value) => !value || value.trim().length > 0)
-    .withMessage('Profile image public ID must be a string'),
   body('skills')
     .optional()
     .isArray()
@@ -146,22 +211,22 @@ const personalValidation = [
     .isInt({ min: 0, max: 100 })
     .withMessage('Skill level must be between 0 and 100'),
   body('socialLinks.github')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .custom((value) => !value || require('validator').isURL(value))
     .withMessage('GitHub URL must be a valid URL'),
   body('socialLinks.linkedin')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .custom((value) => !value || require('validator').isURL(value))
     .withMessage('LinkedIn URL must be a valid URL'),
   body('socialLinks.twitter')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .custom((value) => !value || require('validator').isURL(value))
     .withMessage('Twitter URL must be a valid URL'),
   body('socialLinks.email')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .custom((value) => {
       if (!value) return true;
@@ -188,22 +253,21 @@ const techStackValidation = [
     .isIn(['Frontend', 'Backend', 'Database', 'Tools', 'Cloud', 'Mobile'])
     .withMessage('Category must be one of: Frontend, Backend, Database, Tools, Cloud, Mobile'),
   body('logoUrl')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .custom((value) => !value || require('validator').isURL(value))
     .withMessage('Logo URL must be a valid URL'),
   body('logoPublicId')
-    .optional()
-    .trim()
-    .custom((value) => !value || value.trim().length > 0)
-    .withMessage('Logo public ID must be a string'),
+    .optional({ checkFalsy: true })
+    .trim(),
   body('order')
     .optional()
     .isInt({ min: 0 })
     .withMessage('Order must be a non-negative integer')
+    .toInt()
 ];
 
-// NEW: Certificate validation rules
+// Certificate validation rules
 const certificateValidation = [
   body('title')
     .trim()
@@ -225,7 +289,7 @@ const certificateValidation = [
       return true;
     }),
   body('expiryDate')
-    .optional()
+    .optional({ checkFalsy: true })
     .isISO8601()
     .withMessage('Expiry date must be a valid date')
     .custom((value, { req }) => {
@@ -238,17 +302,17 @@ const certificateValidation = [
       return true;
     }),
   body('credentialId')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ min: 0, max: 100 })
     .withMessage('Credential ID must be less than 100 characters'),
   body('credentialUrl')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .custom((value) => !value || require('validator').isURL(value))
     .withMessage('Credential URL must be a valid URL'),
   body('description')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ min: 0, max: 1000 })
     .withMessage('Description must be less than 1000 characters'),
@@ -268,32 +332,33 @@ const certificateValidation = [
   body('priority')
     .optional()
     .isInt({ min: 0, max: 10 })
-    .withMessage('Priority must be an integer between 0 and 10'),
+    .withMessage('Priority must be an integer between 0 and 10')
+    .toInt(),
   body('isPublic')
     .optional()
     .isBoolean()
     .withMessage('isPublic must be a boolean'),
   body('difficulty')
-    .optional()
+    .optional({ checkFalsy: true })
     .isIn(['Beginner', 'Intermediate', 'Advanced', 'Expert'])
     .withMessage('Difficulty must be one of: Beginner, Intermediate, Advanced, Expert'),
   body('duration')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ min: 0, max: 50 })
     .withMessage('Duration must be less than 50 characters'),
   body('score')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ min: 0, max: 20 })
     .withMessage('Score must be less than 20 characters'),
   body('verificationStatus')
-    .optional()
+    .optional({ checkFalsy: true })
     .isIn(['Verified', 'Pending', 'Expired', 'Invalid'])
     .withMessage('Verification status must be one of: Verified, Pending, Expired, Invalid')
 ];
 
-// NEW: Bulk operations validation
+// Bulk operations validation
 const bulkOperationValidation = [
   body('action')
     .isIn(['delete', 'updateStatus', 'updateVisibility'])
@@ -332,6 +397,7 @@ module.exports = {
   projectValidation,
   personalValidation,
   techStackValidation,
-  certificateValidation, // NEW
-  bulkOperationValidation // NEW
+  certificateValidation,
+  bulkOperationValidation,
+  seoValidation // ADDED
 };

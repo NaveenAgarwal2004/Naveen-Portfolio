@@ -1,6 +1,14 @@
+/* Enhanced Typography System */
+@import './styles/typography.css';
+
+/* Theme System */
+@import './styles/themes.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
 
 body {
     margin: 0;

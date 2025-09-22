@@ -152,6 +152,35 @@ const personalSchema = new mongoose.Schema({
     linkedin: { type: String, default: '' },
     twitter: { type: String, default: '' },
     email: { type: String, default: '' }
+  },
+  // Branding and Enhanced Fields
+  heroBackground: {
+    public_id: { type: String, default: '' },
+    url: { type: String, default: '' }
+  },
+  personalLogo: {
+    public_id: { type: String, default: '' },
+    url: { type: String, default: '' }
+  },
+  brandColors: {
+    primary: { type: String, default: '#3b82f6' },
+    secondary: { type: String, default: '#8b5cf6' },
+    accent: { type: String, default: '#06b6d4' }
+  },
+  techStackHighlights: [{
+    type: String,
+    trim: true
+  }],
+  availability: {
+    status: {
+      type: String,
+      enum: ['Available', 'Busy', 'Not Available'],
+      default: 'Available'
+    },
+    message: {
+      type: String,
+      default: 'Available for work'
+    }
   }
 }, {
   timestamps: true

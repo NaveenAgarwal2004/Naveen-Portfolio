@@ -101,6 +101,8 @@ const adminRoutes = require('./routes/admin');
 const contactRoutes = require('./routes/contact');
 const resumeRoutes = require('./routes/resume');
 const certificatesRoutes = require('./routes/certificates');
+const seoRoutes = require('./routes/seo');
+const chatRoutes = require('./routes/chat');
 const testPersonalRoutes = require('./routes/testPersonal');
 const pdfProxyRoutes = require('./routes/pdf-proxy');
 const localPdfRoutes = require('./routes/local-pdf');
@@ -110,11 +112,14 @@ app.use('/api/auth', generalRateLimiter, authRoutes);
 app.use('/api/portfolio', generalRateLimiter, portfolioRoutes);
 app.use('/api/resume', generalRateLimiter, resumeRoutes);
 app.use('/api/certificates', generalRateLimiter, certificatesRoutes);
+app.use('/api/seo', generalRateLimiter, seoRoutes);
+app.use('/api/chat', generalRateLimiter, chatRoutes);
 
 // Admin routes (no rate limiting for admin operations)
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/resume', resumeRoutes);
 app.use('/api/admin/certificates', certificatesRoutes);
+app.use('/api/admin/seo', seoRoutes);
 
 // Other routes
 app.use('/api/test-personal', testPersonalRoutes);
