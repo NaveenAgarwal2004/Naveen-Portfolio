@@ -50,34 +50,35 @@ const projectValidation = [
     .isURL()
     .withMessage('Live URL must be a valid URL'),
   body('techStack')
-    .isArray({ min: 1 })
-    .withMessage('Tech stack must be an array with at least one item')
-    .custom((techStack) => {
-      // Ensure all tech stack items are valid strings
-      if (!Array.isArray(techStack)) {
-        throw new Error('Tech stack must be an array');
-      }
-      for (let i = 0; i < techStack.length; i++) {
-        const item = techStack[i];
-        if (typeof item !== 'string') {
-          throw new Error(`Tech stack item at index ${i} must be a string, got ${typeof item}`);
-        }
-        if (item.trim().length === 0) {
-          throw new Error(`Tech stack item at index ${i} cannot be empty`);
-        }
-        if (item.trim().length > 50) {
-          throw new Error(`Tech stack item at index ${i} must be less than 50 characters`);
-        }
-      }
-      return true;
-    })
-    .customSanitizer((techStack) => {
-      // Sanitize the array by trimming whitespace and filtering out empty items
-      if (!Array.isArray(techStack)) return techStack;
-      return techStack
-        .map(item => typeof item === 'string' ? item.trim() : item)
-        .filter(item => item && item.length > 0);
-    }),
+  .isArray({ min: 1 })
+  .withMessage('Tech stack must be an array with at least one item')
+  .custom((techStack) => {
+    if (!Array.isArray(techStack)) {
+      throw new Error('Tech stack must be an array');
+    }
+    
+    const validItems = techStack.filter(item => 
+      typeof item === 'string' && item.trim().length > 0
+    );
+    
+    if (validItems.length === 0) {
+      throw new Error('Tech stack must contain at least one valid technology');
+    }
+    
+    // Check for excessively long items (increased limit)
+    const longItems = validItems.filter(item => item.trim().length > 100);
+    if (longItems.length > 0) {
+      throw new Error(`Some technology names are too long: ${longItems[0]}`);
+    }
+    
+    return true;
+  })
+  .customSanitizer((techStack) => {
+    // Clean the array
+    return techStack
+      .filter(item => typeof item === 'string' && item.trim().length > 0)
+      .map(item => item.trim());
+  }),
   body('featured')
     .optional()
     .isBoolean()
