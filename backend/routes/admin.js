@@ -84,6 +84,15 @@ router.put('/projects/:id', projectValidation, handleValidationErrors, async (re
     console.log('- techStack type:', typeof req.body.techStack, 'isArray:', Array.isArray(req.body.techStack));
     console.log('- featured type:', typeof req.body.featured);
     console.log('- order type:', typeof req.body.order);
+
+    // Additional techStack debugging
+    if (req.body.techStack) {
+      console.log('TechStack Details:');
+      console.log('- Length:', req.body.techStack.length);
+      console.log('- Items:', req.body.techStack.map((item, index) => `[${index}]: "${item}" (type: ${typeof item}, length: ${item.length})`));
+      console.log('- Empty items check:', req.body.techStack.filter(item => !item || item.trim().length === 0));
+    }
+
     const updateData = req.body;
 
     const project = await Project.findByIdAndUpdate(

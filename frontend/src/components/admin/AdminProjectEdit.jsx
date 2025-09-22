@@ -211,6 +211,18 @@ const AdminProjectEdit = () => {
         .map(tech => tech.trim())
         .filter(tech => tech.length > 0);
 
+      // Additional validation for tech stack items
+      const invalidTechItems = techStackArray.filter(tech => tech.length > 50);
+      if (invalidTechItems.length > 0) {
+        toast({
+          title: 'Validation Error',
+          description: `Technology names must be less than 50 characters. Invalid items: ${invalidTechItems.slice(0, 3).join(', ')}${invalidTechItems.length > 3 ? '...' : ''}`,
+          variant: 'destructive',
+        });
+        setSaving(false);
+        return;
+      }
+
       if (techStackArray.length === 0) {
         toast({
           title: 'Validation Error',

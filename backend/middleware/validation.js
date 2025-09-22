@@ -56,11 +56,25 @@ const projectValidation = [
         throw new Error('Tech stack must be an array');
       }
       for (let i = 0; i < techStack.length; i++) {
-        if (typeof techStack[i] !== 'string' || techStack[i].trim().length === 0) {
-          throw new Error(`Tech stack item at index ${i} must be a non-empty string`);
+        const item = techStack[i];
+        if (typeof item !== 'string') {
+          throw new Error(`Tech stack item at index ${i} must be a string, got ${typeof item}`);
+        }
+        if (item.trim().length === 0) {
+          throw new Error(`Tech stack item at index ${i} cannot be empty`);
+        }
+        if (item.trim().length > 50) {
+          throw new Error(`Tech stack item at index ${i} must be less than 50 characters`);
         }
       }
       return true;
+    })
+    .customSanitizer((techStack) => {
+      // Sanitize the array by trimming whitespace and filtering out empty items
+      if (!Array.isArray(techStack)) return techStack;
+      return techStack
+        .map(item => typeof item === 'string' ? item.trim() : item)
+        .filter(item => item && item.length > 0);
     }),
   body('featured')
     .optional()
