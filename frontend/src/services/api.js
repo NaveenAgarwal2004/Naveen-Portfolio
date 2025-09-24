@@ -3,20 +3,22 @@ import axios from 'axios';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
 const API = `${BACKEND_URL}/api`;
 
-// Create axios instance with enhanced config for backend sleep issues
+console.log('🔗 Backend URL:', BACKEND_URL); // Debug log
+
+// Create axios instance with enhanced config
 const apiClient = axios.create({
   baseURL: API,
-  timeout: 45000, // 45 seconds for slow wake-ups
+  timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',
   }
 });
 
 // Enhanced retry configuration
-const MAX_RETRIES = 3; // Reduced from 10 to prevent rate limiting
-const BASE_DELAY = 2000; // Reduced from 3s to 2s
+const MAX_RETRIES = 2;
+const BASE_DELAY = 1000;
 
-// Request interceptor to add auth token
+// Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
@@ -24,53 +26,49 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // FIXED: Remove cache busting timestamp that was causing issues
-    // Only add cache busting for admin routes and when explicitly needed
+    // Add timestamp for admin routes to bust cache
     if (config.method === 'get' && config.url.includes('/admin/')) {
       config.params = { ...config.params, _t: Date.now() };
     }
     
+    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Enhanced response interceptor with exponential backoff
+// Response interceptor with better error handling
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`✅ API Success: ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`);
+    return response;
+  },
   async (error) => {
     const { config } = error;
     
+    console.error(`❌ API Error: ${config?.method?.toUpperCase()} ${config?.url}`, {
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message,
+      data: error.response?.data
+    });
+    
     // Initialize retry count
-    if (!config.__retryCount) {
+    if (!config?.__retryCount) {
       config.__retryCount = 0;
     }
     
-    // FIXED: Don't retry on 429 (rate limit) errors to prevent further rate limiting
+    // Don't retry on 4xx errors (except 408) or rate limits
     const shouldRetry = 
+      config &&
       config.__retryCount < MAX_RETRIES && 
       error.response &&
-      error.response.status !== 429 && // Don't retry rate limit errors
+      error.response.status !== 429 && 
       (
         error.response.status >= 500 ||
         error.response.status === 408 ||
         error.code === 'ECONNABORTED' ||
         error.code === 'NETWORK_ERROR'
       );
-    
-    // For 429 errors, add a longer delay before allowing any retries
-    if (error.response?.status === 429) {
-      console.warn('Rate limited. Backing off for 60 seconds...');
-      // Store the backoff time
-      window.__rateLimitBackoff = Date.now() + 60000;
-      return Promise.reject(error);
-    }
-    
-    // Check if we're in a rate limit backoff period
-    if (window.__rateLimitBackoff && Date.now() < window.__rateLimitBackoff) {
-      console.warn('Still in rate limit backoff period');
-      return Promise.reject(new Error('Rate limit backoff active'));
-    }
     
     if (!shouldRetry) {
       return Promise.reject(error);
@@ -79,52 +77,170 @@ apiClient.interceptors.response.use(
     // Increment retry count
     config.__retryCount += 1;
     
-    // Calculate delay with exponential backoff and jitter
-    const delay = Math.min(BASE_DELAY * Math.pow(2, config.__retryCount - 1), 30000);
-    const jitter = Math.random() * 1000;
+    // Calculate delay with exponential backoff
+    const delay = BASE_DELAY * Math.pow(2, config.__retryCount - 1);
     
-    console.log(`Retrying request (${config.__retryCount}/${MAX_RETRIES}) after ${delay + jitter}ms...`);
+    console.log(`🔄 Retrying request (${config.__retryCount}/${MAX_RETRIES}) after ${delay}ms...`);
     
     // Wait before retrying
-    await new Promise(resolve => setTimeout(resolve, delay + jitter));
+    await new Promise(resolve => setTimeout(resolve, delay));
     
-    // Retry the request
     return apiClient(config);
   }
 );
 
-// FIXED: Add request debouncing to prevent rapid duplicate requests
-const pendingRequests = new Map();
+// ============= PORTFOLIO APIs (PUBLIC) =============
 
-const createDebouncedRequest = (requestFn) => {
-  return async (...args) => {
-    const key = JSON.stringify(args);
-    
-    if (pendingRequests.has(key)) {
-      return pendingRequests.get(key);
-    }
-    
-    const promise = requestFn(...args);
-    pendingRequests.set(key, promise);
-    
+export const portfolioAPI = {
+  // Get projects - FIXED: Direct route check
+  getProjects: async () => {
     try {
-      const result = await promise;
-      pendingRequests.delete(key);
-      return result;
+      console.log('📦 Fetching projects...');
+      const response = await apiClient.get('/portfolio/projects');
+      console.log('📦 Projects response:', response.data);
+      return response;
     } catch (error) {
-      pendingRequests.delete(key);
+      console.error('❌ Projects fetch failed:', error.response?.data || error.message);
       throw error;
     }
-  };
+  },
+  
+  // Get personal info - FIXED
+  getPersonal: async () => {
+    try {
+      console.log('👤 Fetching personal data...');
+      const response = await apiClient.get('/portfolio/personal');
+      console.log('👤 Personal response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('❌ Personal fetch failed:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+  
+  // Get tech stack - FIXED
+  getTechStack: async () => {
+    try {
+      console.log('⚡ Fetching tech stack...');
+      const response = await apiClient.get('/portfolio/tech-stack');
+      console.log('⚡ Tech stack response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('❌ Tech stack fetch failed:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+  
+  // Get certificates - FIXED: Use certificates endpoint
+  getCertificates: async () => {
+    try {
+      console.log('🏆 Fetching certificates...');
+      const response = await apiClient.get('/certificates');
+      console.log('🏆 Certificates response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('❌ Certificates fetch failed:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+  
+  // Get portfolio stats - FIXED
+  getStats: async () => {
+    try {
+      console.log('📊 Fetching stats...');
+      const response = await apiClient.get('/portfolio/stats');
+      console.log('📊 Stats response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('❌ Stats fetch failed:', error.response?.data || error.message);
+      // Return fallback stats on error
+      return {
+        data: {
+          success: true,
+          data: {
+            totalProjects: 0,
+            totalTechnologies: 0,
+            totalCertificates: 0,
+            yearsExperience: 2,
+            clients: 15
+          }
+        }
+      };
+    }
+  }
+};
+
+// ============= CERTIFICATES APIs =============
+
+export const certificatesAPI = {
+  // Get all certificates
+  getCertificates: async () => {
+    try {
+      console.log('🏆 Fetching certificates...');
+      const response = await apiClient.get('/certificates');
+      console.log('🏆 Certificates response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('❌ Certificates fetch failed:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+  
+  // Get certificate stats
+  getCertificateStats: async () => {
+    try {
+      console.log('📊 Fetching certificate stats...');
+      const response = await apiClient.get('/certificates/stats');
+      console.log('📊 Certificate stats response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('❌ Certificate stats fetch failed:', error.response?.data || error.message);
+      // Return fallback stats
+      return {
+        data: {
+          success: true,
+          data: {
+            total: 0,
+            active: 0,
+            expired: 0,
+            expiring: 0,
+            recentlyAdded: 0
+          }
+        }
+      };
+    }
+  }
+};
+
+// ============= CONTACT APIs =============
+
+export const contactAPI = {
+  // Contact form submission
+  submitContact: async (messageData) => {
+    try {
+      console.log('📧 Submitting contact form...');
+      const response = await apiClient.post('/contact', messageData);
+      console.log('📧 Contact response:', response.data);
+      return response;
+    } catch (error) {
+      console.error('❌ Contact submission failed:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+};
+
+// ============= AUTH APIs =============
+
+export const authAPI = {
+  login: (credentials) => apiClient.post('/auth/login', credentials),
+  verify: () => apiClient.post('/auth/verify'),
+  logout: () => apiClient.post('/auth/logout')
 };
 
 // ============= RESUME APIs =============
 
 export const resumeAPI = {
-  // Get resume URLs (with debouncing)
-  getResumes: createDebouncedRequest(() => apiClient.get('/resume/urls')),
-  
-  // Upload resume
+  getResumes: () => apiClient.get('/resume/urls'),
   uploadResume: (type, file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -132,177 +248,40 @@ export const resumeAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
-  
-  // Delete resume
   deleteResume: (type) => apiClient.delete(`/resume/${type}`),
-  
-  // Download resume
   downloadResume: (type) => apiClient.get(`/resume/download/${type}`),
-  
-  // View resume
   viewResume: (type) => apiClient.get(`/resume/view/${type}`)
-};
-
-// ============= CERTIFICATES APIs =============
-
-export const certificatesAPI = {
-  // Get all certificates with debouncing
-  getCertificates: createDebouncedRequest(() => apiClient.get('/certificates')),
-  getAllCertificates: createDebouncedRequest(() => apiClient.get('/certificates')),
-  
-  // Get certificate stats with debouncing
-  getCertificateStats: createDebouncedRequest(() => 
-    apiClient.get('/certificates/stats').catch(() => 
-      ({ data: { success: false, data: {} } })
-    )
-  ),
-  
-  // Add certificate
-  addCertificate: (certificateData) => apiClient.post('/certificates', certificateData),
-  
-  // Update certificate
-  updateCertificate: (id, certificateData) => apiClient.put(`/certificates/${id}`, certificateData),
-  
-  // Delete certificate
-  deleteCertificate: (id) => apiClient.delete(`/certificates/${id}`),
-  
-  // Upload certificate image
-  uploadCertificateImage: (id, file) => {
-    const formData = new FormData();
-    formData.append('certificateImage', file);
-    return apiClient.post(`/certificates/${id}/image`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  
-  // Upload certificate logo
-  uploadCertificateLogo: (id, file) => {
-    const formData = new FormData();
-    formData.append('logo', file);
-    return apiClient.post(`/certificates/${id}/logo`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  
-  // Bulk operations
-  bulkOperation: (action, certificateIds, data = {}) => 
-    apiClient.post('/certificates/bulk', { action, certificateIds, data }),
-  
-  // Export certificates
-  exportCertificates: (format = 'json') => apiClient.get('/certificates/export', {
-    params: { format },
-    responseType: format === 'csv' ? 'blob' : 'json'
-  }),
-  
-  // Get available tags
-  getTags: createDebouncedRequest(() => apiClient.get('/certificates/tags'))
-};
-
-// ============= AUTH APIs =============
-
-export const authAPI = {
-  // Login
-  login: (credentials) => apiClient.post('/auth/login', credentials),
-  
-  // Verify token with debouncing
-  verify: createDebouncedRequest(() => apiClient.post('/auth/verify')),
-  
-  // Logout
-  logout: () => apiClient.post('/auth/logout')
-};
-
-// ============= CONTACT APIs =============
-
-export const contactAPI = {
-  // Contact form
-  submitContact: (messageData) => apiClient.post('/contact', messageData)
-};
-
-// ============= PORTFOLIO APIs (alias for PUBLIC) =============
-
-export const portfolioAPI = {
-  // Get projects with debouncing
-  getProjects: createDebouncedRequest(() => apiClient.get('/portfolio/projects')),
-  
-  // Get personal info with debouncing
-  getPersonal: createDebouncedRequest(() => apiClient.get('/portfolio/personal')),
-  
-  // Get tech stack with debouncing
-  getTechStack: createDebouncedRequest(() => apiClient.get('/portfolio/tech-stack')),
-  
-  // Get certificates with debouncing
-  getCertificates: createDebouncedRequest(() => apiClient.get('/certificates')),
-  
-  // Get portfolio stats with debouncing
-  getStats: createDebouncedRequest(() => 
-    apiClient.get('/portfolio/stats').catch(() => 
-      ({ data: { success: true, data: { totalProjects: 0, totalTechnologies: 0, totalCertificates: 0 } } })
-    )
-  )
-};
-
-// ============= PUBLIC APIs =============
-
-export const publicAPI = {
-  // Get projects with debouncing
-  getProjects: createDebouncedRequest(() => apiClient.get('/portfolio/projects')),
-  
-  // Get personal info with debouncing
-  getPersonal: createDebouncedRequest(() => apiClient.get('/portfolio/personal')),
-  
-  // Get tech stack with debouncing
-  getTechStack: createDebouncedRequest(() => apiClient.get('/portfolio/tech-stack')),
-  
-  // Get certificates with debouncing
-  getCertificates: createDebouncedRequest(() => apiClient.get('/certificates')),
-  
-  // Contact form
-  sendMessage: (messageData) => apiClient.post('/contact', messageData)
 };
 
 // ============= ADMIN APIs =============
 
 export const adminAPI = {
-  // Dashboard with debouncing (admin routes get cache busting)
-  getDashboard: createDebouncedRequest(() => apiClient.get('/admin/dashboard')),
+  // Dashboard
+  getDashboard: () => apiClient.get('/admin/dashboard'),
   
   // Projects Management
-  getProjects: createDebouncedRequest(() => apiClient.get('/admin/projects')),
+  getProjects: () => apiClient.get('/admin/projects'),
   createProject: (projectData) => apiClient.post('/admin/projects', projectData),
   updateProject: (id, projectData) => apiClient.put(`/admin/projects/${id}`, projectData),
   deleteProject: (id) => apiClient.delete(`/admin/projects/${id}`),
   
   // Personal Info Management
-  getPersonal: createDebouncedRequest(() => apiClient.get('/admin/personal')),
+  getPersonal: () => apiClient.get('/admin/personal'),
   updatePersonal: (personalData) => apiClient.put('/admin/personal', personalData),
   
   // Tech Stack Management
-  getTechStack: createDebouncedRequest(() => apiClient.get('/admin/tech-stack')),
+  getTechStack: () => apiClient.get('/admin/tech-stack'),
   createTechStack: (techData) => apiClient.post('/admin/tech-stack', techData),
   updateTechStack: (id, techData) => apiClient.put(`/admin/tech-stack/${id}`, techData),
   deleteTechStack: (id) => apiClient.delete(`/admin/tech-stack/${id}`),
   
-  // Resume Management
-  uploadResume: (type, file) => resumeAPI.uploadResume(type, file),
-  deleteResume: (type) => resumeAPI.deleteResume(type),
-  getResumes: () => resumeAPI.getResumes(),
-  
-  // Static file sync for About.jsx compatibility
-  syncStaticFiles: () => apiClient.post('/resume/sync-static'),
-  getStaticStatus: () => apiClient.get('/resume/static-status'),
-  
-  // Enhanced Certificates Management
+  // Certificates Management
   getCertificates: () => certificatesAPI.getCertificates(),
-  addCertificate: (certificateData) => certificatesAPI.addCertificate(certificateData),
-  updateCertificate: (id, certificateData) => certificatesAPI.updateCertificate(id, certificateData),
-  deleteCertificate: (id) => certificatesAPI.deleteCertificate(id),
-  uploadCertificateImage: (id, file) => certificatesAPI.uploadCertificateImage(id, file),
-  uploadCertificateLogo: (id, file) => certificatesAPI.uploadCertificateLogo(id, file),
-  bulkCertificateOperation: (action, ids, data) => certificatesAPI.bulkOperation(action, ids, data),
-  exportCertificates: (format) => certificatesAPI.exportCertificates(format),
-  getCertificateTags: () => certificatesAPI.getTags(),
+  addCertificate: (certificateData) => apiClient.post('/certificates', certificateData),
+  updateCertificate: (id, certificateData) => apiClient.put(`/certificates/${id}`, certificateData),
+  deleteCertificate: (id) => apiClient.delete(`/certificates/${id}`),
   
-  // File Uploads - LEGACY (keeping for backward compatibility)
+  // File Uploads
   uploadProfileImage: (file) => {
     const formData = new FormData();
     formData.append('profileImage', file);
@@ -310,41 +289,36 @@ export const adminAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
-
+  
   uploadProjectImage: (file) => {
     const formData = new FormData();
     formData.append('projectImage', file);
     return apiClient.post('/admin/upload/project-image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-  },
-
-  // SEO Management APIs
-  getSEOData: createDebouncedRequest(() => apiClient.get('/seo')),
-  updateSEOData: (page, seoData) => apiClient.post('/seo', { page, ...seoData }),
-  uploadSEOImage: (page, file) => {
-    const formData = new FormData();
-    formData.append('ogImage', file);
-    return apiClient.post(`/seo/${page}/og-image`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
   }
 };
 
-// FIXED: Add utility to clear request cache when needed
-export const clearApiCache = () => {
-  pendingRequests.clear();
-  window.__rateLimitBackoff = null;
+// Helper function to test API connectivity
+export const testConnection = async () => {
+  try {
+    console.log('🔍 Testing API connection...');
+    const response = await apiClient.get('/health');
+    console.log('✅ API connection successful:', response.data);
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error('❌ API connection failed:', error.message);
+    return { success: false, error: error.message };
+  }
 };
 
 // Default export for backwards compatibility
 export default {
-  publicAPI,
   portfolioAPI,
   contactAPI,
   adminAPI,
   authAPI,
   resumeAPI,
   certificatesAPI,
-  clearApiCache
+  testConnection
 };
