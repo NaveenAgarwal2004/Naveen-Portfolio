@@ -13,8 +13,8 @@ const apiClient = axios.create({
 });
 
 // Enhanced retry configuration
-const MAX_RETRIES = 10; // Increased for backend sleep
-const BASE_DELAY = 3000; // Start with 3s delay
+const MAX_RETRIES = 3; // Reduced from 10 to prevent rate limiting
+const BASE_DELAY = 2000; // Reduced from 3s to 2s
 
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
@@ -24,8 +24,9 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Add timestamp as query parameter instead of header to avoid CORS issues
-    if (config.method === 'get') {
+    // FIXED: Remove cache busting timestamp that was causing issues
+    // Only add cache busting for admin routes and when explicitly needed
+    if (config.method === 'get' && config.url.includes('/admin/')) {
       config.params = { ...config.params, _t: Date.now() };
     }
     
@@ -45,16 +46,31 @@ apiClient.interceptors.response.use(
       config.__retryCount = 0;
     }
     
-    // Check if we should retry
+    // FIXED: Don't retry on 429 (rate limit) errors to prevent further rate limiting
     const shouldRetry = 
       config.__retryCount < MAX_RETRIES && 
+      error.response &&
+      error.response.status !== 429 && // Don't retry rate limit errors
       (
-        !error.response || 
         error.response.status >= 500 ||
         error.response.status === 408 ||
         error.code === 'ECONNABORTED' ||
         error.code === 'NETWORK_ERROR'
       );
+    
+    // For 429 errors, add a longer delay before allowing any retries
+    if (error.response?.status === 429) {
+      console.warn('Rate limited. Backing off for 60 seconds...');
+      // Store the backoff time
+      window.__rateLimitBackoff = Date.now() + 60000;
+      return Promise.reject(error);
+    }
+    
+    // Check if we're in a rate limit backoff period
+    if (window.__rateLimitBackoff && Date.now() < window.__rateLimitBackoff) {
+      console.warn('Still in rate limit backoff period');
+      return Promise.reject(new Error('Rate limit backoff active'));
+    }
     
     if (!shouldRetry) {
       return Promise.reject(error);
@@ -77,11 +93,36 @@ apiClient.interceptors.response.use(
   }
 );
 
+// FIXED: Add request debouncing to prevent rapid duplicate requests
+const pendingRequests = new Map();
+
+const createDebouncedRequest = (requestFn) => {
+  return async (...args) => {
+    const key = JSON.stringify(args);
+    
+    if (pendingRequests.has(key)) {
+      return pendingRequests.get(key);
+    }
+    
+    const promise = requestFn(...args);
+    pendingRequests.set(key, promise);
+    
+    try {
+      const result = await promise;
+      pendingRequests.delete(key);
+      return result;
+    } catch (error) {
+      pendingRequests.delete(key);
+      throw error;
+    }
+  };
+};
+
 // ============= RESUME APIs =============
 
 export const resumeAPI = {
-  // Get resume URLs
-  getResumes: () => apiClient.get('/resume/urls'),
+  // Get resume URLs (with debouncing)
+  getResumes: createDebouncedRequest(() => apiClient.get('/resume/urls')),
   
   // Upload resume
   uploadResume: (type, file) => {
@@ -105,29 +146,31 @@ export const resumeAPI = {
 // ============= CERTIFICATES APIs =============
 
 export const certificatesAPI = {
-  // Get all certificates with retry (multiple function names for compatibility)
-  getCertificates: () => apiClient.get('/certificates'),
-  getAllCertificates: () => apiClient.get('/certificates'),
+  // Get all certificates with debouncing
+  getCertificates: createDebouncedRequest(() => apiClient.get('/certificates')),
+  getAllCertificates: createDebouncedRequest(() => apiClient.get('/certificates')),
   
-  // Get certificate stats (fallback to certificates if no stats endpoint)
-  getCertificateStats: () => apiClient.get('/certificates/stats').catch(() => 
-    ({ data: { success: false, data: {} } })
+  // Get certificate stats with debouncing
+  getCertificateStats: createDebouncedRequest(() => 
+    apiClient.get('/certificates/stats').catch(() => 
+      ({ data: { success: false, data: {} } })
+    )
   ),
   
-  // Add certificate with retry
-  addCertificate: (certificateData) => apiClient.post('/admin/certificates', certificateData),
+  // Add certificate
+  addCertificate: (certificateData) => apiClient.post('/certificates', certificateData),
   
-  // Update certificate with retry
-  updateCertificate: (id, certificateData) => apiClient.put(`/admin/certificates/${id}`, certificateData),
+  // Update certificate
+  updateCertificate: (id, certificateData) => apiClient.put(`/certificates/${id}`, certificateData),
   
-  // Delete certificate with retry
-  deleteCertificate: (id) => apiClient.delete(`/admin/certificates/${id}`),
+  // Delete certificate
+  deleteCertificate: (id) => apiClient.delete(`/certificates/${id}`),
   
   // Upload certificate image
   uploadCertificateImage: (id, file) => {
     const formData = new FormData();
     formData.append('certificateImage', file);
-    return apiClient.post(`/admin/certificates/${id}/upload-image`, formData, {
+    return apiClient.post(`/certificates/${id}/image`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
@@ -135,104 +178,106 @@ export const certificatesAPI = {
   // Upload certificate logo
   uploadCertificateLogo: (id, file) => {
     const formData = new FormData();
-    formData.append('certificateLogo', file);
-    return apiClient.post(`/admin/certificates/${id}/upload-logo`, formData, {
+    formData.append('logo', file);
+    return apiClient.post(`/certificates/${id}/logo`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
   
   // Bulk operations
-  bulkOperation: (action, ids, data = {}) => 
-    apiClient.post('/admin/certificates/bulk', { action, ids, data }),
+  bulkOperation: (action, certificateIds, data = {}) => 
+    apiClient.post('/certificates/bulk', { action, certificateIds, data }),
   
   // Export certificates
-  exportCertificates: (format = 'json') => apiClient.get('/admin/certificates/export', {
+  exportCertificates: (format = 'json') => apiClient.get('/certificates/export', {
     params: { format },
     responseType: format === 'csv' ? 'blob' : 'json'
   }),
   
   // Get available tags
-  getTags: () => apiClient.get('/admin/certificates/tags')
+  getTags: createDebouncedRequest(() => apiClient.get('/certificates/tags'))
 };
 
 // ============= AUTH APIs =============
 
 export const authAPI = {
-  // Login with retry
+  // Login
   login: (credentials) => apiClient.post('/auth/login', credentials),
   
-  // Verify token with retry
-  verify: () => apiClient.post('/auth/verify'),
+  // Verify token with debouncing
+  verify: createDebouncedRequest(() => apiClient.post('/auth/verify')),
   
-  // Logout with retry
+  // Logout
   logout: () => apiClient.post('/auth/logout')
 };
 
 // ============= CONTACT APIs =============
 
 export const contactAPI = {
-  // Contact form with retry
+  // Contact form
   submitContact: (messageData) => apiClient.post('/contact', messageData)
 };
 
 // ============= PORTFOLIO APIs (alias for PUBLIC) =============
 
 export const portfolioAPI = {
-  // Get projects with retry
-  getProjects: () => apiClient.get('/portfolio/projects'),
+  // Get projects with debouncing
+  getProjects: createDebouncedRequest(() => apiClient.get('/portfolio/projects')),
   
-  // Get personal info with retry
-  getPersonal: () => apiClient.get('/portfolio/personal'),
+  // Get personal info with debouncing
+  getPersonal: createDebouncedRequest(() => apiClient.get('/portfolio/personal')),
   
-  // Get tech stack with retry
-  getTechStack: () => apiClient.get('/portfolio/tech-stack'),
+  // Get tech stack with debouncing
+  getTechStack: createDebouncedRequest(() => apiClient.get('/portfolio/tech-stack')),
   
-  // Get certificates with retry
-  getCertificates: () => apiClient.get('/certificates'),
+  // Get certificates with debouncing
+  getCertificates: createDebouncedRequest(() => apiClient.get('/certificates')),
   
-  // Get portfolio stats with retry
-  getStats: () => apiClient.get('/portfolio/stats').catch(() => 
-    ({ data: { success: true, data: { totalProjects: 0, totalTechnologies: 0, totalCertificates: 0 } } })
+  // Get portfolio stats with debouncing
+  getStats: createDebouncedRequest(() => 
+    apiClient.get('/portfolio/stats').catch(() => 
+      ({ data: { success: true, data: { totalProjects: 0, totalTechnologies: 0, totalCertificates: 0 } } })
+    )
   )
 };
 
 // ============= PUBLIC APIs =============
 
 export const publicAPI = {
-  // Get projects with retry
-  getProjects: () => apiClient.get('/portfolio/projects'),
+  // Get projects with debouncing
+  getProjects: createDebouncedRequest(() => apiClient.get('/portfolio/projects')),
   
-  // Get personal info with retry
-  getPersonal: () => apiClient.get('/portfolio/personal'),
+  // Get personal info with debouncing
+  getPersonal: createDebouncedRequest(() => apiClient.get('/portfolio/personal')),
   
-  // Get tech stack with retry
-  getTechStack: () => apiClient.get('/portfolio/tech-stack'),
+  // Get tech stack with debouncing
+  getTechStack: createDebouncedRequest(() => apiClient.get('/portfolio/tech-stack')),
   
-  // Get certificates with retry
-  getCertificates: () => apiClient.get('/certificates'),
+  // Get certificates with debouncing
+  getCertificates: createDebouncedRequest(() => apiClient.get('/certificates')),
   
-  // Contact form with retry
+  // Contact form
   sendMessage: (messageData) => apiClient.post('/contact', messageData)
 };
 
 // ============= ADMIN APIs =============
 
 export const adminAPI = {
-  // Dashboard with retry
-  getDashboard: () => apiClient.get('/admin/dashboard'),
+  // Dashboard with debouncing (admin routes get cache busting)
+  getDashboard: createDebouncedRequest(() => apiClient.get('/admin/dashboard')),
   
-  // Projects Management with retry
-  getProjects: () => apiClient.get('/admin/projects'),
+  // Projects Management
+  getProjects: createDebouncedRequest(() => apiClient.get('/admin/projects')),
   createProject: (projectData) => apiClient.post('/admin/projects', projectData),
   updateProject: (id, projectData) => apiClient.put(`/admin/projects/${id}`, projectData),
   deleteProject: (id) => apiClient.delete(`/admin/projects/${id}`),
   
-  // Personal Info Management with retry
-  getPersonal: () => apiClient.get('/admin/personal'),
+  // Personal Info Management
+  getPersonal: createDebouncedRequest(() => apiClient.get('/admin/personal')),
   updatePersonal: (personalData) => apiClient.put('/admin/personal', personalData),
   
-  // Tech Stack Management with retry
-  getTechStack: () => apiClient.get('/admin/tech-stack'),
+  // Tech Stack Management
+  getTechStack: createDebouncedRequest(() => apiClient.get('/admin/tech-stack')),
   createTechStack: (techData) => apiClient.post('/admin/tech-stack', techData),
   updateTechStack: (id, techData) => apiClient.put(`/admin/tech-stack/${id}`, techData),
   deleteTechStack: (id) => apiClient.delete(`/admin/tech-stack/${id}`),
@@ -275,15 +320,21 @@ export const adminAPI = {
   },
 
   // SEO Management APIs
-  getSEOData: () => apiClient.get('/admin/seo'),
-  updateSEOData: (page, seoData) => apiClient.post('/admin/seo', { page, ...seoData }),
+  getSEOData: createDebouncedRequest(() => apiClient.get('/seo')),
+  updateSEOData: (page, seoData) => apiClient.post('/seo', { page, ...seoData }),
   uploadSEOImage: (page, file) => {
     const formData = new FormData();
     formData.append('ogImage', file);
-    return apiClient.post(`/admin/seo/${page}/og-image`, formData, {
+    return apiClient.post(`/seo/${page}/og-image`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   }
+};
+
+// FIXED: Add utility to clear request cache when needed
+export const clearApiCache = () => {
+  pendingRequests.clear();
+  window.__rateLimitBackoff = null;
 };
 
 // Default export for backwards compatibility
@@ -294,5 +345,6 @@ export default {
   adminAPI,
   authAPI,
   resumeAPI,
-  certificatesAPI
+  certificatesAPI,
+  clearApiCache
 };

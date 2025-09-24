@@ -27,7 +27,7 @@ app.use(responseTime((req, res, time) => {
 }));
 
 // Trust proxy - important for getting real client IP when behind a proxy
-app.set('trust proxy', true);
+app.set('trust proxy', 1); // FIXED: Set to 1 instead of true
 
 // Security middleware
 app.use(helmet());
@@ -79,16 +79,68 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Rate limiting for non-contact routes - Fixed trust proxy issue
-const generalRateLimiter = rateLimit({
+// FIXED: Separate rate limiters for different environments and routes
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// Development-friendly rate limiter
+const developmentRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // Much higher limit for development
   message: {
     success: false,
     message: 'Too many requests. Please try again later.'
   },
-  trustProxy: false // Disable trust proxy to avoid validation error
+  trustProxy: 1,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting for localhost in development
+    const ip = req.ip || req.connection.remoteAddress;
+    return isDevelopment && (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.'));
+  }
 });
+
+// Production rate limiter
+const productionRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // Increased from 100 to 300 for better UX
+  message: {
+    success: false,
+    message: 'Too many requests. Please try again later.'
+  },
+  trustProxy: 1,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Contact form specific rate limiter (stricter)
+const contactRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: isDevelopment ? 50 : 10, // More lenient in development
+  message: {
+    success: false,
+    message: 'Too many contact form submissions. Please try again later.'
+  },
+  trustProxy: 1,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Translation rate limiter (more lenient)
+const translationRateLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: isDevelopment ? 100 : 30, // Much more lenient for translations
+  message: {
+    success: false,
+    message: 'Translation rate limit exceeded. Please try again later.'
+  },
+  trustProxy: 1,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Choose appropriate rate limiter based on environment
+const generalRateLimiter = isDevelopment ? developmentRateLimiter : productionRateLimiter;
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -106,13 +158,21 @@ const chatRoutes = require('./routes/chat');
 const testPersonalRoutes = require('./routes/testPersonal');
 const pdfProxyRoutes = require('./routes/pdf-proxy');
 const localPdfRoutes = require('./routes/local-pdf');
+const translationRoutes = require('./routes/translation');
 
-// Apply routes with rate limiting and caching
-app.use('/api/auth', generalRateLimiter, authRoutes);
-app.use('/api/portfolio', generalRateLimiter, portfolioRoutes);
+// FIXED: Apply caching middleware before rate limiting for better performance
+// Apply routes with caching first, then rate limiting
+app.use('/api/portfolio', cachePortfolio, generalRateLimiter, portfolioRoutes);
+app.use('/api/certificates', cacheCertificates, generalRateLimiter, certificatesRoutes);
 app.use('/api/resume', generalRateLimiter, resumeRoutes);
-app.use('/api/certificates', generalRateLimiter, certificatesRoutes);
-app.use('/api/seo', generalRateLimiter, seoRoutes);
+app.use('/api/seo', cacheStats, generalRateLimiter, seoRoutes);
+
+// Routes with specific rate limiters
+app.use('/api/translate', translationRateLimiter, translationRoutes);
+app.use('/api/contact', contactRateLimiter, contactRoutes);
+
+// Other routes with general rate limiting
+app.use('/api/auth', generalRateLimiter, authRoutes);
 app.use('/api/chat', generalRateLimiter, chatRoutes);
 
 // Admin routes (no rate limiting for admin operations)
@@ -121,11 +181,10 @@ app.use('/api/admin/resume', resumeRoutes);
 app.use('/api/admin/certificates', certificatesRoutes);
 app.use('/api/admin/seo', seoRoutes);
 
-// Other routes
+// Other routes without heavy rate limiting
 app.use('/api/test-personal', testPersonalRoutes);
-app.use('/api/contact', contactRoutes); // Contact has its own rate limiting
-app.use('/api/proxy', pdfProxyRoutes); // PDF proxy for serving resumes
-app.use('/api/local', localPdfRoutes); // Local PDF serving (fallback)
+app.use('/api/proxy', pdfProxyRoutes);
+app.use('/api/local', localPdfRoutes);
 
 // Logging middleware
 if (process.env.NODE_ENV !== 'production') {
@@ -160,15 +219,16 @@ mongoose.connection.on('error', (err) => {
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('📵 Mongoose disconnected from MongoDB');
+  console.log('🔵 Mongoose disconnected from MongoDB');
 });
 
-// Health check endpoints
+// Health check endpoints (no rate limiting)
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -176,7 +236,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     message: 'Portfolio API is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -252,13 +313,23 @@ app.get('/api', (req, res) => {
   res.json({
     success: true,
     message: 'Portfolio Backend API',
-    version: '1.0.0'
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
+
+  // Rate limit error handling
+  if (err.message && err.message.includes('Too many requests')) {
+    return res.status(429).json({
+      success: false,
+      message: 'Rate limit exceeded. Please try again later.',
+      retryAfter: 60 // seconds
+    });
+  }
 
   // Multer error handling
   if (err.code === 'LIMIT_FILE_SIZE') {
@@ -349,6 +420,7 @@ const PORT = process.env.PORT || 8001;
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Rate limiting: ${isDevelopment ? 'Development (Lenient)' : 'Production (Strict)'}`);
 
   // Signal that server is ready (important for Render)
   if (process.send) {

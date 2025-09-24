@@ -386,7 +386,7 @@ const Footer = () => {
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 opacity-30"></div>
       </footer>
 
-      <style jsx>{`
+      <style jsx="true">{`
         @keyframes float {
           0%, 100% { 
             transform: translateY(0px) rotate(0deg); 

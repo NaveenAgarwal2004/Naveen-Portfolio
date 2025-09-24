@@ -38,8 +38,10 @@ const CertificatesSection = () => {
       if (!certificatesResponse.data.success) {
         throw new Error(certificatesResponse.data.message || 'Failed to fetch certificates');
       }
-      
-      setCertificates(certificatesResponse.data.data || []);
+
+      // Ensure certificates is always an array
+      const certificatesData = certificatesResponse.data.data;
+      setCertificates(Array.isArray(certificatesData) ? certificatesData : []);
       setStats(statsResponse.data.success ? statsResponse.data.data : {});
       
     } catch (err) {
@@ -65,10 +67,10 @@ const CertificatesSection = () => {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(cert =>
-        cert.title.toLowerCase().includes(term) ||
-        cert.issuer.toLowerCase().includes(term) ||
+        cert.title && cert.title.toLowerCase().includes(term) ||
+        cert.issuer && cert.issuer.toLowerCase().includes(term) ||
         (cert.description && cert.description.toLowerCase().includes(term)) ||
-        (cert.tags && cert.tags.some(tag => tag.toLowerCase().includes(term)))
+        (cert.tags && Array.isArray(cert.tags) && cert.tags.some(tag => tag.toLowerCase().includes(term)))
       );
     }
 

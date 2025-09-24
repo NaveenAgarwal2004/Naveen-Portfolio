@@ -46,7 +46,7 @@ const iconMap = {
 };
 
 const TechStack = ({ techStackData }) => {
-  const [techStack, setTechStack] = useState([]);
+  const [techStack, setTechStack] = useState([]); // FIXED: Always initialize as array
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -54,26 +54,50 @@ const TechStack = ({ techStackData }) => {
   const techStackRef = useRef(null);
   const categoriesRef = useRef(null);
 
-  // Sample tech stack data
+  // FIXED: Better data handling with proper validation
   useEffect(() => {
     if (techStackData) {
-      setTechStack(techStackData);
+      // FIXED: Ensure techStackData is always an array
+      const validTechStack = Array.isArray(techStackData) ? techStackData : [];
+      setTechStack(validTechStack);
       setLoading(false);
       return;
     }
 
     setLoading(true);
+    setError(null); // Clear previous errors
+    
     import('../services/api').then(({ portfolioAPI }) => {
       portfolioAPI.getTechStack()
         .then(response => {
-          if (response.data.success) {
-            setTechStack(response.data.data);
+          console.log('Tech stack response:', response); // Debug log
+          
+          if (response.data && response.data.success && response.data.data) {
+            // FIXED: Ensure response.data.data is an array
+            const techData = response.data.data;
+            const validTechStack = Array.isArray(techData) ? techData : [];
+            setTechStack(validTechStack);
+            
+            if (validTechStack.length === 0) {
+              setError('No technologies found');
+            }
           } else {
+            console.warn('Invalid tech stack response format:', response);
             setTechStack([]);
+            setError('Failed to load technologies');
           }
         })
-        .catch(() => setTechStack([]))
+        .catch(error => {
+          console.error('Tech stack fetch error:', error);
+          setTechStack([]);
+          setError('Unable to load technologies. Please try again later.');
+        })
         .finally(() => setLoading(false));
+    }).catch(error => {
+      console.error('API import error:', error);
+      setTechStack([]);
+      setError('Failed to initialize tech stack');
+      setLoading(false);
     });
   }, [techStackData]);
 
@@ -131,6 +155,39 @@ const TechStack = ({ techStackData }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8">
             <p className="text-red-400 text-lg">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 rounded-lg text-red-300 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // FIXED: Double-check techStack is array before rendering
+  if (!Array.isArray(techStack)) {
+    console.error('TechStack is not an array:', techStack);
+    return (
+      <section id="tech-stack" className="py-16 sm:py-20 bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-8">
+            <p className="text-yellow-400 text-lg">Invalid tech stack data format</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // FIXED: Show empty state if no technologies
+  if (techStack.length === 0) {
+    return (
+      <section id="tech-stack" className="py-16 sm:py-20 bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="bg-gray-500/10 border border-gray-500/20 rounded-2xl p-8">
+            <p className="text-gray-400 text-lg">No technologies to display</p>
           </div>
         </div>
       </section>
@@ -185,11 +242,19 @@ const TechStack = ({ techStackData }) => {
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
           {techStack.map((tech, index) => {
-            const Icon = iconMap[tech.icon];
+            // FIXED: Better validation for each tech item
+            if (!tech || typeof tech !== 'object') {
+              console.warn('Invalid tech item:', tech);
+              return null;
+            }
+
+            const Icon = tech.icon ? iconMap[tech.icon] : null;
+            const techName = tech.name || 'Unknown';
+            const techId = tech.id || tech._id || `tech-${index}`;
             
             return (
               <div
-                key={tech.id || tech.name}
+                key={techId}
                 className={`group bg-white/5 backdrop-blur-sm border border-white/10 hover:border-blue-500/50 rounded-2xl p-4 sm:p-6 text-center
                   transition-all duration-500 hover:scale-110 hover:bg-white/10 cursor-pointer transform
                   ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
@@ -204,14 +269,14 @@ const TechStack = ({ techStackData }) => {
                       {Icon ? (
                         <Icon 
                           className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" 
-                          style={{ color: isVisible ? tech.color : undefined }}
+                          style={{ color: isVisible && tech.color ? tech.color : undefined }}
                         />
                       ) : (
                         <div 
                           className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 group-hover:text-blue-400 transition-colors duration-300 flex items-center justify-center font-bold text-lg"
-                          style={{ color: isVisible ? tech.color : undefined }}
+                          style={{ color: isVisible && tech.color ? tech.color : undefined }}
                         >
-                          {tech.name.charAt(0)}
+                          {techName.charAt(0).toUpperCase()}
                         </div>
                       )}
                     </div>
@@ -220,13 +285,13 @@ const TechStack = ({ techStackData }) => {
                   </div>
                 </div>
                 <h3 className="text-white font-semibold text-sm sm:text-base group-hover:text-blue-400 transition-colors duration-300 leading-tight">
-                  {tech.name}
+                  {techName}
                 </h3>
                 {/* Hover indicator */}
                 <div className="w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-2 group-hover:w-full transition-all duration-300 rounded-full"></div>
               </div>
             );
-          })}
+          }).filter(Boolean)} {/* FIXED: Filter out null items */}
         </div>
 
         {/* Skills Categories */}

@@ -1,7 +1,10 @@
+// frontend/src/components/Hero.jsx - Updated with Translation System
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Github, Linkedin, Mail, ArrowRight, Sparkles, Code2, Terminal } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from '../hooks/useTranslation';
+import TranslatedText from './TranslatedText';
 import OptimizedImage, { ImagePresets } from './ui/OptimizedImage';
-
 
 const Hero = ({ personalData }) => {
   const [displayText, setDisplayText] = useState('');
@@ -13,6 +16,14 @@ const Hero = ({ personalData }) => {
   const heroRef = useRef(null);
   const vantaRef = useRef(null);
 
+  // Translation setup
+  const { tSync, currentLanguage } = useLanguage();
+  const heroTexts = [
+    'Available for work', 'View My Work', 'About Me', 'Scroll to explore',
+    'Building modern, responsive web experiences with clean code and creative design'
+  ];
+  const { t, isTranslating } = useTranslation(heroTexts);
+
   // Mobile screen detection
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -23,12 +34,11 @@ const Hero = ({ personalData }) => {
 
   const fullText = personalData?.title || 'Front-End Web Developer';
   const name = personalData?.name || 'Naveen Agarwal';
-  const tagline = personalData?.tagline || 'Building modern, responsive web experiences with clean code and creative design';
+  const tagline = personalData?.tagline || t('hero.tagline', 'Building modern, responsive web experiences with clean code and creative design');
   const socialLinks = personalData?.socialLinks || {};
 
   // Vanta.js effect initialization
   useEffect(() => {
-
     if (isMobile) return;
 
     let vanta;
@@ -91,7 +101,7 @@ const Hero = ({ personalData }) => {
   // Mouse tracking for interactive effects (disabled on mobile)
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (window.innerWidth >= 768) { // Only on desktop
+      if (window.innerWidth >= 768) {
         setMousePosition({ x: e.clientX, y: e.clientY });
       }
     };
@@ -202,7 +212,11 @@ const Hero = ({ personalData }) => {
           <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-4 sm:mb-6 group hover:bg-blue-500/15 transition-colors duration-300">
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-blue-400 text-xs sm:text-sm lg:text-base font-medium">Available for work</span>
+              <TranslatedText 
+                tag="span" 
+                fallback={t('hero.availableForWork', 'Available for work')} 
+                className="text-blue-400 text-xs sm:text-sm font-medium"
+              />
               <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400 animate-pulse group-hover:animate-spin transition-all duration-300" />
             </div>
             
@@ -214,13 +228,15 @@ const Hero = ({ personalData }) => {
               </div>
               <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/50 rounded-lg border border-slate-700/50">
                 <Terminal className="h-3 w-3 text-blue-400" />
-                <span className="text-xs text-gray-300">Full Stack</span>
+                <TranslatedText tag="span" fallback="Full Stack" className="text-xs text-gray-300" />
               </div>
             </div>
             
-            <p className="text-base sm:text-lg lg:text-xl text-blue-400 mb-3 sm:mb-4 font-medium">
-              👋 Hello, I'm
-            </p>
+            <TranslatedText 
+              tag="p" 
+              fallback="👋 Hello, I'm" 
+              className="text-base sm:text-lg lg:text-xl text-blue-400 mb-3 sm:mb-4 font-medium"
+            />
           </div>
 
           {/* Name with gradient effect */}
@@ -244,9 +260,11 @@ const Hero = ({ personalData }) => {
 
           {/* Tagline */}
           <div className={`transform transition-all duration-1000 delay-600 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed px-4">
-              {tagline}
-            </p>
+            <TranslatedText 
+              tag="p" 
+              fallback={tagline}
+              className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed px-4"
+            />
           </div>
 
           {/* CTA Buttons */}
@@ -259,7 +277,7 @@ const Hero = ({ personalData }) => {
               >
                 <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 <span className="relative z-10 flex items-center gap-2">
-                  View My Work
+                  <TranslatedText fallback={t('hero.viewWork', 'View My Work')} />
                   <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </span>
               </button>
@@ -269,7 +287,7 @@ const Hero = ({ personalData }) => {
                 className="group relative bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-2xl text-base sm:text-lg font-medium
                 transition-all duration-300 hover:bg-white/10 hover:scale-105 w-full sm:w-auto max-w-xs sm:max-w-none"
               >
-                <span className="relative z-10">About Me</span>
+                <TranslatedText tag="span" fallback={t('hero.aboutMe', 'About Me')} className="relative z-10" />
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
               </button>
             </div>
@@ -315,7 +333,11 @@ const Hero = ({ personalData }) => {
           {/* Scroll Indicator */}
           <div className={`transform transition-all duration-1000 delay-1200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
             <div className="flex flex-col items-center">
-              <span className="text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4">Scroll to explore</span>
+              <TranslatedText 
+                tag="span" 
+                fallback={t('hero.scrollToExplore', 'Scroll to explore')}
+                className="text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4"
+              />
               <button
                 onClick={scrollToAbout}
                 className="group p-1.5 sm:p-2 rounded-full border border-gray-600 hover:border-gray-400 transition-all duration-300 hover:bg-white/5"

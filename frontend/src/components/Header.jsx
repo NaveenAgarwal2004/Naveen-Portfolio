@@ -3,8 +3,11 @@ import { Download, Home, User, Briefcase, Mail, Code, ChevronDown, X, Menu, Awar
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useDebounce } from '../hooks/useDebounce';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from '../hooks/useTranslation';
+import TranslatedText from './TranslatedText';
 import ThemeToggle from './ui/ThemeToggle';
 import LanguageSelector from './ui/LanguageSelector';
+
 
 // Configuration object for easier maintenance
 const headerConfig = {
@@ -65,39 +68,41 @@ const ResumeDropdown = ({
   position = 'right',
   className = "",
   resumes = []
-}) => (
-  <div 
-    className={`absolute ${position}-0 mt-3 w-64 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 transform origin-top-${position} z-[200] ${
-      isOpen 
-        ? 'opacity-100 scale-100 translate-y-0' 
-        : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-    } ${className}`}
-    role="menu"
-    aria-orientation="vertical"
-    aria-labelledby="resume-button"
-  >
-    <div className="p-3">
-      {resumes.map((option, index) => (
-        <button
-          key={option.name}
-          onClick={() => onDownload(option)}
-          className={`w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-xl transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
-            isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
-          }`}
-          style={{
-            transitionDelay: isOpen ? `${index * 50}ms` : '0ms'
-          }}
-          role="menuitem"
-          tabIndex={isOpen ? 0 : -1}
-        >
-          <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200 shrink-0" />
-          <span className="font-medium flex-1 text-sm">{option.name}</span>
-          <Download className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
-        </button>
-      ))}
+}) => {
+  const { tSync } = useLanguage();
+  
+  return (
+    <div 
+      className={`absolute ${position}-0 mt-3 w-64 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 transform origin-top-${position} z-[200] ${
+        isOpen 
+          ? 'opacity-100 scale-100 translate-y-0' 
+          : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+      } ${className}`}
+      role="menu"
+    >
+      <div className="p-3">
+        {resumes.map((option, index) => (
+          <button
+            key={option.name}
+            onClick={() => onDownload(option)}
+            className={`w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-xl transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+              isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
+            }`}
+            style={{
+              transitionDelay: isOpen ? `${index * 50}ms` : '0ms'
+            }}
+            role="menuitem"
+            tabIndex={isOpen ? 0 : -1}
+          >
+            <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200 shrink-0" />
+            <TranslatedText tag="span" fallback={option.name} className="font-medium flex-1 text-sm" />
+            <Download className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
+          </button>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -289,12 +294,6 @@ const Header = () => {
     }
   }, [isOpen, isMobile]);
 
-  const resumes = [
-    { name: "Main Resume", url: "/NaveenAgarwal__Resume.pdf", format: "pdf" },
-    { name: "Frontend Resume", url: "/Naveen Agarwal - Frontend.pdf", format: "pdf" },
-    { name: "Backend Resume", url: "/NaveenAgarwal_Backend.pdf", format: "pdf" }
-  ];
-
   // Enhanced resume download with error handling
   const handleResumeDownload = useCallback(async (option) => {
     setIsDownloading(true);
@@ -370,17 +369,29 @@ const Header = () => {
     }
   }, []);
 
-  const { t } = useLanguage();
+  const { tSync } = useLanguage();
+  const navigationTexts = [
+    'Home', 'About', 'Skills', 'Projects', 'Resumes', 'Certificates', 'Contact',
+    'Go to top of page', 'Open menu', 'Close menu', 'Resume', 'Downloading...',
+    'Download Resume', 'Main Resume', 'Frontend Resume', 'Backend Resume'
+  ];
+  const { t, isTranslating } = useTranslation(navigationTexts);
+
+  const resumes = [
+    { name: tSync('resume.main', "Main Resume"), url: "/NaveenAgarwal__Resume.pdf", format: "pdf" },
+    { name: tSync('resume.frontend', "Frontend Resume"), url: "/Naveen Agarwal - Frontend.pdf", format: "pdf" },
+    { name: tSync('resume.backend', "Backend Resume"), url: "/NaveenAgarwal_Backend.pdf", format: "pdf" }
+  ];
 
   const navItems = [
-    { id: 'hero', label: t('navigation.home', 'Home'), icon: Home },
-    { id: 'about', label: t('navigation.about', 'About'), icon: User },
-    { id: 'tech-stack', label: t('navigation.skills', 'Skills'), icon: Code },
-    { id: 'projects', label: t('navigation.projects', 'Projects'), icon: Briefcase },
-    //{ id: 'timeline', label: t('navigation.timeline', 'Timeline'), icon: Clock },
+    { id: 'hero', label: tSync('navigation.home', 'Home'), icon: Home },
+    { id: 'about', label: tSync('navigation.about', 'About'), icon: User },
+    { id: 'tech-stack', label: tSync('navigation.skills', 'Skills'), icon: Code },
+    { id: 'projects', label: tSync('navigation.projects', 'Projects'), icon: Briefcase },
+    // { id: 'timeline', label: tSync('navigation.timeline', 'Timeline'), icon: Clock },
     { id: 'resumes', label: 'Resumes', icon: FileText },
     { id: 'certificates', label: 'Certificates', icon: Award },
-    { id: 'contact', label: t('navigation.contact', 'Contact'), icon: Mail }
+    { id: 'contact', label: tSync('navigation.contact', 'Contact'), icon: Mail }
   ];
 
   if (!mounted) {
@@ -391,7 +402,6 @@ const Header = () => {
             <div className="text-xl font-bold text-white">
               Naveen<span className="text-blue-500">.</span>
             </div>
-            {/* Loading skeleton for navigation */}
             <div className="hidden md:flex items-center space-x-8">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="w-12 h-4 bg-gray-700/50 rounded animate-pulse"></div>
@@ -425,7 +435,7 @@ const Header = () => {
               className={`font-bold text-white hover:text-blue-400 transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-400/50 rounded-lg px-3 py-2 ${
                 isMobile ? 'text-lg' : 'text-xl'
               }`}
-              aria-label="Go to top of page"
+              aria-label={tSync('nav.goToTop', 'Go to top of page')}
             >
               Naveen<span className="text-blue-500 animate-pulse">.</span>
             </button>

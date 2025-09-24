@@ -481,7 +481,7 @@ const Projects = () => {
       </div>
 
       {/* Custom scrollbar styles */}
-      <style jsx>{`
+      <style jsx="true">{`
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
