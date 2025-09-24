@@ -46,17 +46,26 @@ const iconMap = {
 };
 
 const TechStack = ({ techStackData }) => {
-  const [techStack, setTechStack] = useState([]); // FIXED: Always initialize as array
+  const [techStack, setTechStack] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [categoriesVisible, setCategoriesVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true); // FIXED: Start as true to show items initially
+  const [categoriesVisible, setCategoriesVisible] = useState(true); // FIXED: Start as true
   const techStackRef = useRef(null);
   const categoriesRef = useRef(null);
+
+  // Debug logs
+  useEffect(() => {
+    console.log('🔍 TechStack useEffect triggered with techStackData:', techStackData);
+    console.log('🔍 techStackData type:', typeof techStackData);
+    console.log('🔍 techStackData is array:', Array.isArray(techStackData));
+  }, [techStackData]);
 
   // FIXED: Better data handling with proper validation
   useEffect(() => {
     if (techStackData) {
+      console.log('✅ Using provided techStackData:', techStackData);
+      console.log('✅ techStackData length:', techStackData.length);
       // FIXED: Ensure techStackData is always an array
       const validTechStack = Array.isArray(techStackData) ? techStackData : [];
       setTechStack(validTechStack);
@@ -65,15 +74,14 @@ const TechStack = ({ techStackData }) => {
     }
 
     setLoading(true);
-    setError(null); // Clear previous errors
+    setError(null);
     
     import('../services/api').then(({ portfolioAPI }) => {
       portfolioAPI.getTechStack()
         .then(response => {
-          console.log('Tech stack response:', response); // Debug log
+          console.log('Tech stack response:', response);
           
           if (response.data && response.data.success && response.data.data) {
-            // FIXED: Ensure response.data.data is an array
             const techData = response.data.data;
             const validTechStack = Array.isArray(techData) ? techData : [];
             setTechStack(validTechStack);
@@ -101,40 +109,69 @@ const TechStack = ({ techStackData }) => {
     });
   }, [techStackData]);
 
-  // Intersection Observers
+  // FIXED: More lenient Intersection Observer with fallback
   useEffect(() => {
+    // Fallback: Set visible after a short delay regardless of intersection
+    const fallbackTimer = setTimeout(() => {
+      setIsVisible(true);
+    }, 500);
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
+          clearTimeout(fallbackTimer);
         }
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0.05, // FIXED: Lower threshold for easier triggering
+        rootMargin: '50px' // FIXED: Add margin to trigger earlier
+      }
     );
 
     if (techStackRef.current) {
       observer.observe(techStackRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   useEffect(() => {
+    // Fallback: Set categories visible after a short delay
+    const fallbackTimer = setTimeout(() => {
+      setCategoriesVisible(true);
+    }, 800);
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setCategoriesVisible(true);
+          clearTimeout(fallbackTimer);
         }
       },
-      { threshold: 0.2 }
+      { 
+        threshold: 0.05, // FIXED: Lower threshold
+        rootMargin: '50px' // FIXED: Add margin
+      }
     );
 
     if (categoriesRef.current) {
       observer.observe(categoriesRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
   }, []);
+
+  // Debug log current state
+  console.log('🎨 TechStack component rendering with techStack:', techStack);
+  console.log('🎨 techStack length:', techStack.length);
+  console.log('🎨 isVisible:', isVisible);
 
   if (loading) {
     return (
@@ -167,7 +204,6 @@ const TechStack = ({ techStackData }) => {
     );
   }
 
-  // FIXED: Double-check techStack is array before rendering
   if (!Array.isArray(techStack)) {
     console.error('TechStack is not an array:', techStack);
     return (
@@ -181,7 +217,6 @@ const TechStack = ({ techStackData }) => {
     );
   }
 
-  // FIXED: Show empty state if no technologies
   if (techStack.length === 0) {
     return (
       <section id="tech-stack" className="py-16 sm:py-20 bg-gray-900">
@@ -237,12 +272,11 @@ const TechStack = ({ techStackData }) => {
           </p>
         </div>
 
-        {/* Tech Stack Grid */}
-        <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 mb-16 transform transition-all duration-1000 delay-200 ${
-          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-        }`}>
+        {/* Tech Stack Grid - FIXED: Always visible */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 mb-16 opacity-100 translate-y-0">
           {techStack.map((tech, index) => {
-            // FIXED: Better validation for each tech item
+            console.log('🔧 Rendering tech item:', tech, 'at index:', index);
+            
             if (!tech || typeof tech !== 'object') {
               console.warn('Invalid tech item:', tech);
               return null;
@@ -255,11 +289,10 @@ const TechStack = ({ techStackData }) => {
             return (
               <div
                 key={techId}
-                className={`group bg-white/5 backdrop-blur-sm border border-white/10 hover:border-blue-500/50 rounded-2xl p-4 sm:p-6 text-center
-                  transition-all duration-500 hover:scale-110 hover:bg-white/10 cursor-pointer transform
-                  ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+                className="group bg-white/5 backdrop-blur-sm border border-white/10 hover:border-blue-500/50 rounded-2xl p-4 sm:p-6 text-center
+                  transition-all duration-500 hover:scale-110 hover:bg-white/10 cursor-pointer transform opacity-100 translate-y-0"
                 style={{
-                  transitionDelay: `${index * 100}ms`
+                  animationDelay: `${index * 100}ms`
                 }}
               >
                 <div className="mb-4 flex justify-center">
@@ -269,12 +302,12 @@ const TechStack = ({ techStackData }) => {
                       {Icon ? (
                         <Icon 
                           className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" 
-                          style={{ color: isVisible && tech.color ? tech.color : undefined }}
+                          style={{ color: tech.color || undefined }}
                         />
                       ) : (
                         <div 
                           className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 group-hover:text-blue-400 transition-colors duration-300 flex items-center justify-center font-bold text-lg"
-                          style={{ color: isVisible && tech.color ? tech.color : undefined }}
+                          style={{ color: tech.color || undefined }}
                         >
                           {techName.charAt(0).toUpperCase()}
                         </div>
@@ -291,11 +324,11 @@ const TechStack = ({ techStackData }) => {
                 <div className="w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-2 group-hover:w-full transition-all duration-300 rounded-full"></div>
               </div>
             );
-          }).filter(Boolean)} {/* FIXED: Filter out null items */}
+          }).filter(Boolean)}
         </div>
 
-        {/* Skills Categories */}
-        <div ref={categoriesRef} className="grid md:grid-cols-3 gap-6 sm:gap-8">
+        {/* Skills Categories - FIXED: Always visible */}
+        <div ref={categoriesRef} className="grid md:grid-cols-3 gap-6 sm:gap-8 opacity-100 translate-y-0">
           {[
             {
               icon: Component,
@@ -335,11 +368,7 @@ const TechStack = ({ techStackData }) => {
               <div
                 key={category.title}
                 className={`group bg-gradient-to-br ${colorClasses[category.color]} backdrop-blur-sm border rounded-2xl p-6 sm:p-8 text-center
-                  transition-all duration-500 hover:scale-105 hover:bg-white/5 cursor-pointer transform
-                  ${categoriesVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
-                style={{
-                  transitionDelay: `${category.delay}ms`
-                }}
+                  transition-all duration-500 hover:scale-105 hover:bg-white/5 cursor-pointer transform opacity-100 translate-y-0`}
               >
                 <div className="mb-6 flex justify-center">
                   <div className="relative">
@@ -362,7 +391,7 @@ const TechStack = ({ techStackData }) => {
         </div>
       </div>
 
-       <style>{`
+      <style jsx>{`
         @keyframes float {
           0%, 100% { 
             transform: translateY(0px) rotate(0deg); 

@@ -8,7 +8,6 @@ import TranslatedText from './TranslatedText';
 import ThemeToggle from './ui/ThemeToggle';
 import LanguageSelector from './ui/LanguageSelector';
 
-
 // Configuration object for easier maintenance
 const headerConfig = {
   animations: {
@@ -134,21 +133,50 @@ const Header = () => {
     }
   }, [isMobile, isOpen]);
 
-  // Enhanced scroll detection with throttling
+  // FIXED: Enhanced scroll detection with better mobile support
   useEffect(() => {
     const handleScroll = throttle(() => {
       setIsScrolled(window.scrollY > headerConfig.animations.scrollThreshold);
       
-      // Update active section based on scroll position
-      const sections = ['hero', 'about', 'tech-stack', 'projects', 'timeline', 'resumes', 'certificates', 'contact'];
-      const currentSection = sections.find(section => {
-        const element = document.getElementById(section);
+      // FIXED: Better section detection for mobile
+      const sections = ['hero', 'about', 'tech-stack', 'projects', 'resumes', 'certificates', 'contact'];
+      const headerHeight = headerRef.current?.offsetHeight || (isMobile ? 64 : 80);
+      
+      let currentSection = null;
+      for (const sectionId of sections) {
+        const element = document.getElementById(sectionId);
         if (element) {
           const rect = element.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom >= 100;
+          const elementTop = rect.top + window.scrollY;
+          const elementBottom = elementTop + rect.height;
+          const scrollPosition = window.scrollY + headerHeight + 100;
+          
+          if (scrollPosition >= elementTop && scrollPosition <= elementBottom) {
+            currentSection = sectionId;
+            break;
+          }
         }
-        return false;
-      });
+      }
+      
+      // If no section is found, find the closest one
+      if (!currentSection) {
+        let closestSection = sections[0];
+        let closestDistance = Infinity;
+        
+        sections.forEach(sectionId => {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            const distance = Math.abs(rect.top);
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closestSection = sectionId;
+            }
+          }
+        });
+        
+        currentSection = closestSection;
+      }
       
       if (currentSection && currentSection !== activeSection) {
         setActiveSection(currentSection);
@@ -157,44 +185,46 @@ const Header = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeSection]);
+  }, [activeSection, isMobile]);
 
-  // Intersection Observer for better section detection
+  // FIXED: Better intersection observer for mobile
   useEffect(() => {
     const navItems = [
       { id: 'hero' }, { id: 'about' }, { id: 'tech-stack' }, 
-      { id: 'projects' }, { id: 'timeline' }, { id: 'resumes' }, { id: 'certificates' }, { id: 'contact' }
+      { id: 'projects' }, { id: 'resumes' }, { id: 'certificates' }, { id: 'contact' }
     ];
 
-    const observers = navItems.map(item => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
           setVisibleSections(prev => {
             const newSet = new Set(prev);
             if (entry.isIntersecting) {
-              newSet.add(item.id);
+              newSet.add(entry.target.id);
             } else {
-              newSet.delete(item.id);
+              newSet.delete(entry.target.id);
             }
             return newSet;
           });
-        },
-        { threshold: 0.3, rootMargin: '-100px 0px -50% 0px' }
-      );
-      
+        });
+      },
+      { 
+        threshold: 0.2,
+        rootMargin: isMobile ? '-80px 0px -60% 0px' : '-100px 0px -50% 0px'
+      }
+    );
+    
+    navItems.forEach(item => {
       const element = document.getElementById(item.id);
       if (element) observer.observe(element);
-      
-      return observer;
     });
     
-    return () => observers.forEach(observer => observer.disconnect());
-  }, []);
+    return () => observer.disconnect();
+  }, [isMobile]);
 
   // Update active section based on intersection observer
   useEffect(() => {
     if (visibleSections.size > 0) {
-      // Get the first visible section as active
       const sectionsOrder = ['hero', 'about', 'tech-stack', 'projects', 'resumes', 'certificates', 'contact'];
       const visibleInOrder = sectionsOrder.find(section => visibleSections.has(section));
       if (visibleInOrder && visibleInOrder !== activeSection) {
@@ -203,12 +233,13 @@ const Header = () => {
     }
   }, [visibleSections, activeSection]);
 
-  // Enhanced click outside detection
+  // FIXED: Enhanced click outside detection with touch support
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Close mobile menu
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target) && isOpen) {
         setIsOpen(false);
+        setIsMobileResumeOpen(false); // Also close resume dropdown
       }
       
       // Close resume dropdown
@@ -219,8 +250,9 @@ const Header = () => {
     };
 
     if (isOpen || isResumeOpen || isMobileResumeOpen) {
+      // FIXED: Add both mouse and touch events for better mobile support
       document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside, { passive: true });
     }
 
     return () => {
@@ -237,59 +269,46 @@ const Header = () => {
         setIsResumeOpen(false);
         setIsMobileResumeOpen(false);
       }
-      
-      // Enhanced keyboard navigation for resume dropdown
-      if (event.key === 'Enter' || event.key === ' ') {
-        const activeElement = document.activeElement;
-        if (activeElement?.id === 'resume-button') {
-          event.preventDefault();
-          setIsResumeOpen(!isResumeOpen);
-        }
-      }
-      
-      if (event.key === 'Tab' && isOpen) {
-        // Trap focus within mobile menu
-        const focusableElements = mobileMenuRef.current?.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        
-        if (focusableElements?.length) {
-          const firstElement = focusableElements[0];
-          const lastElement = focusableElements[focusableElements.length - 1];
-          
-          if (event.shiftKey && document.activeElement === firstElement) {
-            event.preventDefault();
-            lastElement.focus();
-          } else if (!event.shiftKey && document.activeElement === lastElement) {
-            event.preventDefault();
-            firstElement.focus();
-          }
-        }
-      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isResumeOpen]);
+  }, []);
 
-  // Better scroll prevention for mobile menu
+  // FIXED: Better body scroll prevention for mobile
   useEffect(() => {
     if (isOpen && isMobile) {
-      // Store original scroll position
       const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
+      const body = document.body;
+      
+      // Store original styles
+      const originalStyles = {
+        position: body.style.position,
+        top: body.style.top,
+        width: body.style.width,
+        overflow: body.style.overflow,
+        touchAction: body.style.touchAction
+      };
+      
+      // Apply scroll lock
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.width = '100%';
+      body.style.overflow = 'hidden';
+      body.style.touchAction = 'none'; // Prevent touch scrolling
       
       return () => {
+        // Restore original styles
+        Object.entries(originalStyles).forEach(([key, value]) => {
+          if (value) {
+            body.style[key] = value;
+          } else {
+            body.style.removeProperty(key);
+          }
+        });
+        
         // Restore scroll position
-        const scrollY = document.body.style.top;
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        window.scrollTo(0, scrollY);
       };
     }
   }, [isOpen, isMobile]);
@@ -302,72 +321,75 @@ const Header = () => {
       if (option.format === 'view') {
         window.open(option.url, '_blank', 'noopener,noreferrer');
       } else {
-        // Check if file exists first
-        try {
-          const response = await fetch(option.url, { method: 'HEAD' });
-          if (response.ok) {
-            const link = document.createElement('a');
-            link.href = option.url;
-            link.download = `naveen-agarwal-${option.name.toLowerCase().replace(/\s+/g, '-')}.${option.format}`;
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Analytics tracking
-            if (window.gtag) {
-              window.gtag('event', 'resume_download', {
-                'resume_type': option.name,
-                'event_category': 'engagement'
-              });
-            }
-          } else {
-            throw new Error('File not found');
-          }
-        } catch (fetchError) {
-          console.warn('Direct download failed, opening in new tab:', fetchError);
-          window.open(option.url, '_blank', 'noopener,noreferrer');
+        const link = document.createElement('a');
+        link.href = option.url;
+        link.download = `naveen-agarwal-${option.name.toLowerCase().replace(/\s+/g, '-')}.${option.format}`;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Analytics tracking
+        if (window.gtag) {
+          window.gtag('event', 'resume_download', {
+            'resume_type': option.name,
+            'event_category': 'engagement'
+          });
         }
       }
     } catch (error) {
       console.error('Download failed:', error);
-      // Fallback: open in new tab
       window.open(option.url, '_blank', 'noopener,noreferrer');
     } finally {
       setIsDownloading(false);
       setIsResumeOpen(false);
       setIsMobileResumeOpen(false);
+      
+      // FIXED: Always close mobile menu after resume download
       setIsOpen(false);
     }
   }, []);
 
-  // Enhanced scroll to section with analytics
+  // FIXED: Enhanced scroll to section with better mobile support
   const scrollToSection = useCallback((sectionId) => {
+    console.log(`📍 Scrolling to section: ${sectionId}`); // Debug log
+    
     const element = document.getElementById(sectionId);
     if (element) {
-      const headerHeight = headerRef.current?.offsetHeight || 64;
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-      const offsetPosition = elementPosition - headerHeight - 20;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-      
+      // FIXED: Always close mobile menu first
       setIsOpen(false);
+      setIsMobileResumeOpen(false);
+      setIsResumeOpen(false);
       
-      // Update active section immediately for better UX
-      setActiveSection(sectionId);
-      
-      // Analytics tracking
-      if (window.gtag) {
-        window.gtag('event', 'navigation_click', {
-          'section': sectionId,
-          'event_category': 'navigation'
+      // Wait for menu to close before scrolling
+      setTimeout(() => {
+        const headerHeight = headerRef.current?.offsetHeight || (isMobile ? 64 : 80);
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+        const offsetPosition = elementPosition - headerHeight - (isMobile ? 20 : 40);
+
+        window.scrollTo({
+          top: Math.max(0, offsetPosition), // Prevent negative scroll
+          behavior: 'smooth'
         });
-      }
+        
+        // Update active section immediately for better UX
+        setActiveSection(sectionId);
+        
+        console.log(`✅ Scrolled to ${sectionId}`); // Debug log
+        
+        // Analytics tracking
+        if (window.gtag) {
+          window.gtag('event', 'navigation_click', {
+            'section': sectionId,
+            'event_category': 'navigation',
+            'device_type': isMobile ? 'mobile' : 'desktop'
+          });
+        }
+      }, isMobile ? 350 : 100); // Wait longer on mobile for menu animation
+    } else {
+      console.warn(`❌ Section not found: ${sectionId}`); // Debug log
     }
-  }, []);
+  }, [isMobile]);
 
   const { tSync } = useLanguage();
   const navigationTexts = [
@@ -387,8 +409,8 @@ const Header = () => {
     { id: 'hero', label: tSync('navigation.home', 'Home'), icon: Home },
     { id: 'about', label: tSync('navigation.about', 'About'), icon: User },
     { id: 'tech-stack', label: tSync('navigation.skills', 'Skills'), icon: Code },
+        // { id: 'timeline', label: tSync('navigation.timeline', 'Timeline'), icon: Clock },
     { id: 'projects', label: tSync('navigation.projects', 'Projects'), icon: Briefcase },
-    // { id: 'timeline', label: tSync('navigation.timeline', 'Timeline'), icon: Clock },
     { id: 'resumes', label: 'Resumes', icon: FileText },
     { id: 'certificates', label: 'Certificates', icon: Award },
     { id: 'contact', label: tSync('navigation.contact', 'Contact'), icon: Mail }
@@ -527,7 +549,7 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* FIXED: Enhanced Mobile Menu with better touch handling */}
         <div 
           id="mobile-menu"
           ref={mobileMenuRef}
@@ -536,6 +558,10 @@ const Header = () => {
           }`}
           role="menu"
           aria-hidden={!isOpen}
+          style={{ 
+            WebkitOverflowScrolling: 'touch', // Better iOS scrolling
+            touchAction: isOpen ? 'auto' : 'none' // Allow scrolling when open
+          }}
         >
           <div className="px-3 pt-6 pb-8 space-y-3 bg-gray-900/95 backdrop-blur-xl rounded-2xl mt-4 mx-2 border border-gray-800/50 shadow-2xl max-h-[70vh] overflow-y-auto">
             {/* Navigation Items */}
@@ -544,14 +570,20 @@ const Header = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className={`flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium w-full text-left transition-all duration-300 hover:scale-105 transform focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+                  onClick={() => {
+                    console.log(`🔥 Mobile nav clicked: ${item.id}`); // Debug log
+                    scrollToSection(item.id);
+                  }}
+                  className={`flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium w-full text-left transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-blue-400/50 active:scale-95 ${
                     activeSection === item.id
-                      ? 'text-white bg-blue-500/20 border border-blue-500/30'
-                      : 'text-gray-300 hover:text-white hover:bg-blue-500/10'
+                      ? 'text-white bg-blue-500/20 border border-blue-500/30 scale-105'
+                      : 'text-gray-300 hover:text-white hover:bg-blue-500/10 hover:scale-105'
                   } ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
                   style={{ 
-                    transitionDelay: isOpen ? `${index * 80}ms` : '0ms' 
+                    transitionDelay: isOpen ? `${index * 80}ms` : '0ms',
+                    // Better touch targets for mobile
+                    minHeight: '48px',
+                    touchAction: 'manipulation'
                   }}
                   role="menuitem"
                   tabIndex={isOpen ? 0 : -1}
@@ -561,7 +593,7 @@ const Header = () => {
                   }`} />
                   <span className="flex-1">{item.label}</span>
                   {activeSection === item.id && (
-                    <div className="w-2 h-2 bg-blue-400 rounded-full" />
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
                   )}
                 </button>
               );
@@ -585,12 +617,17 @@ const Header = () => {
                     {resumes.map((option, index) => (
                       <button
                         key={option.name}
-                        onClick={() => handleResumeDownload(option)}
-                        className={`w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-lg transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+                        onClick={() => {
+                          console.log(`📄 Mobile resume download: ${option.name}`); // Debug log
+                          handleResumeDownload(option);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-lg transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 active:scale-95 ${
                           isMobileResumeOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
                         }`}
                         style={{ 
-                          transitionDelay: isMobileResumeOpen ? `${index * 80}ms` : '0ms' 
+                          transitionDelay: isMobileResumeOpen ? `${index * 80}ms` : '0ms',
+                          minHeight: '44px',
+                          touchAction: 'manipulation'
                         }}
                         tabIndex={isMobileResumeOpen ? 0 : -1}
                       >
@@ -605,10 +642,12 @@ const Header = () => {
                 <button
                   onClick={() => setIsMobileResumeOpen(!isMobileResumeOpen)}
                   className={`group w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-5 py-4 rounded-xl font-medium 
-                    transition-all duration-300 transform hover:scale-105 flex items-center justify-between overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50
+                    transition-all duration-300 transform hover:scale-105 flex items-center justify-between overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50 active:scale-95
                     ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
                   style={{
-                    transitionDelay: isOpen ? `${(navItems.length + 1) * 80}ms` : '0ms'
+                    transitionDelay: isOpen ? `${(navItems.length + 1) * 80}ms` : '0ms',
+                    minHeight: '48px',
+                    touchAction: 'manipulation'
                   }}
                   aria-expanded={isMobileResumeOpen}
                   tabIndex={isOpen ? 0 : -1}
@@ -631,6 +670,17 @@ const Header = () => {
         <div aria-live="polite" className="sr-only">
           {activeSection && `Currently viewing ${activeSection.replace('-', ' ')} section`}
         </div>
+
+        {/* Debug info for development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="fixed bottom-4 right-4 bg-black/80 text-white text-xs p-2 rounded z-50 max-w-xs">
+            <div>Active: {activeSection}</div>
+            <div>Mobile: {isMobile ? 'Yes' : 'No'}</div>
+            <div>Menu Open: {isOpen ? 'Yes' : 'No'}</div>
+            <div>Scroll Y: {Math.round(window.scrollY || 0)}</div>
+            <div>Visible: [{Array.from(visibleSections).join(', ')}]</div>
+          </div>
+        )}
       </div>
     </header>
   );
