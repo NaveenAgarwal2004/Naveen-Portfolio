@@ -59,6 +59,10 @@ export default defineConfig({
             if (id.includes('axios')) {
               return 'http-vendor';
             }
+            // Add Three.js/Vanta to separate chunk if you decide to bundle them later
+            if (id.includes('three') || id.includes('vanta')) {
+              return 'three-vendor';
+            }
             return 'vendor';
           }
 
