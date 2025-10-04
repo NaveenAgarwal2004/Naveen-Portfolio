@@ -2,25 +2,35 @@ class TranslationService {
   constructor() {
     this.cache = new Map();
     this.cacheExpiry = new Map();
-    this.CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+    this.CACHE_DURATION = 24 * 60 * 60 * 1000;
     this.isOnline = navigator.onLine;
     this.requestQueue = new Map();
     this.pendingRequests = new Map();
-    this.rateLimitDelay = 10000; // FIXED: Increased to 10s to prevent rate limiting
-    this.batchDelay = 15000; // FIXED: Increased to 15s for batch processing
+    this.rateLimitDelay = 10000;
+    this.batchDelay = 15000;
     this.lastRequestTime = 0;
-    this.maxRetries = 0; // FIXED: Disabled retries to prevent rate limiting
+    this.maxRetries = 0;
     this.requestCount = 0;
     this.requestWindowStart = Date.now();
-    this.maxRequestsPerMinute = 5; // FIXED: Reduced to 5 requests per minute
+    this.maxRequestsPerMinute = 5;
     this.translationEnabled = true;
-    this.backoffUntil = 0; // Track when we're backing off due to rate limits
-    
+    this.backoffUntil = 0;
+    this.listeners = new Set();
+
     this.initializeOfflineDetection();
     this.loadFromLocalStorage();
     this.startBatchProcessor();
     this.startRequestMonitor();
     this.checkBackendAvailability();
+  }
+
+  addListener(callback) {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
+
+  notifyListeners(status) {
+    this.listeners.forEach(callback => callback(status));
   }
 
   async checkBackendAvailability() {

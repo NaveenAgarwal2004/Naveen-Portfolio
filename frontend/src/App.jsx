@@ -19,6 +19,7 @@ import { portfolioAPI, testConnection } from './services/api';
 import ResumeSection from './components/ResumeSection';
 import CertificatesSection from './components/CertificatesSection';
 import MetaTags from './components/SEO/MetaTags';
+import LanguageLoadingOverlay from './components/LanguageLoadingOverlay';
 import { AlertCircle, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 
 // Lazy load admin components
@@ -465,6 +466,7 @@ function App() {
                 </Routes>
               </BrowserRouter>
             </AuthProvider>
+            <LanguageLoadingOverlay />
             <Analytics />
             <SpeedInsights />
           </div>
