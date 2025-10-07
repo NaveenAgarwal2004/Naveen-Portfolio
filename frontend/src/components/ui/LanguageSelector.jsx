@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Globe } from 'lucide-react';
+import { ChevronDown, Globe, Check } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const LanguageSelector = ({ className = '' }) => {
   const { currentLanguage, changeLanguage, languages, isLoading } = useLanguage();
+  const { isDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef();
 
@@ -32,11 +34,12 @@ const LanguageSelector = ({ className = '' }) => {
         className="
           flex items-center gap-2 px-3 py-2 rounded-lg
           theme-button-secondary theme-transition
-          hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500
+          hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500
           disabled:opacity-50 disabled:cursor-not-allowed
         "
         disabled={isLoading}
         aria-label="Select language"
+        aria-expanded={isOpen}
       >
         <Globe className="w-4 h-4" />
         <span className="text-lg">{currentLang.flag}</span>
@@ -51,11 +54,15 @@ const LanguageSelector = ({ className = '' }) => {
       </button>
 
       {isOpen && (
-        <div className="
+        <div className={`
           absolute top-full left-0 mt-2 min-w-48 z-50
-          theme-card rounded-xl shadow-xl border theme-border
-          animate-in fade-in slide-in-from-top-2 duration-200
-        ">
+          rounded-xl shadow-2xl border
+          animate-in fade-in slide-in-from-top-4 zoom-in-95 duration-300
+          ${isDark
+            ? 'bg-gray-900/95 border-gray-700/50 backdrop-blur-xl'
+            : 'bg-white/95 border-gray-200/50 backdrop-blur-xl'
+          }
+        `}>
           <div className="py-2">
             {Object.values(languages).map((language) => (
               <button
@@ -76,15 +83,19 @@ const LanguageSelector = ({ className = '' }) => {
                   <div className="text-xs theme-text-tertiary">{language.name}</div>
                 </div>
                 {currentLanguage === language.code && (
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  <Check className="w-4 h-4 text-blue-500 shrink-0" />
                 )}
               </button>
             ))}
           </div>
           
-          <div className="border-t theme-border px-4 py-2">
-            <p className="text-xs theme-text-tertiary text-center">
-              🌍 More languages coming soon
+          <div className={`border-t px-4 py-2 ${
+            isDark ? 'border-gray-700/50' : 'border-gray-200/50'
+          }`}>
+            <p className={`text-xs text-center ${
+              isDark ? 'text-gray-500' : 'text-gray-400'
+            }`}>
+              More languages coming soon
             </p>
           </div>
         </div>

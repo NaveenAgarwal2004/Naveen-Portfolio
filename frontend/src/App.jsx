@@ -21,6 +21,7 @@ import CertificatesSection from './components/CertificatesSection';
 // import InteractiveTimeline from './components/InteractiveTimeline';
 // import AIFabChatAssistant from './components/AIFabChatAssistant';
 import MetaTags from './components/SEO/MetaTags';
+import LanguageLoadingOverlay from './components/LanguageLoadingOverlay';
 import { AlertCircle, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 
 // Lazy load admin components
@@ -467,6 +468,7 @@ function App() {
                 </Routes>
               </BrowserRouter>
             </AuthProvider>
+            <LanguageLoadingOverlay />
             <Analytics />
             <SpeedInsights />
           </div>

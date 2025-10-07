@@ -12,25 +12,25 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Check for saved theme preference or default to system preference
     const savedTheme = localStorage.getItem('portfolio-theme');
     if (savedTheme) {
       return savedTheme;
     }
-    
-    // Check system preference
+
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
       return 'light';
     }
-    
-    return 'dark'; // Default to dark for developer portfolio
+
+    return 'dark';
   });
 
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   useEffect(() => {
-    // Save theme preference
+    setIsTransitioning(true);
+
     localStorage.setItem('portfolio-theme', theme);
-    
-    // Apply theme to document
+
     if (theme === 'dark') {
       document.documentElement.classList.remove('light');
       document.documentElement.classList.add('dark');
@@ -38,12 +38,17 @@ export const ThemeProvider = ({ children }) => {
       document.documentElement.classList.remove('dark');
       document.documentElement.classList.add('light');
     }
-    
-    // Update meta theme-color for mobile browsers
+
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', theme === 'dark' ? '#0f172a' : '#ffffff');
     }
+
+    const timer = setTimeout(() => {
+      setIsTransitioning(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -54,7 +59,8 @@ export const ThemeProvider = ({ children }) => {
     theme,
     toggleTheme,
     isDark: theme === 'dark',
-    isLight: theme === 'light'
+    isLight: theme === 'light',
+    isTransitioning
   };
 
   return (
