@@ -409,8 +409,8 @@ const Header = () => {
     { id: 'hero', label: tSync('navigation.home', 'Home'), icon: Home },
     { id: 'about', label: tSync('navigation.about', 'About'), icon: User },
     { id: 'tech-stack', label: tSync('navigation.skills', 'Skills'), icon: Code },
-        // { id: 'timeline', label: tSync('navigation.timeline', 'Timeline'), icon: Clock },
     { id: 'projects', label: tSync('navigation.projects', 'Projects'), icon: Briefcase },
+    // { id: 'timeline', label: tSync('navigation.timeline', 'Timeline'), icon: Clock },
     { id: 'resumes', label: 'Resumes', icon: FileText },
     { id: 'certificates', label: 'Certificates', icon: Award },
     { id: 'contact', label: tSync('navigation.contact', 'Contact'), icon: Mail }

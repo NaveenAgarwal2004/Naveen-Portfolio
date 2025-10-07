@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { 
-  ExternalLink, Award, Calendar, Building, AlertCircle, RefreshCcw, 
-  IdCard, CheckCircle, Clock, Filter, Search, ChevronDown, Image as ImageIcon,
-  Eye, X, Download, Star, MapPin, Trophy, Target, Timer, GraduationCap,
-  Zap, ShieldCheck, AlertTriangle, Grid3X3, List, SlidersHorizontal
+  Award, Calendar, Building, AlertCircle, RefreshCcw, 
+  IdCard, CheckCircle, Clock, Search, ChevronLeft, ChevronRight,
+  Eye, X, Download, Star, Trophy, Target, GraduationCap,
+  Zap, ShieldCheck, AlertTriangle, ExternalLink, Shuffle
 } from 'lucide-react';
 import { certificatesAPI } from '../services/api';
 
@@ -18,13 +17,13 @@ const CertificatesSection = () => {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('issueDate');
-  const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // grid or list
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [direction, setDirection] = useState('next');
 
-  // Fetch certificates and stats
+  // Fetch certificates and stats from API
   const fetchData = useCallback(async () => {
     try {
       setError('');
@@ -39,14 +38,26 @@ const CertificatesSection = () => {
         throw new Error(certificatesResponse.data.message || 'Failed to fetch certificates');
       }
 
-      // Ensure certificates is always an array
       const certificatesData = certificatesResponse.data.data;
-      setCertificates(Array.isArray(certificatesData) ? certificatesData : []);
+      const certs = Array.isArray(certificatesData) ? certificatesData : [];
+      
+      // Sort by priority (highest first) then by issue date (newest first)
+      const sortedCerts = certs.sort((a, b) => {
+        if ((b.priority || 0) !== (a.priority || 0)) {
+          return (b.priority || 0) - (a.priority || 0);
+        }
+        return new Date(b.issueDate) - new Date(a.issueDate);
+      });
+      
+      setCertificates(sortedCerts);
+      setFilteredCertificates(sortedCerts);
       setStats(statsResponse.data.success ? statsResponse.data.data : {});
       
     } catch (err) {
       setError('Unable to load certificates. Please try again later.');
       console.error('Certificates fetch error:', err);
+      setCertificates([]);
+      setFilteredCertificates([]);
     } finally {
       setLoading(false);
     }
@@ -58,23 +69,20 @@ const CertificatesSection = () => {
 
   useEffect(() => {
     applyFiltersAndSearch();
-  }, [certificates, searchTerm, filter, sortBy]);
+  }, [certificates, searchTerm, filter]);
 
   const applyFiltersAndSearch = () => {
     let filtered = [...certificates];
 
-    // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(cert =>
-        cert.title && cert.title.toLowerCase().includes(term) ||
-        cert.issuer && cert.issuer.toLowerCase().includes(term) ||
-        (cert.description && cert.description.toLowerCase().includes(term)) ||
-        (cert.tags && Array.isArray(cert.tags) && cert.tags.some(tag => tag.toLowerCase().includes(term)))
+        cert.title?.toLowerCase().includes(term) ||
+        cert.issuer?.toLowerCase().includes(term) ||
+        cert.tags?.some(tag => tag.toLowerCase().includes(term))
       );
     }
 
-    // Apply status filter
     if (filter !== 'all') {
       filtered = filtered.filter(cert => {
         switch (filter) {
@@ -92,31 +100,12 @@ const CertificatesSection = () => {
       });
     }
 
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'title':
-          return a.title.localeCompare(b.title);
-        case 'issuer':
-          return a.issuer.localeCompare(b.issuer);
-        case 'priority':
-          return (b.priority || 0) - (a.priority || 0);
-        case 'expiryDate':
-          if (!a.expiryDate && !b.expiryDate) return 0;
-          if (!a.expiryDate) return 1;
-          if (!b.expiryDate) return -1;
-          return new Date(b.expiryDate) - new Date(a.expiryDate);
-        case 'issueDate':
-        default:
-          return new Date(b.issueDate) - new Date(a.issueDate);
-      }
-    });
-
     setFilteredCertificates(filtered);
+    setCurrentIndex(0);
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return 'No Expiry';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
@@ -192,8 +181,41 @@ const CertificatesSection = () => {
     }
   };
 
-  const openModal = (certificate) => {
-    setSelectedCertificate(certificate);
+  const nextCard = () => {
+    if (isAnimating || currentIndex >= filteredCertificates.length - 1) return;
+    setIsAnimating(true);
+    setDirection('next');
+    setCurrentIndex(prev => prev + 1);
+    setTimeout(() => setIsAnimating(false), 600);
+  };
+
+  const prevCard = () => {
+    if (isAnimating || currentIndex <= 0) return;
+    setIsAnimating(true);
+    setDirection('prev');
+    setCurrentIndex(prev => prev - 1);
+    setTimeout(() => setIsAnimating(false), 600);
+  };
+
+  const shuffleCards = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    const shuffled = [...filteredCertificates].sort(() => Math.random() - 0.5);
+    setFilteredCertificates(shuffled);
+    setCurrentIndex(0);
+    setTimeout(() => setIsAnimating(false), 600);
+  };
+
+  const goToCard = (index) => {
+    if (isAnimating || index === currentIndex) return;
+    setIsAnimating(true);
+    setDirection(index > currentIndex ? 'next' : 'prev');
+    setCurrentIndex(index);
+    setTimeout(() => setIsAnimating(false), 600);
+  };
+
+  const openModal = (cert) => {
+    setSelectedCertificate(cert);
     setShowModal(true);
   };
 
@@ -201,6 +223,19 @@ const CertificatesSection = () => {
     setShowModal(false);
     setSelectedCertificate(null);
   };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (showModal) return;
+      if (e.key === 'ArrowLeft') prevCard();
+      if (e.key === 'ArrowRight') nextCard();
+      if (e.key === ' ') e.preventDefault();
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentIndex, filteredCertificates.length, showModal, isAnimating]);
 
   // Certificate Modal Component
   const CertificateModal = ({ certificate, isOpen, onClose }) => {
@@ -210,13 +245,20 @@ const CertificatesSection = () => {
     const StatusIcon = statusInfo.icon;
 
     return (
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          {/* Modal Header */}
-          <div className="sticky top-0 bg-gray-900/95 backdrop-blur border-b border-gray-700 p-6 flex justify-between items-start">
+      <div 
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        style={{ animation: 'fadeIn 0.2s ease-out' }}
+        onClick={onClose}
+      >
+        <div 
+          className="bg-gray-900 border border-gray-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+          style={{ animation: 'slideUp 0.3s ease-out' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="sticky top-0 bg-gray-900/95 backdrop-blur border-b border-gray-700 p-6 flex justify-between items-start z-10">
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-white mb-2">{certificate.title}</h2>
-              <div className="flex items-center gap-4 text-gray-400">
+              <div className="flex flex-wrap items-center gap-4 text-gray-400">
                 <div className="flex items-center gap-2">
                   <Building className="w-4 h-4" />
                   <span>{certificate.issuer}</span>
@@ -237,9 +279,7 @@ const CertificatesSection = () => {
             </Button>
           </div>
 
-          {/* Modal Content */}
           <div className="p-6 space-y-6">
-            {/* Certificate Image */}
             {certificate.certificateImage?.url && (
               <div className="relative group">
                 <img
@@ -261,9 +301,7 @@ const CertificatesSection = () => {
               </div>
             )}
 
-            {/* Certificate Details Grid */}
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Left Column */}
               <div className="space-y-4">
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
@@ -315,7 +353,6 @@ const CertificatesSection = () => {
                 </div>
               </div>
 
-              {/* Right Column */}
               <div className="space-y-4">
                 {certificate.difficulty && (
                   <div className="bg-gray-800/50 rounded-lg p-4">
@@ -365,7 +402,6 @@ const CertificatesSection = () => {
               </div>
             </div>
 
-            {/* Description */}
             {certificate.description && (
               <div className="bg-gray-800/50 rounded-lg p-4">
                 <h3 className="text-white font-semibold mb-3">Description</h3>
@@ -373,7 +409,6 @@ const CertificatesSection = () => {
               </div>
             )}
 
-            {/* Actions */}
             <div className="flex gap-3 pt-4 border-t border-gray-700">
               {certificate.credentialUrl && (
                 <Button
@@ -403,31 +438,15 @@ const CertificatesSection = () => {
 
   if (loading) {
     return (
-      <section id="certificates" className="py-16 bg-gradient-to-b from-gray-800 to-gray-900">
+      <section id="certificates" className="py-16 bg-gradient-to-b from-gray-800 to-gray-900 min-h-screen">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-white">Professional Certifications</h2>
           
-          {/* Loading skeleton */}
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-4 justify-center mb-6">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-16 w-32 bg-gray-700 rounded-lg animate-pulse"></div>
-              ))}
+          <div className="flex items-center justify-center min-h-[600px]">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-gray-400">Loading certificates...</p>
             </div>
-            <div className="h-10 bg-gray-700 rounded-lg animate-pulse max-w-md mx-auto mb-4"></div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse bg-gray-900 border-gray-700">
-                <CardContent className="p-6">
-                  <div className="h-16 w-16 bg-gray-700 rounded-full mx-auto mb-4"></div>
-                  <div className="h-4 bg-gray-700 rounded w-3/4 mb-4 mx-auto"></div>
-                  <div className="h-8 bg-gray-700 rounded mb-2"></div>
-                  <div className="h-8 bg-gray-700 rounded"></div>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </section>
@@ -436,7 +455,7 @@ const CertificatesSection = () => {
 
   if (certificates.length === 0 && !loading) {
     return (
-      <section id="certificates" className="py-16 bg-gradient-to-b from-gray-800 to-gray-900">
+      <section id="certificates" className="py-16 bg-gradient-to-b from-gray-800 to-gray-900 min-h-screen">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 text-white">Professional Certifications</h2>
@@ -474,47 +493,62 @@ const CertificatesSection = () => {
   }
 
   return (
-    <section id="certificates" className="py-16 bg-gradient-to-b from-gray-800 to-gray-900">
+    <section id="certificates" className="py-16 bg-gradient-to-b from-gray-800 to-gray-900 min-h-screen">
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+      `}</style>
+
       <div className="container mx-auto px-4">
-        {/* Header with enhanced stats */}
+        {/* Header with Stats */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-white">Professional Certifications</h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">Professional Certifications</h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-lg mb-8">
             Validated expertise through industry-recognized certifications and continuous learning
           </p>
           
-          {/* Enhanced Stats Cards */}
+          {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
             <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 hover:bg-gray-800/50 transition-colors">
-              <div className="text-2xl font-bold text-blue-400 flex items-center justify-center gap-2">
+              <div className="text-3xl font-bold text-blue-400 flex items-center justify-center gap-2">
                 <Trophy className="w-6 h-6" />
                 {stats.total || certificates.length}
               </div>
-              <div className="text-gray-400 text-sm">Total Earned</div>
+              <div className="text-gray-400 text-sm mt-1">Total Earned</div>
             </div>
             <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 hover:bg-gray-800/50 transition-colors">
-              <div className="text-2xl font-bold text-green-400 flex items-center justify-center gap-2">
+              <div className="text-3xl font-bold text-green-400 flex items-center justify-center gap-2">
                 <CheckCircle className="w-6 h-6" />
                 {stats.active || 0}
               </div>
-              <div className="text-gray-400 text-sm">Currently Valid</div>
+              <div className="text-gray-400 text-sm mt-1">Currently Valid</div>
             </div>
             {(stats.expiring > 0 || certificates.some(c => c.isExpiringSoon)) && (
               <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 hover:bg-gray-800/50 transition-colors">
-                <div className="text-2xl font-bold text-yellow-400 flex items-center justify-center gap-2">
+                <div className="text-3xl font-bold text-yellow-400 flex items-center justify-center gap-2">
                   <Clock className="w-6 h-6" />
                   {stats.expiring || certificates.filter(c => c.isExpiringSoon).length}
                 </div>
-                <div className="text-gray-400 text-sm">Expiring Soon</div>
+                <div className="text-gray-400 text-sm mt-1">Expiring Soon</div>
               </div>
             )}
             {stats.recentlyAdded > 0 && (
               <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 hover:bg-gray-800/50 transition-colors">
-                <div className="text-2xl font-bold text-purple-400 flex items-center justify-center gap-2">
+                <div className="text-3xl font-bold text-purple-400 flex items-center justify-center gap-2">
                   <Zap className="w-6 h-6" />
                   {stats.recentlyAdded}
                 </div>
-                <div className="text-gray-400 text-sm">Recently Added</div>
+                <div className="text-gray-400 text-sm mt-1">Recently Added</div>
               </div>
             )}
           </div>
@@ -536,431 +570,51 @@ const CertificatesSection = () => {
           </div>
         )}
 
-        {/* Enhanced Search and Filter Controls */}
-        {certificates.length > 0 && (
-          <div className="mb-8 space-y-4">
-            {/* Search Bar with View Toggle */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search certificates, issuers, or tags..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* View Mode Toggle */}
-              <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg p-1 border border-gray-700">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className={`${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className={`${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
+        {/* Search and Filter Controls */}
+        <div className="mb-8 space-y-4 max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search certificates, issuers, or tags..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
 
-            {/* Filter Toggle */}
-            <div className="text-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
-              >
-                <SlidersHorizontal className="w-4 h-4 mr-2" />
-                Advanced Filters
-                <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-              </Button>
-            </div>
+            {/* Filter Dropdown */}
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Certificates</option>
+              <option value="active">Active Only</option>
+              <option value="expiring">Expiring Soon</option>
+              <option value="expired">Expired</option>
+              <option value="verified">Verified Only</option>
+            </select>
 
-            {/* Advanced Filter Controls */}
-            {showFilters && (
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 max-w-4xl mx-auto">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Filter by Status</label>
-                    <select
-                      value={filter}
-                      onChange={(e) => setFilter(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="all">All Certificates</option>
-                      <option value="active">Active Only</option>
-                      <option value="expiring">Expiring Soon</option>
-                      <option value="expired">Expired</option>
-                      <option value="verified">Verified Only</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Sort by</label>
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="issueDate">Issue Date (Newest)</option>
-                      <option value="expiryDate">Expiry Date</option>
-                      <option value="title">Title (A-Z)</option>
-                      <option value="issuer">Issuer (A-Z)</option>
-                      <option value="priority">Priority</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-end">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setSearchTerm('');
-                        setFilter('all');
-                        setSortBy('issueDate');
-                      }}
-                      className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-                    >
-                      Clear All Filters
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Shuffle Button */}
+            <Button
+              onClick={shuffleCards}
+              disabled={isAnimating || filteredCertificates.length <= 1}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+            >
+              <Shuffle className="w-4 h-4 mr-2" />
+              Shuffle
+            </Button>
           </div>
-        )}
 
-        {/* Results Info */}
-        {certificates.length > 0 && (
-          <div className="text-center mb-6 text-gray-400">
+          {/* Results Info */}
+          <div className="text-center text-gray-400 text-sm">
             Showing {filteredCertificates.length} of {certificates.length} certificates
             {searchTerm && <span> for "{searchTerm}"</span>}
           </div>
-        )}
-
-        {/* Certificates Display */}
-        {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCertificates.map((cert) => {
-              const statusInfo = getStatusInfo(cert);
-              const StatusIcon = statusInfo.icon;
-              
-              return (
-                <Card 
-                  key={cert._id} 
-                  className={`bg-gray-900/80 backdrop-blur border-gray-700 hover:shadow-xl hover:shadow-blue-900/20 transition-all duration-500 group relative overflow-hidden cursor-pointer ${
-                    statusInfo.status === 'expired' ? 'opacity-75' : ''
-                  }`}
-                  onClick={() => openModal(cert)}
-                >
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
-                  {/* Priority Star */}
-                  {cert.priority > 0 && (
-                    <div className="absolute top-3 left-3 bg-yellow-500 text-yellow-900 text-xs px-2 py-1 rounded-full flex items-center gap-1 z-10">
-                      <Star className="w-3 h-3 fill-current" />
-                      {cert.priority}
-                    </div>
-                  )}
-
-                  {/* Status Badge */}
-                  <div className={`absolute top-3 right-3 ${statusInfo.color} text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 z-10`}>
-                    <StatusIcon className="w-3 h-3" />
-                    {statusInfo.status === 'expired' ? 'Expired' : 
-                     statusInfo.status === 'expiring' ? 'Expiring' : 'Active'}
-                  </div>
-
-                  <CardHeader className="text-center pb-4 relative z-10">
-                    {/* Logo or Certificate Image */}
-                    <div className="relative">
-                      {cert.certificateImage?.url ? (
-                        <div className="w-20 h-20 mx-auto mb-4 relative group/image">
-                          <img 
-                            src={cert.certificateImage.url} 
-                            alt={`${cert.title} certificate`}
-                            className="w-full h-full object-cover rounded-xl border border-gray-600 group-hover:scale-110 transition-transform duration-300"
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/40 transition-colors duration-300 rounded-xl flex items-center justify-center">
-                            <Eye className="w-6 h-6 text-white opacity-0 group-hover/image:opacity-100 transition-opacity duration-300" />
-                          </div>
-                        </div>
-                      ) : cert.logo?.url ? (
-                        <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-white/5 rounded-xl p-3 group-hover:scale-110 transition-transform duration-300">
-                          <img 
-                            src={cert.logo.url} 
-                            alt={`${cert.issuer} logo`}
-                            className="max-w-full max-h-full object-contain"
-                            onError={(e) => {
-                              e.target.parentElement.innerHTML = `
-                                <div class="w-full h-full rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                                  <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                  </svg>
-                                </div>
-                              `;
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-20 h-20 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                          <Award className="w-10 h-10 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    
-                    <CardTitle className="text-white text-lg leading-tight hover:text-blue-300 transition-colors duration-300">
-                      {cert.title}
-                    </CardTitle>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4 relative z-10">
-                    <div className="space-y-4">
-                    {/* Issuer */}
-                    <div className="flex items-center text-gray-300 text-sm">
-                      <Building className="w-4 h-4 mr-3 text-blue-400 flex-shrink-0" />
-                      <span className="truncate font-medium">{cert.issuer}</span>
-                    </div>
-                    
-                    {/* Date Information */}
-                    <div className="space-y-2">
-                      <div className="flex items-center text-gray-300 text-sm">
-                        <Calendar className="w-4 h-4 mr-3 text-green-400 flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate">Issued: {formatDate(cert.issueDate)}</div>
-                          {cert.expiryDate && (
-                            <div className={`truncate text-xs ${statusInfo.textColor}`}>
-                              Expires: {formatDate(cert.expiryDate)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Status and Difficulty */}
-                    <div className="flex items-center justify-between">
-                      <div className={`flex items-center text-sm ${statusInfo.textColor}`}>
-                        <StatusIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-                        <span className="font-medium truncate">{statusInfo.label}</span>
-                      </div>
-                      {cert.difficulty && (
-                        <Badge className={getDifficultyColor(cert.difficulty)}>
-                          {cert.difficulty}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    {/* Tags */}
-                    {cert.tags && cert.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {cert.tags.slice(0, 3).map((tag, index) => (
-                          <Badge
-                            key={index}
-                            className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                        {cert.tags.length > 3 && (
-                          <Badge className="bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs">
-                            +{cert.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                    
-                    {/* Credential ID */}
-                    {cert.credentialId && (
-                      <div className="flex items-center text-gray-400 text-sm">
-                        <IdCard className="w-4 h-4 mr-3 text-yellow-400 flex-shrink-0" />
-                        <span className="font-mono text-xs bg-gray-800 px-2 py-1 rounded truncate">
-                          {cert.credentialId}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Score */}
-                    {cert.score && (
-                      <div className="flex items-center text-gray-400 text-sm">
-                        <GraduationCap className="w-4 h-4 mr-3 text-purple-400 flex-shrink-0" />
-                        <span className="font-semibold text-white">{cert.score}</span>
-                      </div>
-                    )}
-
-                    {/* Certificate Image Indicator */}
-                    {cert.certificateImage?.url && (
-                      <div className="flex items-center text-blue-400 text-sm">
-                        <ImageIcon className="w-4 h-4 mr-2" />
-                        <span>Certificate Available</span>
-                      </div>
-                    )}
-                    
-                    {/* Action Button */}
-                    {cert.credentialUrl && (
-                      <div className="pt-2">
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(cert.credentialUrl, '_blank');
-                          }}
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Verify Certificate
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
         </div>
-        ) : (
-          /* List View */
-          <div className="space-y-4">
-            {filteredCertificates.map((cert) => {
-              const statusInfo = getStatusInfo(cert);
-              const StatusIcon = statusInfo.icon;
-              
-              return (
-                <Card 
-                  key={cert._id} 
-                  className={`bg-gray-900/80 backdrop-blur border-gray-700 hover:shadow-lg hover:shadow-blue-900/20 transition-all duration-300 cursor-pointer ${
-                    statusInfo.status === 'expired' ? 'opacity-75' : ''
-                  }`}
-                  onClick={() => openModal(cert)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-6">
-                      {/* Logo/Image */}
-                      <div className="flex-shrink-0">
-                        {cert.certificateImage?.url ? (
-                          <div className="w-16 h-16 relative group/image">
-                            <img 
-                              src={cert.certificateImage.url} 
-                              alt={`${cert.title} certificate`}
-                              className="w-full h-full object-cover rounded-lg border border-gray-600"
-                            />
-                            <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/40 transition-colors duration-300 rounded-lg flex items-center justify-center">
-                              <Eye className="w-4 h-4 text-white opacity-0 group-hover/image:opacity-100 transition-opacity duration-300" />
-                            </div>
-                          </div>
-                        ) : cert.logo?.url ? (
-                          <div className="w-16 h-16 flex items-center justify-center bg-white/5 rounded-lg p-2">
-                            <img 
-                              src={cert.logo.url} 
-                              alt={`${cert.issuer} logo`}
-                              className="max-w-full max-h-full object-contain"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                            <Award className="w-8 h-8 text-white" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Certificate Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-white text-xl font-semibold leading-tight truncate pr-4">
-                            {cert.title}
-                          </h3>
-                          {cert.priority > 0 && (
-                            <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 flex-shrink-0">
-                              <Star className="w-3 h-3 mr-1 fill-current" />
-                              {cert.priority}
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-4 mb-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center text-gray-300 text-sm">
-                              <Building className="w-4 h-4 mr-2 text-blue-400" />
-                              <span className="truncate">{cert.issuer}</span>
-                            </div>
-                            <div className="flex items-center text-gray-300 text-sm">
-                              <Calendar className="w-4 h-4 mr-2 text-green-400" />
-                              <span>{formatDate(cert.issueDate)}</span>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className={`flex items-center text-sm ${statusInfo.textColor}`}>
-                              <StatusIcon className="w-4 h-4 mr-2" />
-                              <span className="truncate">{statusInfo.label}</span>
-                            </div>
-                            {cert.difficulty && (
-                              <div className="flex items-center gap-2">
-                                <Target className="w-4 h-4 text-purple-400" />
-                                <Badge className={getDifficultyColor(cert.difficulty)}>
-                                  {cert.difficulty}
-                                </Badge>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Tags and Actions */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-wrap gap-1">
-                            {cert.tags && cert.tags.slice(0, 2).map((tag, index) => (
-                              <Badge
-                                key={index}
-                                className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs"
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                            {cert.tags && cert.tags.length > 2 && (
-                              <Badge className="bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs">
-                                +{cert.tags.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            {cert.certificateImage?.url && (
-                              <div className="text-blue-400 text-xs flex items-center gap-1">
-                                <ImageIcon className="w-3 h-3" />
-                                <span>Image</span>
-                              </div>
-                            )}
-                            {cert.credentialUrl && (
-                              <Button
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(cert.credentialUrl, '_blank');
-                                }}
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs px-3 py-1"
-                              >
-                                <ExternalLink className="w-3 h-3 mr-1" />
-                                Verify
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
 
         {/* No Results */}
         {filteredCertificates.length === 0 && certificates.length > 0 && (
@@ -982,6 +636,273 @@ const CertificatesSection = () => {
             >
               Clear Filters
             </Button>
+          </div>
+        )}
+
+        {/* Floating Card Stack */}
+        {filteredCertificates.length > 0 && (
+          <div className="relative">
+            {/* Main Stack Container */}
+            <div className="relative min-h-[700px] md:min-h-[800px] flex items-center justify-center mb-12">
+              {/* Stack of Cards */}
+              <div className="relative w-full max-w-2xl" style={{ perspective: '2000px' }}>
+                {filteredCertificates.map((cert, index) => {
+                  const statusInfo = getStatusInfo(cert);
+                  const StatusIcon = statusInfo.icon;
+                  const offset = index - currentIndex;
+                  const absOffset = Math.abs(offset);
+                  
+                  // Only render cards that are close to current
+                  if (absOffset > 3) return null;
+
+                  // Calculate transform based on position in stack
+                  let transform = '';
+                  let opacity = 1;
+                  let zIndex = filteredCertificates.length - absOffset;
+                  let pointerEvents = 'auto';
+
+                  if (offset === 0) {
+                    // Front card
+                    transform = 'translateX(0) translateY(0) rotateY(0deg) scale(1)';
+                    opacity = 1;
+                    zIndex = filteredCertificates.length + 10;
+                  } else if (offset > 0) {
+                    // Cards behind (to the right)
+                    transform = `translateX(${offset * 30}px) translateY(${offset * 20}px) rotateY(-${offset * 5}deg) scale(${1 - offset * 0.1})`;
+                    opacity = Math.max(0.3, 1 - offset * 0.2);
+                    pointerEvents = 'none';
+                  } else {
+                    // Cards in front (to the left) - hidden
+                    transform = `translateX(${offset * 30}px) translateY(${offset * 20}px) rotateY(${offset * 5}deg) scale(${1 + offset * 0.1})`;
+                    opacity = 0;
+                    pointerEvents = 'none';
+                  }
+
+                  const isExpired = cert.isExpired;
+
+                  return (
+                    <div
+                      key={cert._id}
+                      className="absolute inset-0 transition-all duration-700 ease-out"
+                      style={{
+                        transform,
+                        opacity,
+                        zIndex,
+                        pointerEvents,
+                        filter: isExpired ? 'grayscale(0.5)' : 'none'
+                      }}
+                    >
+                      <div
+                        className={`bg-gray-900 border-2 rounded-2xl overflow-hidden shadow-2xl cursor-pointer hover:shadow-blue-900/50 transition-all duration-300 ${
+                          offset === 0 ? 'border-blue-500/50' : 'border-gray-700'
+                        } ${cert.priority > 7 ? 'ring-2 ring-yellow-500/30' : ''}`}
+                        onClick={() => offset === 0 && openModal(cert)}
+                        style={{
+                          height: '600px',
+                          animation: offset === 0 ? 'float 3s ease-in-out infinite' : 'none'
+                        }}
+                      >
+                        {/* Card Header */}
+                        <div className="relative h-48 bg-gradient-to-br from-blue-900 to-purple-900 overflow-hidden">
+                          {cert.certificateImage?.url ? (
+                            <img
+                              src={cert.certificateImage.url}
+                              alt={cert.title}
+                              className="w-full h-full object-cover opacity-80"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Award className="w-24 h-24 text-white/20" />
+                            </div>
+                          )}
+                          
+                          {/* Priority Badge */}
+                          {cert.priority > 0 && (
+                            <div className="absolute top-4 left-4 bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full flex items-center gap-1 font-bold shadow-lg">
+                              <Star className="w-4 h-4 fill-current" />
+                              {cert.priority}
+                            </div>
+                          )}
+
+                          {/* Status Badge */}
+                          <div className={`absolute top-4 right-4 ${statusInfo.color} text-white px-3 py-1 rounded-full flex items-center gap-1 text-sm font-medium shadow-lg`}>
+                            <StatusIcon className="w-4 h-4" />
+                            {statusInfo.status === 'expired' ? 'Expired' : 
+                             statusInfo.status === 'expiring' ? 'Expiring' : 'Active'}
+                          </div>
+
+                          {/* Logo Overlay */}
+                          {cert.logo?.url && (
+                            <div className="absolute bottom-4 left-4 w-16 h-16 bg-white rounded-lg p-2 shadow-lg">
+                              <img
+                                src={cert.logo.url}
+                                alt={`${cert.issuer} logo`}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Card Content */}
+                        <div className="p-6 space-y-4">
+                          <div>
+                            <h3 className="text-2xl font-bold text-white mb-2 line-clamp-2">
+                              {cert.title}
+                            </h3>
+                            <div className="flex items-center text-gray-400 mb-3">
+                              <Building className="w-4 h-4 mr-2" />
+                              <span className="text-sm">{cert.issuer}</span>
+                            </div>
+                          </div>
+
+                          {cert.description && (
+                            <p className="text-gray-300 text-sm line-clamp-3 leading-relaxed">
+                              {cert.description}
+                            </p>
+                          )}
+
+                          {/* Details Grid */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-gray-800/50 rounded-lg p-3">
+                              <div className="flex items-center text-green-400 mb-1">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                <span className="text-xs font-medium">Issued</span>
+                              </div>
+                              <div className="text-white text-sm font-semibold">
+                                {formatDate(cert.issueDate)}
+                              </div>
+                            </div>
+
+                            <div className="bg-gray-800/50 rounded-lg p-3">
+                              <div className={`flex items-center mb-1 ${statusInfo.textColor}`}>
+                                <Clock className="w-4 h-4 mr-2" />
+                                <span className="text-xs font-medium">
+                                  {cert.expiryDate ? 'Expires' : 'Valid'}
+                                </span>
+                              </div>
+                              <div className="text-white text-sm font-semibold">
+                                {formatDate(cert.expiryDate)}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Additional Info */}
+                          <div className="flex items-center justify-between pt-2">
+                            {cert.difficulty && (
+                              <Badge className={getDifficultyColor(cert.difficulty)}>
+                                <Target className="w-3 h-3 mr-1" />
+                                {cert.difficulty}
+                              </Badge>
+                            )}
+                            
+                            {cert.score && (
+                              <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20">
+                                <GraduationCap className="w-3 h-3 mr-1" />
+                                {cert.score}
+                              </Badge>
+                            )}
+                          </div>
+
+                          {/* Tags */}
+                          {cert.tags && cert.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {cert.tags.slice(0, 4).map((tag, idx) => (
+                                <Badge
+                                  key={idx}
+                                  className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {cert.tags.length > 4 && (
+                                <Badge className="bg-gray-500/10 text-gray-400 border-gray-500/20 text-xs">
+                                  +{cert.tags.length - 4}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-2 pt-2">
+                            {cert.credentialUrl && (
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(cert.credentialUrl, '_blank');
+                                }}
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-sm"
+                              >
+                                <ExternalLink className="w-3 h-3 mr-1" />
+                                Verify
+                              </Button>
+                            )}
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openModal(cert);
+                              }}
+                              variant="outline"
+                              className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700 text-sm"
+                            >
+                              <Eye className="w-3 h-3 mr-1" />
+                              Details
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Navigation Controls */}
+            <div className="flex items-center justify-center gap-6 mb-8">
+              <Button
+                onClick={prevCard}
+                disabled={currentIndex === 0 || isAnimating}
+                className="bg-gray-800 hover:bg-gray-700 text-white disabled:opacity-30 disabled:cursor-not-allowed w-12 h-12 rounded-full p-0 flex items-center justify-center"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </Button>
+
+              {/* Progress Indicator */}
+              <div className="flex items-center gap-2">
+                {filteredCertificates.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToCard(index)}
+                    disabled={isAnimating}
+                    className={`transition-all duration-300 rounded-full ${
+                      index === currentIndex
+                        ? 'w-8 h-3 bg-blue-500'
+                        : 'w-3 h-3 bg-gray-600 hover:bg-gray-500'
+                    }`}
+                    aria-label={`Go to certificate ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              <Button
+                onClick={nextCard}
+                disabled={currentIndex === filteredCertificates.length - 1 || isAnimating}
+                className="bg-gray-800 hover:bg-gray-700 text-white disabled:opacity-30 disabled:cursor-not-allowed w-12 h-12 rounded-full p-0 flex items-center justify-center"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </Button>
+            </div>
+
+            {/* Current Certificate Info */}
+            {filteredCertificates[currentIndex] && (
+              <div className="text-center text-gray-400 text-sm">
+                <p>
+                  Certificate {currentIndex + 1} of {filteredCertificates.length}
+                </p>
+                <p className="text-xs mt-1 text-gray-500">
+                  Use arrow keys to navigate • Click card for details
+                </p>
+              </div>
+            )}
           </div>
         )}
 

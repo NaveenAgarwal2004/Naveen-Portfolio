@@ -18,6 +18,8 @@ import { Toaster } from './components/ui/toaster';
 import { portfolioAPI, testConnection } from './services/api';
 import ResumeSection from './components/ResumeSection';
 import CertificatesSection from './components/CertificatesSection';
+// import InteractiveTimeline from './components/InteractiveTimeline';
+// import AIFabChatAssistant from './components/AIFabChatAssistant';
 import MetaTags from './components/SEO/MetaTags';
 import { AlertCircle, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 
