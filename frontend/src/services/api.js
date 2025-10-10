@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
+// Temporary fix: Hardcode production backend URL
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ||
+  (import.meta.env.PROD ? 'https://naveen-portfolio-il6e.onrender.com' : 'http://localhost:8001');
 const API = `${BACKEND_URL}/api`;
 
 console.log('🔗 Backend URL:', BACKEND_URL); // Debug log
@@ -277,9 +279,26 @@ export const adminAPI = {
   
   // Certificates Management
   getCertificates: () => certificatesAPI.getCertificates(),
-  addCertificate: (certificateData) => apiClient.post('/certificates', certificateData),
-  updateCertificate: (id, certificateData) => apiClient.put(`/certificates/${id}`, certificateData),
-  deleteCertificate: (id) => apiClient.delete(`/certificates/${id}`),
+  getCertificateTags: () => apiClient.get('/admin/certificates/tags'),
+  addCertificate: (certificateData) => apiClient.post('/admin/certificates', certificateData),
+  updateCertificate: (id, certificateData) => apiClient.put(`/admin/certificates/${id}`, certificateData),
+  deleteCertificate: (id) => apiClient.delete(`/admin/certificates/${id}`),
+  uploadCertificateImage: (certificateId, file) => {
+    const formData = new FormData();
+    formData.append('certificateImage', file);
+    return apiClient.post(`/admin/certificates/${certificateId}/image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadCertificateLogo: (certificateId, file) => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    return apiClient.post(`/admin/certificates/${certificateId}/logo`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  bulkCertificateOperation: (action, certificateIds, data) => apiClient.post('/admin/certificates/bulk', { action, certificateIds, data }),
+  exportCertificates: (format = 'json') => apiClient.get('/admin/certificates/export', { params: { format } }),
   
   // File Uploads
   uploadProfileImage: (file) => {
