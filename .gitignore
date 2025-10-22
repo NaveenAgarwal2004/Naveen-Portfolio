@@ -395,12 +395,14 @@ upload-resumes.js
 personal-notes.md
 my-notes.txt
 scratch.md
+*.md
+
 
 # Resume protection (uncomment if you don't want resumes in git)
-# *.pdf
-# frontend/public/*.pdf
+*.pdf
+frontend/public/*.pdf
 backend/*.pdf
-
+testsprite_tests
 # ============================================================================
 # Custom Project Ignores (Add your specific files here)
 # ============================================================================
