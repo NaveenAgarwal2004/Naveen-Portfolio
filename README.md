@@ -7,7 +7,7 @@ To present a modern, full-stack developer portfolio using React and Express with
 # **Context:**
 This portfolio is built using the MERN stack (MongoDB, Express, React, Node.js), with full CRUD capabilities via an admin dashboard and a contact form backed by email services. Tailwind CSS and shadcn/ui were used to build a modern and responsive design.
 
-# **Instructions:**
+# **Instructions:** 
 
 ## **Instruction 1 :**
 Clone the repository and set up both frontend and backend separately. Use `.env.example` to configure your environment variables for backend services like MongoDB, Cloudinary, and Resend.
