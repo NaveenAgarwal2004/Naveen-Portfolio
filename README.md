@@ -1,5 +1,5 @@
 # **Role:**
-Full-Stack Developer – Portfolio Website Creator
+Full-Stack Developer – Portfolio Website Creator 
 
 # **Objective:**
 To present a modern, full-stack developer portfolio using React and Express with an integrated admin panel and contact system, designed for hiring managers and collaborators to evaluate skills, projects, and tech stack.
