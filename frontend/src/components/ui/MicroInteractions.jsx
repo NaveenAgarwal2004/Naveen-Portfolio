@@ -148,10 +148,10 @@ export const TiltWrapper = ({ children, maxTilt = 10, className = '' }) => {
   );
 };
 
-// Glow Effect Component
+// Glow Effect Component - Workshop Theme
 export const GlowWrapper = ({ 
   children, 
-  glowColor = '#3b82f6', 
+  glowColor = '#E85D04', // Workshop orange color
   intensity = 0.5, 
   className = '' 
 }) => {

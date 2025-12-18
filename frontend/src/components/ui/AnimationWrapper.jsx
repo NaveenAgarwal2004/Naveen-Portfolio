@@ -77,7 +77,7 @@ export const StaggerWrapper = ({ children, className = '', delay = 100 }) => {
   );
 };
 
-// Hover animation wrapper
+// Hover animation wrapper - Workshop Theme
 export const HoverAnimationWrapper = ({ 
   children, 
   className = '', 
@@ -91,7 +91,7 @@ export const HoverAnimationWrapper = ({
       case 'lift':
         return 'transform transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl';
       case 'glow':
-        return 'transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/25';
+        return 'transition-all duration-300 hover:shadow-2xl hover:shadow-forge-orange/25';
       case 'rotate':
         return 'transform transition-all duration-300 hover:rotate-1 hover:scale-105';
       case 'pulse':

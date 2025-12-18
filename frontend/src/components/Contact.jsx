@@ -138,8 +138,8 @@ const Contact = () => {
       label: 'Location',
       value: personalData.location,
       href: '#',
-      color: 'text-purple-400',
-      bgColor: 'bg-purple-500/20'
+      color: 'text-clay',
+      bgColor: 'bg-ember-red/20'
     }
   ];
 
@@ -240,7 +240,7 @@ const Contact = () => {
                       <TranslatedText>Your Name *</TranslatedText>
                     </label>
                     <div className="relative group">
-                      <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg sm:rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === 'name' ? 'opacity-100' : ''}`}></div>
+                      <div className={`absolute inset-0 bg-gradient-to-r from-forge-orange/20 to-ember-red/20 rounded-lg sm:rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === 'name' ? 'opacity-100' : ''}`}></div>
                       <input
                         id="name"
                         name="name"
@@ -251,7 +251,7 @@ const Contact = () => {
                         onFocus={() => setFocusedField('name')}
                         onBlur={() => setFocusedField(null)}
                         className="relative w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-sm sm:text-base text-white placeholder-gray-400 
-                        focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all duration-200 backdrop-blur-sm"
+                        focus:border-forge-orange/50 focus:ring-2 focus:ring-forge-orange/20 focus:outline-none transition-all duration-200 backdrop-blur-sm"
                         placeholder="Enter your full name"
                         disabled={isSubmitting}
                       />
@@ -368,7 +368,7 @@ const Contact = () => {
                         <p className="text-gray-400 text-xs sm:text-sm font-medium">
                           <TranslatedText>{contact.label}</TranslatedText>
                         </p>
-                        <p className="text-white text-sm sm:text-base font-semibold group-hover:text-blue-100 transition-colors duration-200 truncate">{contact.value}</p>
+                        <p className="text-white text-sm sm:text-base font-semibold group-hover:text-workshop-tan transition-colors duration-200 truncate">{contact.value}</p>
                       </div>
                       <div className="ml-auto w-0 h-0.5 bg-gradient-to-r from-forge-orange to-ember-red group-hover:w-6 sm:group-hover:w-8 transition-all duration-300 rounded-full"></div>
                     </div>
@@ -380,8 +380,8 @@ const Contact = () => {
             {/* Social Links */}
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 hover:bg-white/10 transition-all duration-300 shadow-xl">
               <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-purple-500/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                  <Github className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-purple-400" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-ember-red/20 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <Github className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-clay" />
                 </div>
                 <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-white">
                   <TranslatedText>Follow Me</TranslatedText>

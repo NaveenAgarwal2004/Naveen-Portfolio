@@ -23,9 +23,9 @@ const Button = forwardRef(({
 
   const variants = {
     primary: `
-      bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500
-      text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25
-      focus:ring-blue-400/50
+      bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-clay
+      text-white hover:scale-105 hover:shadow-lg hover:shadow-forge-orange/25
+      focus:ring-forge-orange/50
     `,
     secondary: `
       bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20

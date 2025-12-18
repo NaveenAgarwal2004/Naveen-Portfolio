@@ -91,7 +91,7 @@ Please describe what you were doing when this error occurred:
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <button
                   onClick={this.handleRetry}
-                  className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 justify-center"
+                  className="group bg-gradient-to-r from-forge-orange to-ember-red hover:from-forge-orange hover:to-ember-red text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 justify-center"
                 >
                   <RefreshCw className="h-5 w-5 group-hover:rotate-180 transition-transform duration-500" />
                   Try Again
@@ -165,7 +165,7 @@ Please describe what you were doing when this error occurred:
                 If this problem persists, please contact support at{' '}
                 <a 
                   href="mailto:naveen@example.com" 
-                  className="text-blue-400 hover:text-blue-300 underline"
+                  className="text-forge-orange hover:text-workshop-tan underline"
                 >
                   naveen@example.com
                 </a>

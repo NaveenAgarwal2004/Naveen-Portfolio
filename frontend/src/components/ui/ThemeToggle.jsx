@@ -14,7 +14,7 @@ const ThemeToggle = ({ className = '' }) => {
         transition-all duration-300 ease-in-out
         hover:bg-gray-200 dark:hover:bg-gray-700
         hover:scale-110 active:scale-95
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-forge-orange focus:ring-offset-2
         focus:ring-offset-white dark:focus:ring-offset-gray-900
         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
         ${className}
@@ -37,7 +37,7 @@ const ThemeToggle = ({ className = '' }) => {
 
         <Moon
           className={`
-            absolute inset-0 w-5 h-5 text-blue-400
+            absolute inset-0 w-5 h-5 text-clay
             transition-all duration-500 ease-in-out
             ${isDark
               ? 'opacity-100 rotate-0 scale-100'

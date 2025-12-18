@@ -14,10 +14,11 @@
   --border-primary: #334155;
   --border-secondary: #475569;
   
-  --accent-blue: #3b82f6;
-  --accent-purple: #8b5cf6;
-  --accent-green: #10b981;
-  --accent-yellow: #f59e0b;
+  /* Workshop Theme Colors - Updated from blue/purple to warm craftsman palette */
+  --accent-orange: #E85D04;
+  --accent-ember: #DC2F02;
+  --accent-green: #40916C;
+  --accent-clay: #D97757;
   --accent-red: #ef4444;
   
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -41,10 +42,11 @@
   --border-primary: #e2e8f0;
   --border-secondary: #cbd5e1;
   
-  --accent-blue: #2563eb;
-  --accent-purple: #7c3aed;
-  --accent-green: #059669;
-  --accent-yellow: #d97706;
+  /* Workshop Theme Colors - Light mode variants */
+  --accent-orange: #E85D04;
+  --accent-ember: #DC2F02;
+  --accent-green: #40916C;
+  --accent-clay: #D97757;
   --accent-red: #dc2626;
   
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -122,9 +124,9 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
-/* Button Components */
+/* Button Components - Workshop Theme */
 .theme-button-primary {
-  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+  background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-ember) 100%);
   color: white;
   border: none;
   transition: all 0.3s ease;
@@ -156,8 +158,8 @@ body {
 }
 
 .theme-input:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 0 3px rgb(232 93 4 / 0.1);
 }
 
 .theme-input::placeholder {
@@ -178,19 +180,19 @@ body {
   color: var(--text-secondary);
 }
 
-/* Links */
+/* Links - Workshop Theme */
 .theme-link {
-  color: var(--accent-blue);
+  color: var(--accent-orange);
   transition: color 0.3s ease;
 }
 
 .theme-link:hover {
-  color: var(--accent-purple);
+  color: var(--accent-ember);
 }
 
-/* Gradients */
+/* Gradients - Workshop Theme */
 .theme-gradient-primary {
-  background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+  background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-ember) 100%);
 }
 
 .theme-gradient-secondary {
@@ -215,9 +217,9 @@ body {
   background: var(--text-muted);
 }
 
-/* Selection */
+/* Selection - Workshop Theme */
 ::selection {
-  background: var(--accent-blue);
+  background: var(--accent-orange);
   color: white;
 }
 
@@ -237,20 +239,20 @@ body {
   }
 }
 
-/* Light theme specific adjustments */
-.light .shadow-blue-500\/10 {
-  box-shadow: 0 0 0 1px rgb(59 130 246 / 0.1), var(--shadow-md);
+/* Light theme specific adjustments - Workshop Theme */
+.light .shadow-orange-500\/10 {
+  box-shadow: 0 0 0 1px rgb(232 93 4 / 0.1), var(--shadow-md);
 }
 
-.light .shadow-purple-500\/10 {
-  box-shadow: 0 0 0 1px rgb(139 92 246 / 0.1), var(--shadow-md);
+.light .shadow-ember-500\/10 {
+  box-shadow: 0 0 0 1px rgb(220 47 2 / 0.1), var(--shadow-md);
 }
 
-/* Dark theme specific adjustments */
-.dark .shadow-blue-500\/10 {
-  box-shadow: 0 0 20px rgb(59 130 246 / 0.1), var(--shadow-md);
+/* Dark theme specific adjustments - Workshop Theme */
+.dark .shadow-orange-500\/10 {
+  box-shadow: 0 0 20px rgb(232 93 4 / 0.1), var(--shadow-md);
 }
 
-.dark .shadow-purple-500\/10 {
-  box-shadow: 0 0 20px rgb(139 92 246 / 0.1), var(--shadow-md);
+.dark .shadow-ember-500\/10 {
+  box-shadow: 0 0 20px rgb(220 47 2 / 0.1), var(--shadow-md);
 }

@@ -18,8 +18,8 @@ import { Toaster } from './components/ui/toaster';
 import { portfolioAPI, testConnection } from './services/api';
 import ResumeSection from './components/ResumeSection';
 import CertificatesSection from './components/CertificatesSection';
-// import InteractiveTimeline from './components/InteractiveTimeline';
-// import AIFabChatAssistant from './components/AIFabChatAssistant';
+import InteractiveTimeline from './components/InteractiveTimeline';
+import AIFabChatAssistant from './components/AIFabChatAssistant';
 import MetaTags from './components/SEO/MetaTags';
 import LanguageLoadingOverlay from './components/LanguageLoadingOverlay';
 import { AlertCircle, Wifi, WifiOff, RefreshCw } from 'lucide-react';
@@ -43,13 +43,13 @@ const ProtectedRoute = lazy(() => import('./components/admin/ProtectedRoute'));
 const LoadingSpinner = ({ message = "Loading...", showRetry = false, onRetry }) => (
   <div className="min-h-screen bg-gray-900 flex items-center justify-center">
     <div className="text-center max-w-md px-4">
-      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-6"></div>
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-forge-orange mx-auto mb-6"></div>
       <p className="text-gray-400 text-lg mb-2">{message}</p>
       <p className="text-gray-500 text-sm mb-4">This may take a moment...</p>
       {showRetry && (
         <button
           onClick={onRetry}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 mx-auto"
+          className="px-4 py-2 bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-forge-orange text-white rounded-lg transition-colors flex items-center gap-2 mx-auto"
         >
           <RefreshCw className="w-4 h-4" />
           Retry
@@ -79,14 +79,14 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen bg-gray-900 flex items-center justify-center">
           <div className="text-center max-w-md px-4">
-            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+            <AlertCircle className="w-16 h-16 text-ember-red mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-white mb-2">Something went wrong</h2>
             <p className="text-gray-400 mb-4">
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-forge-orange text-white rounded-lg transition-colors"
             >
               Reload Page
             </button>

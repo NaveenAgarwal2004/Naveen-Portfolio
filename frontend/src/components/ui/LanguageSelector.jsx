@@ -34,7 +34,7 @@ const LanguageSelector = ({ className = '' }) => {
         className="
           flex items-center gap-2 px-3 py-2 rounded-lg
           theme-button-secondary theme-transition
-          hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500
+          hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-forge-orange
           disabled:opacity-50 disabled:cursor-not-allowed
         "
         disabled={isLoading}
@@ -83,7 +83,7 @@ const LanguageSelector = ({ className = '' }) => {
                   <div className="text-xs theme-text-tertiary">{language.name}</div>
                 </div>
                 {currentLanguage === language.code && (
-                  <Check className="w-4 h-4 text-blue-500 shrink-0" />
+                  <Check className="w-4 h-4 text-forge-orange shrink-0" />
                 )}
               </button>
             ))}

@@ -118,12 +118,12 @@ const AIFabChatAssistant = () => {
       .map((line, index) => {
         if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
           return <div key={index} className="ml-4 flex items-start gap-2">
-            <span className="text-blue-400 mt-1">•</span>
+            <span className="text-forge-orange mt-1">•</span>
             <span>{line.replace(/^[•-]\s*/, '')}</span>
           </div>;
         }
         if (line.trim().startsWith('🎓') || line.trim().startsWith('💼') || line.trim().startsWith('🚀') || line.trim().startsWith('📜')) {
-          return <div key={index} className="font-medium text-blue-300 mt-2">{line}</div>;
+          return <div key={index} className="font-medium text-workshop-tan mt-2">{line}</div>;
         }
         return line.trim() ? <div key={index} className="mb-1">{line}</div> : <div key={index} className="h-2"></div>;
       });
@@ -135,7 +135,7 @@ const AIFabChatAssistant = () => {
       {!isOpen && (
         <button
           onClick={toggleChat}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group hover:scale-110"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-clay rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group hover:scale-110"
           aria-label="Open AI Chat Assistant"
         >
           <MessageCircle className="w-6 h-6 text-white" />
@@ -156,7 +156,7 @@ const AIFabChatAssistant = () => {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b theme-border">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-forge-orange to-ember-red rounded-full flex items-center justify-center">
                 <Bot className="w-4 h-4 text-white" />
               </div>
               <div>
@@ -197,7 +197,7 @@ const AIFabChatAssistant = () => {
                     }`}
                   >
                     {message.type === 'assistant' && (
-                      <div className="w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="w-6 h-6 bg-gradient-to-r from-forge-orange to-ember-red rounded-full flex items-center justify-center flex-shrink-0">
                         <Bot className="w-3 h-3 text-white" />
                       </div>
                     )}
@@ -205,7 +205,7 @@ const AIFabChatAssistant = () => {
                     <div
                       className={`max-w-[75%] p-3 rounded-2xl text-sm ${
                         message.type === 'user'
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white ml-auto'
+                          ? 'bg-gradient-to-r from-forge-orange to-ember-red text-white ml-auto'
                           : 'theme-bg-secondary theme-text-primary'
                       }`}
                     >
@@ -228,7 +228,7 @@ const AIFabChatAssistant = () => {
                 
                 {isLoading && (
                   <div className="flex gap-3 justify-start">
-                    <div className="w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                    <div className="w-6 h-6 bg-gradient-to-r from-forge-orange to-ember-red rounded-full flex items-center justify-center">
                       <Bot className="w-3 h-3 text-white" />
                     </div>
                     <div className="theme-bg-secondary p-3 rounded-2xl">
@@ -254,14 +254,14 @@ const AIFabChatAssistant = () => {
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder={t('chat.placeholder', "Ask me about Naveen's projects, skills, or experience...")}
-                    className="flex-1 theme-input rounded-xl px-3 py-2 text-sm resize-none h-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 theme-input rounded-xl px-3 py-2 text-sm resize-none h-10 focus:outline-none focus:ring-2 focus:ring-forge-orange"
                     rows="1"
                     disabled={isLoading}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!inputMessage.trim() || isLoading}
-                    className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-all duration-200"
+                    className="w-10 h-10 bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-clay disabled:opacity-50 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-all duration-200"
                   >
                     {isLoading ? (
                       <Loader2 className="w-4 h-4 text-white animate-spin" />

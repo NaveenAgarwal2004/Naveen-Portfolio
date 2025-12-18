@@ -16,7 +16,7 @@ const LanguageLoadingOverlay = () => {
           : 'bg-white border border-gray-200'
       }`}>
         <div className="text-6xl mb-4 animate-bounce">{languages[currentLanguage]?.flag}</div>
-        <div className="animate-spin w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full mx-auto mb-4"></div>
+        <div className="animate-spin w-8 h-8 border-2 border-forge-orange/30 border-t-forge-orange rounded-full mx-auto mb-4"></div>
         <h3 className={`text-lg font-semibold mb-2 ${
           isDark ? 'text-white' : 'text-gray-900'
         }`}>

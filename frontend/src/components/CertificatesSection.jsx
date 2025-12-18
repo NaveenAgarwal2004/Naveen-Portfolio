@@ -169,7 +169,7 @@ const CertificatesSection = () => {
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case 'Beginner':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        return 'bg-forge-orange/10 text-forge-orange border-forge-orange/20';
       case 'Intermediate':
         return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
       case 'Advanced':
@@ -271,7 +271,7 @@ const CertificatesSection = () => {
               <div className="space-y-4">
                 <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
                   <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                    <Building className="w-4 h-4 text-blue-400" />
+                    <Building className="w-4 h-4 text-forge-orange" />
                     Issuer Information
                   </h3>
                   <div className="flex items-center gap-3">
@@ -323,7 +323,7 @@ const CertificatesSection = () => {
                 {certificate.difficulty && (
                   <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
                     <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                      <Target className="w-4 h-4 text-purple-400" />
+                      <Target className="w-4 h-4 text-clay" />
                       Certification Details
                     </h3>
                     <div className="space-y-2">
@@ -357,7 +357,7 @@ const CertificatesSection = () => {
                       {certificate.tags.map((tag, index) => (
                         <Badge
                           key={index}
-                          className="bg-blue-500/10 text-blue-400 border-blue-500/20"
+                          className="bg-forge-orange/10 text-forge-orange border-forge-orange/20"
                         >
                           {tag}
                         </Badge>
@@ -379,7 +379,7 @@ const CertificatesSection = () => {
               {certificate.credentialUrl && (
                 <Button
                   onClick={() => window.open(certificate.credentialUrl, '_blank')}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white flex-1"
+                  className="bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-clay text-white flex-1"
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Verify Certificate
@@ -410,7 +410,7 @@ const CertificatesSection = () => {
           
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-16 h-16 mx-auto mb-4 border-4 border-forge-orange border-t-transparent rounded-full animate-spin"></div>
               <p className="text-gray-400">Loading certificates...</p>
             </div>
           </div>
@@ -447,8 +447,8 @@ const CertificatesSection = () => {
           )}
           
           <div className="text-center">
-            <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-blue-500/20 flex items-center justify-center">
-              <Award className="w-16 h-16 text-blue-400" />
+            <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-forge-orange/20 to-ember-red/20 backdrop-blur-sm border border-forge-orange/20 flex items-center justify-center">
+              <Award className="w-16 h-16 text-forge-orange" />
             </div>
             <h3 className="text-2xl font-semibold text-white mb-4">No Certifications Available</h3>
             <p className="text-gray-500 text-lg mb-6">Professional certifications will be displayed here once available</p>
@@ -461,7 +461,7 @@ const CertificatesSection = () => {
   return (
     <section id="certificates" className="py-20 bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 min-h-screen relative overflow-hidden">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-carbon/20 via-transparent to-transparent"></div>
       <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]"></div>
 
       <style>{`
@@ -495,7 +495,7 @@ const CertificatesSection = () => {
       <div className="container mx-auto px-4 max-w-7xl relative z-10">
         {/* Header with Stats */}
         <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-6xl font-bold mb-4 text-white bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-white">
+          <h2 className="text-5xl md:text-6xl font-bold mb-4 text-white bg-clip-text text-transparent bg-gradient-to-r from-white via-workshop-tan to-white">
             Professional Certifications
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-lg mb-10">
@@ -505,7 +505,7 @@ const CertificatesSection = () => {
           {/* Enhanced Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-10">
             <div className="bg-white/5 backdrop-blur-md border border-gray-700/50 rounded-xl p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-              <div className="text-3xl font-bold text-blue-400 flex items-center justify-center gap-2 mb-1">
+              <div className="text-3xl font-bold text-forge-orange flex items-center justify-center gap-2 mb-1">
                 <Trophy className="w-6 h-6" />
                 {stats.total || certificates.length}
               </div>
@@ -529,7 +529,7 @@ const CertificatesSection = () => {
             )}
             {stats.recentlyAdded > 0 && (
               <div className="bg-white/5 backdrop-blur-md border border-gray-700/50 rounded-xl p-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="text-3xl font-bold text-purple-400 flex items-center justify-center gap-2 mb-1">
+                <div className="text-3xl font-bold text-clay flex items-center justify-center gap-2 mb-1">
                   <Zap className="w-6 h-6" />
                   {stats.recentlyAdded}
                 </div>
@@ -566,7 +566,7 @@ const CertificatesSection = () => {
                 placeholder="Search certificates, issuers, or tags..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/5 backdrop-blur-md border border-gray-700/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-white/5 backdrop-blur-md border border-gray-700/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-forge-orange focus:border-transparent transition-all"
               />
             </div>
 
@@ -591,7 +591,7 @@ const CertificatesSection = () => {
                   <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-forge-orange"
                   >
                     <option value="all">All Certificates</option>
                     <option value="active">Active Only</option>
@@ -664,7 +664,7 @@ const CertificatesSection = () => {
                   onClick={() => openModal(cert)}
                 >
                   {/* Card */}
-                  <div className="h-full bg-white/5 backdrop-blur-md border border-gray-700/50 rounded-2xl overflow-hidden hover:bg-white/10 hover:border-gray-600/50 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/10">
+                  <div className="h-full bg-white/5 backdrop-blur-md border border-gray-700/50 rounded-2xl overflow-hidden hover:bg-white/10 hover:border-gray-600/50 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-forge-orange/10">
                     {/* Status Indicator Dot */}
                     <div className={`absolute top-4 right-4 w-3 h-3 rounded-full ${statusInfo.dotColor} animate-pulse shadow-lg z-10`}></div>
                     
@@ -677,7 +677,7 @@ const CertificatesSection = () => {
                     )}
 
                     {/* Certificate Image/Logo Background */}
-                    <div className={`relative ${isLargeTile ? 'h-48' : 'h-32'} bg-gradient-to-br from-blue-900/30 via-purple-900/20 to-gray-900/30 overflow-hidden`}>
+                    <div className={`relative ${isLargeTile ? 'h-48' : 'h-32'} bg-gradient-to-br from-carbon/30 via-ember-red/20 to-gray-900/30 overflow-hidden`}>
                       {cert.certificateImage?.url ? (
                         <>
                           <img 
@@ -709,7 +709,7 @@ const CertificatesSection = () => {
                     <div className="p-5 space-y-3">
                       {/* Title & Issuer */}
                       <div>
-                        <h3 className={`font-bold text-white mb-2 line-clamp-2 ${isLargeTile ? 'text-xl' : 'text-lg'} group-hover:text-blue-300 transition-colors`}>
+                        <h3 className={`font-bold text-white mb-2 line-clamp-2 ${isLargeTile ? 'text-xl' : 'text-lg'} group-hover:text-workshop-tan transition-colors`}>
                           {cert.title}
                         </h3>
                         <div className="flex items-center text-gray-400 text-sm">
@@ -760,7 +760,7 @@ const CertificatesSection = () => {
                         )}
                         
                         {cert.score && (
-                          <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-xs">
+                          <Badge className="bg-ember-red/10 text-clay border-ember-red/20 text-xs">
                             <GraduationCap className="w-3 h-3 mr-1" />
                             {cert.score}
                           </Badge>
@@ -771,7 +771,7 @@ const CertificatesSection = () => {
                             {cert.tags.slice(0, isLargeTile ? 3 : 2).map((tag, idx) => (
                               <Badge
                                 key={idx}
-                                className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs"
+                                className="bg-forge-orange/10 text-forge-orange border-forge-orange/20 text-xs"
                               >
                                 {tag}
                               </Badge>
@@ -787,7 +787,7 @@ const CertificatesSection = () => {
 
                       {/* Hover Action */}
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pt-2">
-                        <div className="flex items-center justify-between text-blue-400 text-sm font-medium">
+                        <div className="flex items-center justify-between text-forge-orange text-sm font-medium">
                           <span className="flex items-center gap-2">
                             <Eye className="w-4 h-4" />
                             View Details

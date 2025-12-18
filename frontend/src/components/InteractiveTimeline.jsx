@@ -165,10 +165,10 @@ const InteractiveTimeline = () => {
   const getColorClasses = (color) => {
     const colorMap = {
       blue: {
-        icon: 'text-blue-400 bg-blue-500/10',
-        border: 'border-blue-500/30',
-        accent: 'text-blue-400',
-        bg: 'bg-blue-500/5'
+        icon: 'text-forge-orange bg-forge-orange/10',
+        border: 'border-forge-orange/30',
+        accent: 'text-forge-orange',
+        bg: 'bg-forge-orange/5'
       },
       green: {
         icon: 'text-green-400 bg-green-500/10',
@@ -177,10 +177,10 @@ const InteractiveTimeline = () => {
         bg: 'bg-green-500/5'
       },
       purple: {
-        icon: 'text-purple-400 bg-purple-500/10',
-        border: 'border-purple-500/30',
-        accent: 'text-purple-400',
-        bg: 'bg-purple-500/5'
+        icon: 'text-clay bg-ember-red/10',
+        border: 'border-ember-red/30',
+        accent: 'text-clay',
+        bg: 'bg-ember-red/5'
       },
       orange: {
         icon: 'text-orange-400 bg-orange-500/10',

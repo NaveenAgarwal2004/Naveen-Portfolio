@@ -49,7 +49,7 @@ const LazyImage = ({
       {!isLoaded && !error && (
         <div className="absolute inset-0 bg-gray-800 animate-pulse flex items-center justify-center">
           {placeholder || (
-            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-2 border-forge-orange border-t-transparent rounded-full animate-spin"></div>
           )}
         </div>
       )}

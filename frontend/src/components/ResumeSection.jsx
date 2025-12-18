@@ -83,8 +83,8 @@ const ResumeSection = () => {
   };
 
   const resumeTypes = [
-    { type: 'general', label: 'General Resume', color: 'text-purple-400', description: 'Complete professional resume' },
-    { type: 'frontend', label: 'Frontend Resume', color: 'text-blue-400', description: 'Frontend development focused' },
+    { type: 'general', label: 'General Resume', color: 'text-clay', description: 'Complete professional resume' },
+    { type: 'frontend', label: 'Frontend Resume', color: 'text-forge-orange', description: 'Frontend development focused' },
     { type: 'backend', label: 'Backend Resume', color: 'text-green-400', description: 'Backend development focused' }
   ];
 
@@ -204,4 +204,3 @@ const ResumeSection = () => {
 };
 
 export default ResumeSection;
-            
