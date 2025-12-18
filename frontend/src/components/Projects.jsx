@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ExternalLink, Github, Filter, Star, Calendar, Code, Target, Lightbulb, Trophy, ChevronRight } from 'lucide-react';
-import OptimizedImage, { ImagePresets } from './ui/OptimizedImage';
-import { ScrollAnimationWrapper, HoverAnimationWrapper } from './ui/AnimationWrapper';
+import { Filter, ChevronRight, Github, ExternalLink } from 'lucide-react';
+import { ScrollAnimationWrapper } from './ui/AnimationWrapper';
 import TranslatedText from './TranslatedText';
+import ProjectCard from './ProjectCard';
 
 const Projects = () => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -90,213 +90,7 @@ const Projects = () => {
     setDisplayedCount(6);
   }, [activeFilter]);
 
-  const Badge = ({ children, variant = "default", className = "" }) => {
-    const baseClasses = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium";
-    const variants = {
-      default: "bg-gray-700 text-gray-300",
-      outline: "border border-gray-600 text-gray-400 bg-transparent",
-      secondary: "bg-gray-700 text-gray-300"
-    };
-    
-    return (
-      <span className={`${baseClasses} ${variants[variant]} ${className}`}>
-        {children}
-      </span>
-    );
-  };
-
-  const ProjectCard = ({ project, featured = false, index = 0 }) => {
-    const [showCaseStudy, setShowCaseStudy] = useState(false);
-
-    return (
-      <HoverAnimationWrapper hoverEffect="lift">
-        <div
-          className={`group cursor-pointer bg-white/5 backdrop-blur-sm border border-white/10 hover:border-blue-500/50 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-700 ${
-            featured ? 'lg:col-span-2' : ''
-          } ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
-          style={{
-            transitionDelay: `${index * 150}ms`
-          }}
-          onMouseEnter={() => setHoveredProject(project.id)}
-          onMouseLeave={() => setHoveredProject(null)}
-        >
-          {/* Image Section */}
-          <div className="relative overflow-hidden">
-            <OptimizedImage
-              src={project.image}
-              alt={`${project.title} - ${project.category} project showcasing ${project.techStack.slice(0, 3).join(', ')} technologies`}
-              {...(featured ? { width: 600, height: 400 } : ImagePresets.card)}
-              className={`w-full object-cover transition-all duration-500 group-hover:scale-110 ${
-                featured ? 'h-56 sm:h-72 lg:h-80' : 'h-48 sm:h-52 md:h-56'
-              }`}
-            />
-            
-            {/* Hover Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
-              <div className="absolute bottom-4 left-4 right-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                <div className="flex gap-2 sm:gap-3">
-                  <button
-                    className="flex items-center gap-2 bg-white/90 hover:bg-white text-black px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl font-medium transition-all duration-200 hover:scale-105 text-sm"
-                    onClick={() => window.open(project.githubUrl, '_blank')}
-                  >
-                    <Github className="h-4 w-4" />
-                    <span className="hidden sm:inline"><TranslatedText>Code</TranslatedText></span>
-                  </button>
-                  <button
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl font-medium transition-all duration-200 hover:scale-105 text-sm"
-                    onClick={() => window.open(project.liveUrl, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    <span className="hidden sm:inline"><TranslatedText>Demo</TranslatedText></span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Badges */}
-            {featured && (
-              <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
-                <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white flex items-center gap-1 text-xs">
-                  <Star className="h-3 w-3" />
-                  <TranslatedText>Featured</TranslatedText>
-                </Badge>
-              </div>
-            )}
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
-              <Badge className="bg-black/50 text-white backdrop-blur-sm border border-white/20 text-xs">
-                {project.date}
-              </Badge>
-            </div>
-          </div>
-
-          {/* Content Section */}
-          <div className="p-4 sm:p-5 lg:p-6">
-            {/* Header */}
-            <div className="flex items-start justify-between mb-3 sm:mb-4">
-              <h3 className={`font-semibold text-white group-hover:text-blue-400 transition-colors duration-300 leading-tight ${
-                featured ? 'text-lg sm:text-xl lg:text-2xl' : 'text-lg sm:text-xl'
-              }`}>
-                {project.title}
-              </h3>
-              <Badge variant="outline" className="ml-2 shrink-0 text-xs">
-                {project.category}
-              </Badge>
-            </div>
-
-            {/* Description */}
-            <p className="text-gray-400 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base line-clamp-3">
-              {project.description}
-            </p>
-
-            {/* Case Study Toggle */}
-            <div className="mb-4">
-              <button
-                onClick={() => setShowCaseStudy(!showCaseStudy)}
-                className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors duration-200 text-xs sm:text-sm font-medium"
-              >
-                <TranslatedText>{showCaseStudy ? 'Hide Details' : 'View Case Study'}</TranslatedText>
-                <ChevronRight className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200 ${showCaseStudy ? 'rotate-90' : ''}`} />
-              </button>
-            </div>
-
-            {/* Case Study Details */}
-            {showCaseStudy && (
-              <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6 border-t border-gray-700/50 pt-3 sm:pt-4">
-                {/* Problem Statement */}
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 sm:p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Target className="h-3 w-3 sm:h-4 sm:w-4 text-red-400 shrink-0" />
-                    <span className="text-xs sm:text-sm font-semibold text-red-300">
-                      <TranslatedText>Problem</TranslatedText>
-                    </span>
-                  </div>
-                  <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-                    <TranslatedText>
-                      {project.problem || 'Identified key challenges in user experience and performance optimization that needed innovative solutions.'}
-                    </TranslatedText>
-                  </p>
-                </div>
-
-                {/* Solution */}
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 sm:p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400 shrink-0" />
-                    <span className="text-xs sm:text-sm font-semibold text-blue-300">
-                      <TranslatedText>Solution</TranslatedText>
-                    </span>
-                  </div>
-                  <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-                    <TranslatedText>
-                      {project.solution || 'Developed a comprehensive solution using modern technologies and best practices to address the identified challenges.'}
-                    </TranslatedText>
-                  </p>
-                </div>
-
-                {/* Outcome */}
-                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 sm:p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-green-400 shrink-0" />
-                    <span className="text-xs sm:text-sm font-semibold text-green-300">
-                      <TranslatedText>Results</TranslatedText>
-                    </span>
-                  </div>
-                  <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-                    <TranslatedText>
-                      {project.outcome || 'Successfully delivered a high-performance application with improved user experience and measurable performance gains.'}
-                    </TranslatedText>
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Tech Stack */}
-            <div className="space-y-3 sm:space-y-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                  <Code className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 shrink-0" />
-                  <span className="text-xs sm:text-sm text-gray-500 font-medium">
-                    <TranslatedText>Tech Stack</TranslatedText>
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                  {project.techStack.map((tech, techIndex) => (
-                    <Badge
-                      key={tech}
-                      variant="secondary"
-                      className="text-xs hover:bg-blue-500/20 hover:text-blue-300 transition-all duration-200 cursor-default"
-                      style={{
-                        animationDelay: `${techIndex * 100}ms`
-                      }}
-                    >
-                      {tech}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2 sm:gap-3 pt-2">
-                <button
-                  className="flex-1 flex items-center justify-center gap-2 border border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium transition-all duration-200 hover:scale-105 text-sm"
-                  onClick={() => window.open(project.githubUrl, '_blank')}
-                >
-                  <Github className="h-4 w-4" />
-                  <span><TranslatedText>GitHub</TranslatedText></span>
-                </button>
-                <button
-                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium transition-all duration-200 hover:scale-105 text-sm"
-                  onClick={() => window.open(project.liveUrl, '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span><TranslatedText>Demo</TranslatedText></span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </HoverAnimationWrapper>
-    );
-  };
+  // ProjectCard component moved to separate file: /app/frontend/src/components/ProjectCard.jsx
 
   if (loading) {
     return (
@@ -329,39 +123,39 @@ const Projects = () => {
 
   return (
     <section id="projects" ref={projectsRef} className="py-16 sm:py-20 lg:py-24 bg-gray-800 relative overflow-hidden">
-      {/* Background Elements */}
+      {/* Background Elements - Workshop Theme */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 -right-20 w-32 h-32 sm:w-40 sm:h-40 bg-blue-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 -left-20 w-32 h-32 sm:w-40 sm:h-40 bg-purple-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 -right-20 w-32 h-32 sm:w-40 sm:h-40 bg-forge-orange/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 -left-20 w-32 h-32 sm:w-40 sm:h-40 bg-ember-red/5 rounded-full blur-3xl"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
+        {/* Section Header - Workshop Theme */}
         <div className={`text-center mb-12 sm:mb-16 lg:mb-20 transform transition-all duration-1000 ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-            <TranslatedText>My Projects</TranslatedText>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-parchment mb-4 sm:mb-6">
+            <TranslatedText>The Workshop</TranslatedText>
           </h2>
-          <div className="w-16 sm:w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-6 sm:mb-8 rounded-full"></div>
+          <div className="w-16 sm:w-24 h-1 bg-gradient-to-r from-forge-orange to-ember-red mx-auto mb-6 sm:mb-8 rounded-full shadow-lg shadow-forge-orange/30"></div>
           <p className="text-base sm:text-lg lg:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed px-4">
-            <TranslatedText>Explore my latest work and side projects that showcase my skills and passion for development</TranslatedText>
+            <TranslatedText>Browse through my finished pieces - each crafted with precision and care</TranslatedText>
           </p>
         </div>
 
-        {/* Filter Tabs */}
+        {/* Filter Tabs - Workshop Theme */}
         <div className={`flex justify-center mb-8 sm:mb-12 lg:mb-16 px-4 transform transition-all duration-1000 delay-200 ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-1 flex gap-1 overflow-x-auto scrollbar-hide max-w-full">
+          <div className="bg-carbon/40 backdrop-blur-sm border border-workshop-tan/20 rounded-xl sm:rounded-2xl p-1 flex gap-1 overflow-x-auto scrollbar-hide max-w-full">
             {filters.map((filter, index) => (
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-medium text-sm sm:text-base whitespace-nowrap flex items-center gap-2 ${
+                className={`px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-heading font-semibold text-sm sm:text-base whitespace-nowrap flex items-center gap-2 ${
                   activeFilter === filter.id
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105'
-                    : 'text-gray-400 hover:text-white hover:bg-white/10'
+                    ? 'bg-gradient-to-r from-forge-orange to-ember-red text-white shadow-lg shadow-forge-orange/30 transform scale-105'
+                    : 'text-gray-400 hover:text-parchment hover:bg-workshop-tan/10'
                 }`}
                 style={{
                   transitionDelay: `${index * 100}ms`
@@ -382,19 +176,23 @@ const Projects = () => {
         {/* Projects Grid */}
         {(featuredProjects.length > 0 || displayedProjects.length > 0) ? (
           <div className="space-y-12 sm:space-y-16">
-            {/* Featured Projects */}
+            {/* Featured Projects - Master Pieces */}
             {featuredProjects.length > 0 && (
               <div className={`transform transition-all duration-1000 delay-400 ${
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               }`}>
                 <div className="flex items-center gap-3 mb-6 sm:mb-8 px-2">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                  <h3 className="text-xl sm:text-2xl font-semibold text-white">
-                    <TranslatedText>Featured Projects</TranslatedText>
+                  <div className="w-2 h-2 bg-forge-orange rounded-full animate-pulse"></div>
+                  <h3 className="text-xl sm:text-2xl font-heading font-bold text-parchment">
+                    <TranslatedText>Master Pieces</TranslatedText>
                   </h3>
-                  <div className="flex-1 h-px bg-gradient-to-r from-yellow-500/50 to-transparent"></div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-forge-orange/50 to-transparent"></div>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+                <div className={`grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 ${
+                  featuredProjects.length === 1 
+                    ? 'lg:grid-cols-1 max-w-3xl mx-auto' 
+                    : 'lg:grid-cols-2'
+                }`}>
                   {featuredProjects.map((project, index) => (
                     <ProjectCard 
                       key={project._id || project.id || `featured-${index}`} 
@@ -407,19 +205,19 @@ const Projects = () => {
               </div>
             )}
 
-            {/* Regular Projects */}
+            {/* Regular Projects - Finished Works */}
             {displayedProjects.length > 0 && (
               <div className={`transform transition-all duration-1000 delay-600 ${
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               }`}>
                 <div className="flex items-center gap-3 mb-6 sm:mb-8 px-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <h3 className="text-xl sm:text-2xl font-semibold text-white">
+                  <div className="w-2 h-2 bg-craft-green rounded-full animate-pulse"></div>
+                  <h3 className="text-xl sm:text-2xl font-heading font-bold text-parchment">
                     <TranslatedText>
-                      {featuredProjects.length > 0 ? 'Other Projects' : 'Projects'}
+                      {featuredProjects.length > 0 ? 'Finished Works' : 'All Works'}
                     </TranslatedText>
                   </h3>
-                  <div className="flex-1 h-px bg-gradient-to-r from-blue-500/50 to-transparent"></div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-craft-green/50 to-transparent"></div>
                   <span className="text-sm text-gray-400 bg-gray-800/50 px-3 py-1 rounded-full">
                     {displayedCount} <TranslatedText>of</TranslatedText> {totalProjects}
                   </span>
@@ -436,7 +234,7 @@ const Projects = () => {
               </div>
             )}
 
-            {/* Load More Button */}
+            {/* Load More Button - Workshop Theme */}
             {hasMoreProjects && (
               <div className={`flex justify-center mt-8 sm:mt-12 transform transition-all duration-1000 delay-700 ${
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
@@ -444,25 +242,25 @@ const Projects = () => {
                 <button
                   onClick={handleLoadMore}
                   disabled={loadingMore}
-                  className="group bg-white/5 hover:bg-white/10 border border-white/20 hover:border-blue-500/50 text-white px-8 py-4 rounded-2xl font-medium
-                  transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center gap-3 overflow-hidden
-                  disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:bg-white/5"
+                  className="group bg-carbon/40 hover:bg-workshop-tan/10 border-2 border-workshop-tan/20 hover:border-forge-orange/50 text-parchment px-8 py-4 rounded-2xl font-heading font-semibold
+                  transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-forge-orange/25 flex items-center gap-3 overflow-hidden relative
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:bg-carbon/40"
                 >
                   {loadingMore ? (
                     <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-400/30 border-t-blue-400"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-forge-orange/30 border-t-forge-orange"></div>
                       <span><TranslatedText>Loading...</TranslatedText></span>
                     </>
                   ) : (
                     <>
-                      <span><TranslatedText>Load More Projects</TranslatedText></span>
-                      <span className="text-sm text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full">
+                      <span><TranslatedText>View More Crafts</TranslatedText></span>
+                      <span className="text-sm text-forge-orange bg-workshop-tan/10 px-2 py-1 rounded-full">
                         +{Math.min(PROJECTS_PER_LOAD, totalProjects - displayedCount)}
                       </span>
                       <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                     </>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-forge-orange/10 to-ember-red/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 </button>
               </div>
             )}
@@ -485,26 +283,26 @@ const Projects = () => {
           </div>
         )}
 
-        {/* View More Projects CTA */}
+        {/* View More Projects CTA - Workshop Theme */}
         {filteredProjects.length > 0 && (
           <div className={`text-center mt-12 sm:mt-16 transform transition-all duration-1000 delay-800 ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}>
-            <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto">
-              <h3 className="text-white text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
-                <TranslatedText>Want to see more?</TranslatedText>
+            <div className="bg-gradient-to-r from-forge-orange/10 to-ember-red/10 border border-forge-orange/20 rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto backdrop-blur-sm">
+              <h3 className="text-parchment text-lg sm:text-xl font-heading font-bold mb-3 sm:mb-4">
+                <TranslatedText>Visit the Full Workshop</TranslatedText>
               </h3>
               <p className="text-gray-400 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
-                <TranslatedText>Check out my GitHub profile for more projects, contributions, and open-source work.</TranslatedText>
+                <TranslatedText>Explore the complete blueprint collection on GitHub - more crafts, contributions, and open-source work.</TranslatedText>
               </p>
               <button
-                className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-medium
-                transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center gap-3 mx-auto overflow-hidden text-sm sm:text-base"
+                className="group relative bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-forge-orange text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-heading font-semibold
+                transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-forge-orange/30 flex items-center gap-3 mx-auto overflow-hidden text-sm sm:text-base"
                 onClick={() => window.open('https://github.com/NaveenAgarwal2004', '_blank')}
               >
                 <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 <Github className="h-4 w-4 sm:h-5 sm:w-5 relative z-10" />
-                <span className="relative z-10"><TranslatedText>View All on GitHub</TranslatedText></span>
+                <span className="relative z-10"><TranslatedText>Browse All Blueprints</TranslatedText></span>
                 <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
             </div>

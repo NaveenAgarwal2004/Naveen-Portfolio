@@ -135,3 +135,27 @@ code {
     @apply bg-background text-foreground;
     }
 }
+
+/* Workshop Theme - Blueprint Grid Overlay */
+.grid-overlay {
+  background-image: 
+    linear-gradient(0deg, transparent 24%, rgba(232, 93, 4, 0.1) 25%, rgba(232, 93, 4, 0.1) 26%, transparent 27%, transparent 74%, rgba(232, 93, 4, 0.1) 75%, rgba(232, 93, 4, 0.1) 76%, transparent 77%, transparent),
+    linear-gradient(90deg, transparent 24%, rgba(232, 93, 4, 0.1) 25%, rgba(232, 93, 4, 0.1) 26%, transparent 27%, transparent 74%, rgba(232, 93, 4, 0.1) 75%, rgba(232, 93, 4, 0.1) 76%, transparent 77%, transparent);
+  background-size: 50px 50px;
+}
+
+/* Floating animation for particles */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.7;
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
