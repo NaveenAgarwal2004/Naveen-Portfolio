@@ -320,7 +320,7 @@ const Home = () => {
   useEffect(() => {
     const fetchSEOData = async () => {
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? 'https://naveen-portfolio-il6e.onrender.com' : 'http://localhost:8001');
         const response = await fetch(`${backendUrl}/api/seo/home`, {
           timeout: 5000 // 5 second timeout
         });

@@ -11,10 +11,8 @@ const Hero = ({ personalData }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [vantaEffect, setVantaEffect] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const heroRef = useRef(null);
-  const vantaRef = useRef(null);
 
   // Translation setup
   const { tSync, currentLanguage } = useLanguage();
@@ -37,66 +35,7 @@ const Hero = ({ personalData }) => {
   const tagline = personalData?.tagline || t('hero.tagline', 'Building modern, responsive web experiences with clean code and creative design');
   const socialLinks = personalData?.socialLinks || {};
 
-  // Vanta.js effect initialization
-  useEffect(() => {
-    if (isMobile) return;
-
-    let vanta;
-    
-    const initVanta = () => {
-      try {
-        if (vantaRef.current && !vantaEffect && window.VANTA && window.VANTA.NET) {
-          const vanta = window.VANTA.NET({
-            el: vantaRef.current,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.0,
-            minWidth: 200.0,
-            scale: 1.0,
-            scaleMobile: 0.8,
-            color: 0x3b82f6,
-            backgroundColor: 0x0f172a,
-            points: window.innerWidth < 768 ? 8.0 : 12.0,
-            maxDistance: window.innerWidth < 768 ? 15.0 : 20.0,
-            spacing: window.innerWidth < 740 ? 12.0 : 16.0
-          });
-          setVantaEffect(vanta);
-          console.log('Vanta effect initialized');
-        }
-      } catch (error) {
-        console.error('Vanta.js initialization error:', error);
-      }
-    };
-
-    const timer = setTimeout(() => {
-      initVanta();
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      if (vanta) {
-        console.log('Destroying local vanta instance');
-        vanta.destroy();
-      }
-      if (vantaEffect) {
-        console.log('Destroying state vantaEffect instance');
-        vantaEffect.destroy();
-      }
-    };
-  }, [vantaEffect, isMobile]);
-
-  // Handle resize for Vanta effect
-  useEffect(() => {
-    const handleResize = () => {
-      if (vantaEffect) {
-        vantaEffect.resize();
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [vantaEffect]);
+  // Removed Vanta.js initialization - replaced with lightweight CSS gradient
 
   // Mouse tracking for interactive effects (disabled on mobile)
   useEffect(() => {
@@ -160,17 +99,11 @@ const Hero = ({ personalData }) => {
       ref={heroRef}
       className="relative min-h-screen overflow-hidden flex items-center justify-center pt-16 pb-16"
     >
-      {/* Vanta.js Background - Desktop only */}
-      {!isMobile && (
-        <div 
-          ref={vantaRef} 
-          className="absolute inset-0 w-full h-full"
-          style={{ zIndex: 1 }}
-        />
-      )}
+      {/* Lightweight CSS Gradient Background - Replaces Vanta.js */}
+      <div className="hero-bg absolute inset-0" style={{ zIndex: 0 }} />
 
       {/* Enhanced background with tech image overlay */}
-      <div className="absolute inset-0" style={{ zIndex: 0 }}>
+      <div className="absolute inset-0" style={{ zIndex: 1 }}>
         <OptimizedImage
           src="https://images.unsplash.com/photo-1576272531110-2a342fe22342?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxkZXZlbG9wZXIlMjB3b3Jrc3BhY2V8ZW58MHx8fGJsdWV8MTc1ODQ2NjI0NHww&ixlib=rb-4.1.0&q=85"
           alt="Developer workspace with coding environment"
@@ -180,15 +113,6 @@ const Hero = ({ personalData }) => {
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
       </div>
-
-      {/* Fallback Blobs for Mobile */}
-      {isMobile && (
-        <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 2 }}>
-          <div className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-40 h-40 sm:w-60 sm:h-60 md:w-80 md:h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-20 sm:-bottom-40 -left-20 sm:-left-40 w-40 h-40 sm:w-60 sm:h-60 md:w-80 md:h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-72 sm:h-72 md:w-96 md:h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse delay-500"></div>
-        </div>
-      )}
 
       <FloatingParticles />
 
@@ -350,6 +274,30 @@ const Hero = ({ personalData }) => {
       </div>
 
       <style>{`
+        /* Lightweight CSS Gradient Animation - Replaces Vanta.js (~500KB saved) */
+        .hero-bg {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            135deg,
+            #0A0A0A 0%,
+            #1A1412 50%,
+            #0A0A0A 100%
+          );
+          background-size: 400% 400%;
+          animation: gradient-shift 15s ease infinite;
+          z-index: -1;
+        }
+
+        @keyframes gradient-shift {
+          0%, 100% { 
+            background-position: 0% 50%; 
+          }
+          50% { 
+            background-position: 100% 50%; 
+          }
+        }
+
         @keyframes float {
           0%, 100% { 
             transform: translateY(0px) rotate(0deg); 

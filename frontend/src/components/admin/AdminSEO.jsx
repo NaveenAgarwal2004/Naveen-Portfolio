@@ -68,7 +68,7 @@ const AdminSEO = () => {
   const fetchSEOData = async () => {
     try {
       // Use the backend URL from environment or default
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? 'https://naveen-portfolio-il6e.onrender.com' : 'http://localhost:8001');
       const response = await fetch(`${backendUrl}/api/seo`);
 
       if (!response.ok) {
@@ -132,8 +132,8 @@ const AdminSEO = () => {
   const savePage = async (page) => {
     setIsSaving(true);
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
-      
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || (import.meta.env.PROD ? 'https://naveen-portfolio-il6e.onrender.com' : 'http://localhost:8001');
+
       // First save the SEO data
       const seoResponse = await fetch(`${backendUrl}/api/seo`, {
         method: 'POST',

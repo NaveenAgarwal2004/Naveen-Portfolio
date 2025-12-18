@@ -60,7 +60,7 @@ const ResumeSection = () => {
     }
     
     // Use our backend local file serving as primary method
-    const backendUrl = process.env.VITE_BACKEND_URL || 'http://localhost:8001';
+    const backendUrl = process.env.VITE_BACKEND_URL || (import.meta.env.PROD ? 'https://naveen-portfolio-il6e.onrender.com' : 'http://localhost:8001');
     const localUrl = `${backendUrl}/api/local/pdf/${resumeType}`;
     
     // Create a temporary link element to trigger download
@@ -76,9 +76,9 @@ const ResumeSection = () => {
 
   const handleView = (resumeType) => {
     // Use our backend local file serving for viewing
-    const backendUrl = process.env.VITE_BACKEND_URL || 'http://localhost:8001';
+    const backendUrl = process.env.VITE_BACKEND_URL || (import.meta.env.PROD ? 'https://naveen-portfolio-il6e.onrender.com' : 'http://localhost:8001');
     const localUrl = `${backendUrl}/api/local/pdf/${resumeType}`;
-    
+
     window.open(localUrl, '_blank', 'noopener,noreferrer');
   };
 
