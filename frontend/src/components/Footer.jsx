@@ -153,7 +153,7 @@ const Footer = () => {
       {/* Enhanced Scroll to Top Button */}
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-8 right-8 w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-full
+        className={`fixed bottom-8 right-8 w-12 h-12 bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-forge-orange text-white rounded-full
           flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform z-50 group
           ${showScrollTop ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-16 opacity-0 scale-75 pointer-events-none'}
           hover:scale-110 active:scale-95`}
@@ -165,14 +165,14 @@ const Footer = () => {
       <footer ref={footerRef} className="bg-gradient-to-b from-gray-900 to-black border-t border-gray-800/50 relative overflow-hidden">
         {/* Subtle Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-4 left-1/4 w-16 h-16 bg-blue-500/3 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-4 right-1/4 w-16 h-16 bg-purple-500/3 rounded-full blur-2xl"></div>
+          <div className="absolute top-4 left-1/4 w-16 h-16 bg-forge-orange/3 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-4 right-1/4 w-16 h-16 bg-ember-red/3 rounded-full blur-2xl"></div>
           
           {/* Reduced floating particles */}
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-0.5 h-0.5 bg-blue-400/15 rounded-full animate-float"
+              className="absolute w-0.5 h-0.5 bg-forge-orange/15 rounded-full animate-float"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -193,11 +193,11 @@ const Footer = () => {
               <div className="mb-4">
                 <button 
                   onClick={scrollToTop}
-                  className="group text-2xl font-bold text-white hover:text-blue-400 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
+                  className="group text-2xl font-bold text-white hover:text-forge-orange transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
                 >
                   <span>Naveen</span>
-                  <span className="text-blue-500">.</span>
-                  <Sparkles className="h-5 w-5 text-purple-400 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                  <span className="text-forge-orange">.</span>
+                  <Sparkles className="h-5 w-5 text-ember-red opacity-0 group-hover:opacity-100 transition-all duration-300" />
                 </button>
               </div>
               
@@ -255,7 +255,7 @@ const Footer = () => {
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
             }`}>
               <h3 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
-                <div className="w-0.5 h-4 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+                <div className="w-0.5 h-4 bg-gradient-to-b from-forge-orange to-ember-red rounded-full"></div>
                 <TranslatedText>Quick Links</TranslatedText>
               </h3>
               <div className="grid grid-cols-2 gap-2">
@@ -275,13 +275,13 @@ const Footer = () => {
                 <div className="space-y-1">
                   <button
                     onClick={() => window.open('/NaveenAgarwal__Resume.pdf', '_blank')}
-                    className="text-gray-500 hover:text-blue-400 text-xs transition-colors duration-200 block"
+                    className="text-gray-500 hover:text-forge-orange text-xs transition-colors duration-200 block"
                   >
                     <TranslatedText>Download Resume</TranslatedText>
                   </button>
                   <button
                     onClick={() => scrollToSection('projects')}
-                    className="text-gray-500 hover:text-blue-400 text-xs transition-colors duration-200 block"
+                    className="text-gray-500 hover:text-forge-orange text-xs transition-colors duration-200 block"
                   >
                     <TranslatedText>View Portfolio</TranslatedText>
                   </button>
@@ -294,7 +294,7 @@ const Footer = () => {
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
             }`}>
               <h3 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
-                <div className="w-0.5 h-4 bg-gradient-to-b from-green-500 to-cyan-500 rounded-full"></div>
+                <div className="w-0.5 h-4 bg-gradient-to-b from-craft-green to-forge-orange rounded-full"></div>
                 <TranslatedText>Contact</TranslatedText>
               </h3>
               
@@ -323,8 +323,8 @@ const Footer = () => {
 
                 {/* Compact Location */}
                 <div className="text-gray-400 flex items-center gap-2">
-                  <div className="w-6 h-6 bg-blue-500/20 rounded-md flex items-center justify-center">
-                    <MapPin className="h-3 w-3 text-blue-400" />
+                  <div className="w-6 h-6 bg-clay/20 rounded-md flex items-center justify-center">
+                    <MapPin className="h-3 w-3 text-clay" />
                   </div>
                   <span>{personalData.location}</span>
                 </div>
@@ -400,7 +400,7 @@ const Footer = () => {
         </div>
 
         {/* Subtle decorative bottom border */}
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 opacity-30"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-forge-orange via-ember-red to-clay opacity-30"></div>
       </footer>
 
       <style jsx="true">{`

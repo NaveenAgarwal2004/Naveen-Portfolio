@@ -122,8 +122,8 @@ const Contact = () => {
       label: 'Email',
       value: personalData.email,
       href: `mailto:${personalData.email}`,
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/20'
+      color: 'text-forge-orange',
+      bgColor: 'bg-forge-orange/20'
     },
     {
       icon: Phone,
@@ -178,9 +178,9 @@ const Contact = () => {
     <section id="contact" ref={contactRef} className="py-12 sm:py-16 lg:py-20 xl:py-24 bg-gray-900 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 -right-10 sm:-right-20 w-32 h-32 sm:w-40 sm:h-40 lg:w-56 lg:h-56 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 -left-10 sm:-left-20 w-32 h-32 sm:w-40 sm:h-40 lg:w-56 lg:h-56 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 sm:w-60 sm:h-60 lg:w-80 lg:h-80 bg-cyan-500/3 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-1/4 -right-10 sm:-right-20 w-32 h-32 sm:w-40 sm:h-40 lg:w-56 lg:h-56 bg-forge-orange/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -left-10 sm:-left-20 w-32 h-32 sm:w-40 sm:h-40 lg:w-56 lg:h-56 bg-ember-red/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 sm:w-60 sm:h-60 lg:w-80 lg:h-80 bg-clay/3 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10">
@@ -188,16 +188,16 @@ const Contact = () => {
         <div className={`text-center mb-8 sm:mb-12 lg:mb-16 xl:mb-20 transform transition-all duration-1000 ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-4 sm:mb-6">
-            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-blue-400 text-xs sm:text-sm font-medium">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-forge-orange/10 backdrop-blur-sm border border-forge-orange/20 rounded-full mb-4 sm:mb-6">
+            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-craft-green rounded-full animate-pulse"></div>
+            <span className="text-forge-orange text-xs sm:text-sm font-medium">
               <TranslatedText>Let's Connect</TranslatedText>
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight">
             <TranslatedText>Get In Touch</TranslatedText>
           </h2>
-          <div className="w-16 h-0.5 sm:w-20 sm:h-1 lg:w-24 lg:h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-4 sm:mb-6 lg:mb-8 rounded-full"></div>
+          <div className="w-16 h-0.5 sm:w-20 sm:h-1 lg:w-24 lg:h-1 bg-gradient-to-r from-forge-orange to-ember-red mx-auto mb-4 sm:mb-6 lg:mb-8 rounded-full"></div>
           <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-400 max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto leading-relaxed px-4 sm:px-0">
             <TranslatedText>
               Ready to start your next project? Let's discuss how we can work together to bring your ideas to life.
@@ -212,8 +212,8 @@ const Contact = () => {
           }`}>
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 hover:bg-white/10 transition-all duration-300 shadow-xl">
               <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-500/20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                  <Send className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-blue-400" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-forge-orange/20 rounded-lg sm:rounded-xl flex items-center justify-center">
+                  <Send className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-forge-orange" />
                 </div>
                 <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-white">
                   <TranslatedText>Send Message</TranslatedText>
@@ -264,7 +264,7 @@ const Contact = () => {
                       <TranslatedText>Email Address *</TranslatedText>
                     </label>
                     <div className="relative group">
-                      <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg sm:rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === 'email' ? 'opacity-100' : ''}`}></div>
+                      <div className={`absolute inset-0 bg-gradient-to-r from-forge-orange/20 to-ember-red/20 rounded-lg sm:rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === 'email' ? 'opacity-100' : ''}`}></div>
                       <input
                         id="email"
                         name="email"
@@ -275,7 +275,7 @@ const Contact = () => {
                         onFocus={() => setFocusedField('email')}
                         onBlur={() => setFocusedField(null)}
                         className="relative w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-sm sm:text-base text-white placeholder-gray-400 
-                        focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all duration-200 backdrop-blur-sm"
+                        focus:border-forge-orange/50 focus:ring-2 focus:ring-forge-orange/20 focus:outline-none transition-all duration-200 backdrop-blur-sm"
                         placeholder="Enter your email address"
                         disabled={isSubmitting}
                       />
@@ -288,7 +288,7 @@ const Contact = () => {
                       <TranslatedText>Message *</TranslatedText>
                     </label>
                     <div className="relative group">
-                      <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg sm:rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === 'message' ? 'opacity-100' : ''}`}></div>
+                      <div className={`absolute inset-0 bg-gradient-to-r from-forge-orange/20 to-ember-red/20 rounded-lg sm:rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === 'message' ? 'opacity-100' : ''}`}></div>
                       <textarea
                         id="message"
                         name="message"
@@ -299,7 +299,7 @@ const Contact = () => {
                         onBlur={() => setFocusedField(null)}
                         rows={4}
                         className="relative w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-sm sm:text-base text-white placeholder-gray-400 
-                        focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all duration-200 backdrop-blur-sm resize-none min-h-[120px] sm:min-h-[140px]"
+                        focus:border-forge-orange/50 focus:ring-2 focus:ring-forge-orange/20 focus:outline-none transition-all duration-200 backdrop-blur-sm resize-none min-h-[120px] sm:min-h-[140px]"
                         placeholder="Tell me about your project or just say hello..."
                         disabled={isSubmitting}
                       />
@@ -310,8 +310,8 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="group relative w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold
-                    transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 disabled:hover:scale-100 flex items-center justify-center gap-2 sm:gap-3 overflow-hidden"
+                    className="group relative w-full bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-forge-orange text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold
+                    transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-forge-orange/25 disabled:hover:scale-100 flex items-center justify-center gap-2 sm:gap-3 overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                     {isSubmitting ? (
@@ -370,7 +370,7 @@ const Contact = () => {
                         </p>
                         <p className="text-white text-sm sm:text-base font-semibold group-hover:text-blue-100 transition-colors duration-200 truncate">{contact.value}</p>
                       </div>
-                      <div className="ml-auto w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-6 sm:group-hover:w-8 transition-all duration-300 rounded-full"></div>
+                      <div className="ml-auto w-0 h-0.5 bg-gradient-to-r from-forge-orange to-ember-red group-hover:w-6 sm:group-hover:w-8 transition-all duration-300 rounded-full"></div>
                     </div>
                   );
                 })}
@@ -407,7 +407,7 @@ const Contact = () => {
                       <span className="font-medium text-xs sm:text-sm truncate">
                         <TranslatedText>{social.label}</TranslatedText>
                       </span>
-                      <div className="ml-auto w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-3 sm:group-hover:w-4 transition-all duration-300 rounded-full"></div>
+                      <div className="ml-auto w-0 h-0.5 bg-gradient-to-r from-forge-orange to-ember-red group-hover:w-3 sm:group-hover:w-4 transition-all duration-300 rounded-full"></div>
                     </a>
                   );
                 })}
@@ -415,12 +415,12 @@ const Contact = () => {
             </div>
 
             {/* Quick Response Info */}
-            <div className={`bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 backdrop-blur-sm transform transition-all duration-1000 delay-600 ${
+            <div className={`bg-gradient-to-r from-forge-orange/10 to-ember-red/10 border border-forge-orange/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 backdrop-blur-sm transform transition-all duration-1000 delay-600 ${
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
             }`}>
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-forge-orange/20 rounded-lg flex items-center justify-center">
+                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-forge-orange" />
                 </div>
                 <h3 className="text-white font-semibold text-sm sm:text-base">
                   <TranslatedText>Quick Response</TranslatedText>

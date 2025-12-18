@@ -179,7 +179,7 @@ const TechStack = ({ techStackData }) => {
       <section id="tech-stack" className="py-16 sm:py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-3 text-white">
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-400/30 border-t-blue-400"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-forge-orange/30 border-t-forge-orange"></div>
             <span>
               <TranslatedText>Loading technologies...</TranslatedText>
             </span>
@@ -241,7 +241,7 @@ const TechStack = ({ techStackData }) => {
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/3 -left-20 w-40 h-40 bg-green-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/3 -right-20 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-1/3 -right-20 w-40 h-40 bg-forge-orange/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-purple-500/3 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
@@ -250,7 +250,7 @@ const TechStack = ({ techStackData }) => {
         {[...Array(10)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-blue-400/20 rounded-full animate-float"
+            className="absolute w-1 h-1 bg-forge-orange/20 rounded-full animate-float"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -266,16 +266,16 @@ const TechStack = ({ techStackData }) => {
         <div className={`text-center mb-12 sm:mb-16 transform transition-all duration-1000 ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-6">
-            <Sparkles className="h-4 w-4 text-blue-400 animate-pulse" />
-            <span className="text-blue-400 text-sm font-medium">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-forge-orange/10 backdrop-blur-sm border border-forge-orange/20 rounded-full mb-6">
+            <Sparkles className="h-4 w-4 text-forge-orange animate-pulse" />
+            <span className="text-forge-orange text-sm font-medium">
               <TranslatedText>Technologies & Tools</TranslatedText>
             </span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             <TranslatedText>My Tools</TranslatedText>
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-6 sm:mb-8 rounded-full"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-craft-green to-forge-orange mx-auto mb-6 sm:mb-8 rounded-full"></div>
           <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
             <TranslatedText>Technologies and tools I use to build amazing web experiences</TranslatedText>
           </p>
@@ -298,7 +298,7 @@ const TechStack = ({ techStackData }) => {
             return (
               <div
                 key={techId}
-                className="group bg-white/5 backdrop-blur-sm border border-white/10 hover:border-blue-500/50 rounded-2xl p-4 sm:p-6 text-center
+                className="group bg-white/5 backdrop-blur-sm border border-white/10 hover:border-forge-orange/50 rounded-2xl p-4 sm:p-6 text-center
                   transition-all duration-500 hover:scale-110 hover:bg-white/10 cursor-pointer transform opacity-100 translate-y-0"
                 style={{
                   animationDelay: `${index * 100}ms`
@@ -306,16 +306,16 @@ const TechStack = ({ techStackData }) => {
               >
                 <div className="mb-4 flex justify-center">
                   <div className="relative">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gray-700/50 group-hover:bg-blue-500/10 flex items-center justify-center 
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gray-700/50 group-hover:bg-forge-orange/10 flex items-center justify-center 
                       transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
                       {Icon ? (
                         <Icon 
-                          className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" 
+                          className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 group-hover:text-forge-orange transition-colors duration-300" 
                           style={{ color: tech.color || undefined }}
                         />
                       ) : (
                         <div 
-                          className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 group-hover:text-blue-400 transition-colors duration-300 flex items-center justify-center font-bold text-lg"
+                          className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 group-hover:text-forge-orange transition-colors duration-300 flex items-center justify-center font-bold text-lg"
                           style={{ color: tech.color || undefined }}
                         >
                           {techName.charAt(0).toUpperCase()}
@@ -323,14 +323,14 @@ const TechStack = ({ techStackData }) => {
                       )}
                     </div>
                     {/* Glow effect */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl"></div>
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-forge-orange/20 to-ember-red/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl"></div>
                   </div>
                 </div>
-                <h3 className="text-white font-semibold text-sm sm:text-base group-hover:text-blue-400 transition-colors duration-300 leading-tight">
+                <h3 className="text-white font-semibold text-sm sm:text-base group-hover:text-forge-orange transition-colors duration-300 leading-tight">
                   {techName}
                 </h3>
                 {/* Hover indicator */}
-                <div className="w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-2 group-hover:w-full transition-all duration-300 rounded-full"></div>
+                <div className="w-0 h-0.5 bg-gradient-to-r from-forge-orange to-ember-red mx-auto mt-2 group-hover:w-full transition-all duration-300 rounded-full"></div>
               </div>
             );
           }).filter(Boolean)}
@@ -363,12 +363,12 @@ const TechStack = ({ techStackData }) => {
           ].map((category, index) => {
             const Icon = category.icon;
             const colorClasses = {
-              blue: "from-blue-500/10 to-cyan-500/10 border-blue-500/20 group-hover:border-blue-500/40",
+              blue: "from-forge-orange/10 to-clay/10 border-forge-orange/20 group-hover:border-forge-orange/40",
               green: "from-green-500/10 to-emerald-500/10 border-green-500/20 group-hover:border-green-500/40", 
               purple: "from-purple-500/10 to-pink-500/10 border-purple-500/20 group-hover:border-purple-500/40"
             };
             const iconColors = {
-              blue: "text-blue-400",
+              blue: "text-forge-orange",
               green: "text-green-400",
               purple: "text-purple-400"
             };
@@ -384,16 +384,16 @@ const TechStack = ({ techStackData }) => {
                     <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                       <Icon className={`h-8 w-8 ${iconColors[category.color]} group-hover:scale-110 transition-transform duration-300`} />
                     </div>
-                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${category.color === 'blue' ? 'from-blue-500/20 to-cyan-500/20' : category.color === 'green' ? 'from-green-500/20 to-emerald-500/20' : 'from-purple-500/20 to-pink-500/20'} opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl`}></div>
+                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${category.color === 'blue' ? 'from-forge-orange/20 to-clay/20' : category.color === 'green' ? 'from-craft-green/20 to-emerald-500/20' : 'from-ember-red/20 to-clay/20'} opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl`}></div>
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-4 group-hover:text-blue-100 transition-colors duration-300">
+                <h3 className="text-xl font-semibold text-white mb-4 group-hover:text-parchment transition-colors duration-300">
                   <TranslatedText>{category.title}</TranslatedText>
                 </h3>
                 <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-300">
                   <TranslatedText>{category.description}</TranslatedText>
                 </p>
-                <div className="w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-4 group-hover:w-full transition-all duration-500 rounded-full"></div>
+                <div className="w-0 h-0.5 bg-gradient-to-r from-forge-orange to-ember-red mx-auto mt-4 group-hover:w-full transition-all duration-500 rounded-full"></div>
               </div>
             );
           })}

@@ -177,7 +177,7 @@ const About = ({ personalData }) => {
   const Progress = ({ value, animated = false }) => (
     <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
       <div 
-        className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
+        className="h-full bg-gradient-to-r from-forge-orange to-ember-red rounded-full transition-all duration-1000 ease-out"
         style={{ 
           width: animated ? `${value || 0}%` : '0%',
           transform: animated ? 'translateX(0)' : 'translateX(-100%)'
@@ -206,8 +206,8 @@ const About = ({ personalData }) => {
     <section id="about" ref={aboutRef} className="py-16 sm:py-20 bg-gray-800 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 -left-10 sm:-left-20 w-32 h-32 sm:w-40 sm:h-40 bg-blue-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 -right-10 sm:-right-20 w-32 h-32 sm:w-40 sm:h-40 bg-purple-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 -left-10 sm:-left-20 w-32 h-32 sm:w-40 sm:h-40 bg-forge-orange/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 -right-10 sm:-right-20 w-32 h-32 sm:w-40 sm:h-40 bg-ember-red/5 rounded-full blur-3xl"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -218,7 +218,7 @@ const About = ({ personalData }) => {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             <TranslatedText>{displayData.title || "About Me"}</TranslatedText>
           </h2>
-          <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-6 sm:mb-8 rounded-full"></div>
+          <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-forge-orange to-ember-red mx-auto mb-6 sm:mb-8 rounded-full"></div>
           <p className="text-base sm:text-lg lg:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed px-4">
             <TranslatedText>
               {displayData.description || "Get to know more about my journey, skills, and passion for creating amazing web experiences"}
@@ -233,7 +233,7 @@ const About = ({ personalData }) => {
           }`}>
             {/* Profile Image */}
             <div className="relative group mx-auto lg:mx-0">
-              <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 mx-auto rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 p-1 shadow-2xl">
+              <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 mx-auto rounded-2xl overflow-hidden bg-gradient-to-br from-forge-orange to-ember-red p-1 shadow-2xl">
                 <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-800">
                   <img 
                     src={displayData.profileImageUrl || displayData.image || "/Naveen.jpg"}
@@ -246,8 +246,8 @@ const About = ({ personalData }) => {
                 </div>
               </div>
               {/* Floating elements around image */}
-              <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-6 h-6 sm:w-8 sm:h-8 bg-blue-500/20 rounded-full animate-pulse"></div>
-              <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-4 h-4 sm:w-6 sm:h-6 bg-purple-500/20 rounded-full animate-pulse delay-1000"></div>
+              <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 w-6 h-6 sm:w-8 sm:h-8 bg-forge-orange/20 rounded-full animate-pulse"></div>
+              <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 w-4 h-4 sm:w-6 sm:h-6 bg-ember-red/20 rounded-full animate-pulse delay-1000"></div>
             </div>
 
             {/* Contact Info Card */}
@@ -258,8 +258,8 @@ const About = ({ personalData }) => {
               </h3>
               <div className="space-y-3 sm:space-y-4">
                 <div className="group flex items-center gap-3 sm:gap-4 p-3 rounded-xl hover:bg-white/5 transition-all duration-200">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
-                    <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-forge-orange/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                    <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-forge-orange" />
                   </div>
                   <span className="text-gray-300 group-hover:text-white transition-colors text-sm sm:text-base truncate">
                     {displayData.email || "naveen@example.com"}
@@ -274,8 +274,8 @@ const About = ({ personalData }) => {
                   </span>
                 </div>
                 <div className="group flex items-center gap-3 sm:gap-4 p-3 rounded-xl hover:bg-white/5 transition-all duration-200">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
-                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-clay/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-clay" />
                   </div>
                   <span className="text-gray-300 group-hover:text-white transition-colors text-sm sm:text-base">
                     {displayData.location || "San Francisco, CA"}
@@ -287,8 +287,8 @@ const About = ({ personalData }) => {
               <div className="relative mt-4 sm:mt-6 resume-dropdown-container z-[100]">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="group w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium
-                  transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center justify-between overflow-hidden text-sm sm:text-base"
+                  className="group w-full bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-forge-orange text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium
+                  transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-forge-orange/25 flex items-center justify-between overflow-hidden text-sm sm:text-base"
                 >
                   <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                   <span className="relative z-10 flex items-center gap-2">
@@ -310,14 +310,14 @@ const About = ({ personalData }) => {
                       <button
                         key={resume.name}
                         onClick={() => handleDownloadResume(resume)}
-                        className={`w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-xl 
+                        className={`w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 text-gray-300 hover:text-white hover:bg-forge-orange/10 rounded-xl 
                           transition-all duration-200 flex items-center gap-2 sm:gap-3 group transform text-sm sm:text-base
                           ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
                         style={{
                           transitionDelay: isOpen ? `${index * 50}ms` : '0ms'
                         }}
                       >
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200 shrink-0"></div>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-forge-orange rounded-full group-hover:scale-125 transition-transform duration-200 shrink-0"></div>
                         <span className="font-medium flex-1 truncate">
                           <TranslatedText>{resume.name}</TranslatedText>
                         </span>
@@ -337,7 +337,7 @@ const About = ({ personalData }) => {
             {/* Bio with Stats */}
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 lg:p-8 hover:bg-white/10 transition-all duration-300">
               <h3 className="text-xl sm:text-2xl font-semibold text-white mb-4 sm:mb-6 flex items-center gap-2">
-                <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
+                <User className="h-5 w-5 sm:h-6 sm:w-6 text-forge-orange" />
                 <TranslatedText>My Story</TranslatedText>
               </h3>
               <div className="space-y-4 sm:space-y-6 text-gray-300 leading-relaxed">
@@ -351,7 +351,7 @@ const About = ({ personalData }) => {
                 {(displayData.experience || displayData.projects || displayData.technologies) && (
                   <div className="grid grid-cols-3 gap-4 py-4 border-t border-white/10">
                     <div className="text-center">
-                      <div className="text-xl sm:text-2xl font-bold text-blue-400">
+                      <div className="text-xl sm:text-2xl font-bold text-forge-orange">
                         {displayData.experience || "3+"}
                       </div>
                       <div className="text-xs sm:text-sm text-gray-400">
@@ -359,7 +359,7 @@ const About = ({ personalData }) => {
                       </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl sm:text-2xl font-bold text-purple-400">
+                      <div className="text-xl sm:text-2xl font-bold text-ember-red">
                         {displayData.projects || "25+"}
                       </div>
                       <div className="text-xs sm:text-sm text-gray-400">
@@ -367,7 +367,7 @@ const About = ({ personalData }) => {
                       </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl sm:text-2xl font-bold text-green-400">
+                      <div className="text-xl sm:text-2xl font-bold text-craft-green">
                         {displayData.technologies || "15+"}
                       </div>
                       <div className="text-xs sm:text-sm text-gray-400">
@@ -389,7 +389,7 @@ const About = ({ personalData }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-white/10 transition-all duration-300">
                 <div className="flex items-center mb-3">
-                  <Code className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400 mr-2" />
+                  <Code className="h-5 w-5 sm:h-6 sm:w-6 text-forge-orange mr-2" />
                   <h4 className="font-semibold text-white text-sm sm:text-base">
                     <TranslatedText>Frontend</TranslatedText>
                   </h4>
@@ -431,7 +431,7 @@ const About = ({ personalData }) => {
                   >
                     <div className="flex justify-between items-center">
                       <span className="text-gray-300 font-medium text-sm sm:text-base">{skill.name}</span>
-                      <span className="text-blue-400 text-xs sm:text-sm font-semibold bg-blue-500/10 px-2 py-1 rounded-lg">
+                      <span className="text-forge-orange text-xs sm:text-sm font-semibold bg-forge-orange/10 px-2 py-1 rounded-lg">
                         {animatedSkills[skill.name] || 0}%
                       </span>
                     </div>

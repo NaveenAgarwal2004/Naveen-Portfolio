@@ -35,13 +35,13 @@ const LoadingSpinner = ({
       container: "bg-gray-900",
       text: "text-white",
       subtext: "text-gray-400",
-      spinner: "border-blue-500"
+      spinner: "border-forge-orange"
     },
     light: {
       container: "bg-white",
       text: "text-gray-800", 
       subtext: "text-gray-600",
-      spinner: "border-blue-600"
+      spinner: "border-forge-orange"
     }
   };
 
@@ -96,8 +96,8 @@ const LoadingSpinner = ({
     <div className={`min-h-screen ${currentTheme.container} flex flex-col justify-center items-center relative overflow-hidden`}>
       {/* Background Animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-forge-orange/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-32 h-32 bg-ember-red/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
       
       <div className="text-center relative z-10">
@@ -107,7 +107,7 @@ const LoadingSpinner = ({
             <div className={`absolute inset-0 border-4 ${currentTheme.spinner} border-t-transparent rounded-full animate-spin`}></div>
           </div>
           {/* Pulse ring */}
-          <div className={`absolute inset-0 ${sizeClasses[size]} border-2 border-blue-500/30 rounded-full animate-ping`}></div>
+          <div className={`absolute inset-0 ${sizeClasses[size]} border-2 border-forge-orange/30 rounded-full animate-ping`}></div>
         </div>
         
         <h3 className={`text-lg font-semibold ${currentTheme.text} mb-2`}>{message}</h3>
@@ -120,7 +120,7 @@ const LoadingSpinner = ({
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="w-2 h-2 bg-blue-500/50 rounded-full animate-pulse"
+              className="w-2 h-2 bg-forge-orange/50 rounded-full animate-pulse"
               style={{
                 animationDelay: `${i * 0.15}s`,
                 animationDuration: '1.5s'
@@ -136,7 +136,7 @@ const LoadingSpinner = ({
 // Additional Loading Components
 export const InlineSpinner = ({ size = "small", className = "" }) => (
   <div className={`inline-flex items-center gap-2 ${className}`}>
-    <div className={`${size === 'small' ? 'w-4 h-4' : 'w-6 h-6'} border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin`}></div>
+    <div className={`${size === 'small' ? 'w-4 h-4' : 'w-6 h-6'} border-2 border-forge-orange/30 border-t-forge-orange rounded-full animate-spin`}></div>
   </div>
 );
 
