@@ -42,6 +42,8 @@ const Projects = () => {
 
   // Intersection Observer for scroll animations
   useEffect(() => {
+    if (loading || !projectsRef.current) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -56,7 +58,7 @@ const Projects = () => {
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [loading]);
 
   const filteredProjects = Array.isArray(projects)
     ? (activeFilter === 'All'
