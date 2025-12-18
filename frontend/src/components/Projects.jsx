@@ -98,7 +98,7 @@ const Projects = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center gap-3 text-white">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-400/30 border-t-blue-400"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-forge-orange/30 border-t-forge-orange"></div>
               <span className="text-sm sm:text-base">
                 <TranslatedText>Loading amazing projects...</TranslatedText>
               </span>
