@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Github, Linkedin, Mail, Twitter, Heart, ArrowUp, Sparkles, MapPin, Phone, Clock } from 'lucide-react';
+import TranslatedText from './TranslatedText';
 
 const Footer = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -99,7 +100,7 @@ const Footer = () => {
     { label: 'About', id: 'about' },
     { label: 'Skills', id: 'tech-stack' },
     { label: 'Projects', id: 'projects' },
-    {label: 'Resumes' , id: 'resumes'},
+    { label: 'Resumes', id: 'resumes' },
     { label: 'Certificates', id: 'certificates' },
     { label: 'Contact', id: 'contact' }
   ];
@@ -201,7 +202,9 @@ const Footer = () => {
               </div>
               
               <p className="text-gray-400 text-sm mb-4 max-w-md leading-relaxed">
-                Frontend Developer passionate about creating beautiful web experiences. Always learning, always building.
+                <TranslatedText>
+                  Frontend Developer passionate about creating beautiful web experiences. Always learning, always building.
+                </TranslatedText>
               </p>
               
               {/* Compact Social Links */}
@@ -236,7 +239,9 @@ const Footer = () => {
                    style={{ transitionDelay: '400ms' }}>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-gray-400">Available for work</span>
+                  <span className="text-gray-400">
+                    <TranslatedText>Available for work</TranslatedText>
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-gray-500">
                   <Clock className="h-3 w-3" />
@@ -251,7 +256,7 @@ const Footer = () => {
             }`}>
               <h3 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
                 <div className="w-0.5 h-4 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
-                Quick Links
+                <TranslatedText>Quick Links</TranslatedText>
               </h3>
               <div className="grid grid-cols-2 gap-2">
                 {footerLinks.map((link, index) => (
@@ -260,7 +265,7 @@ const Footer = () => {
                     onClick={() => scrollToSection(link.id)}
                     className="group text-gray-400 hover:text-white transition-all duration-200 text-xs text-left transform hover:translate-x-0.5"
                   >
-                    {link.label}
+                    <TranslatedText>{link.label}</TranslatedText>
                   </button>
                 ))}
               </div>
@@ -272,13 +277,13 @@ const Footer = () => {
                     onClick={() => window.open('/NaveenAgarwal__Resume.pdf', '_blank')}
                     className="text-gray-500 hover:text-blue-400 text-xs transition-colors duration-200 block"
                   >
-                    Download Resume
+                    <TranslatedText>Download Resume</TranslatedText>
                   </button>
                   <button
                     onClick={() => scrollToSection('projects')}
                     className="text-gray-500 hover:text-blue-400 text-xs transition-colors duration-200 block"
                   >
-                    View Portfolio
+                    <TranslatedText>View Portfolio</TranslatedText>
                   </button>
                 </div>
               </div>
@@ -290,7 +295,7 @@ const Footer = () => {
             }`}>
               <h3 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
                 <div className="w-0.5 h-4 bg-gradient-to-b from-green-500 to-cyan-500 rounded-full"></div>
-                Contact
+                <TranslatedText>Contact</TranslatedText>
               </h3>
               
               <div className="space-y-3 text-xs">
@@ -336,19 +341,27 @@ const Footer = () => {
               <div className="flex flex-wrap items-center justify-center gap-1 text-gray-400 text-xs text-center">
                 <span>© {currentYear} Naveen Agarwal.</span>
                 <div className="flex items-center gap-1">
-                  <span>Made with</span>
+                  <span>
+                    <TranslatedText>Made with</TranslatedText>
+                  </span>
                   <Heart className="h-3 w-3 text-red-500 animate-pulse" />
-                  <span>and ☕</span>
+                  <span>
+                    <TranslatedText>and ☕</TranslatedText>
+                  </span>
                 </div>
               </div>
               
               <div className="flex items-center justify-center gap-3 text-xs text-gray-500">
                 <div className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                  <span>All systems operational</span>
+                  <span>
+                    <TranslatedText>All systems operational</TranslatedText>
+                  </span>
                 </div>
                 <span>•</span>
-                <span>Built with React ⚛️</span>
+                <span>
+                  <TranslatedText>Built with React ⚛️</TranslatedText>
+                </span>
               </div>
             </div>
 
@@ -356,18 +369,20 @@ const Footer = () => {
             <div className="hidden md:flex md:justify-between md:items-center">
               <div className="flex items-center gap-4 text-gray-400 text-xs">
                 <div className="flex items-center gap-2">
-                  <span>© {currentYear} Naveen Agarwal. Made with</span>
+                  <span>© {currentYear} Naveen Agarwal. <TranslatedText>Made with</TranslatedText></span>
                   <Heart className="h-3 w-3 text-red-500 animate-pulse" />
-                  <span>and ☕</span>
+                  <span><TranslatedText>and ☕</TranslatedText></span>
                 </div>
                 <span>•</span>
-                <span>Built with React ⚛️</span>
+                <span><TranslatedText>Built with React ⚛️</TranslatedText></span>
               </div>
               
               <div className="flex items-center gap-4 text-xs text-gray-500">
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                  <span>All systems operational</span>
+                  <span>
+                    <TranslatedText>All systems operational</TranslatedText>
+                  </span>
                 </div>
                 <button
                   onClick={scrollToTop}
@@ -375,7 +390,9 @@ const Footer = () => {
                   transition-all duration-200 hover:scale-105 flex items-center gap-1.5"
                 >
                   <ArrowUp className="h-3 w-3 group-hover:animate-bounce" />
-                  <span>Top</span>
+                  <span>
+                    <TranslatedText>Top</TranslatedText>
+                  </span>
                 </button>
               </div>
             </div>

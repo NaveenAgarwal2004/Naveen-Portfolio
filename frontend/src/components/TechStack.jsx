@@ -21,6 +21,7 @@ import {
   Cpu,
   HardDrive
 } from 'lucide-react';
+import TranslatedText from './TranslatedText';
 
 const iconMap = {
   FileCode, 
@@ -179,7 +180,9 @@ const TechStack = ({ techStackData }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-3 text-white">
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-400/30 border-t-blue-400"></div>
-            <span>Loading technologies...</span>
+            <span>
+              <TranslatedText>Loading technologies...</TranslatedText>
+            </span>
           </div>
         </div>
       </section>
@@ -196,7 +199,7 @@ const TechStack = ({ techStackData }) => {
               onClick={() => window.location.reload()} 
               className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 rounded-lg text-red-300 transition-colors"
             >
-              Try Again
+              <TranslatedText>Try Again</TranslatedText>
             </button>
           </div>
         </div>
@@ -210,7 +213,9 @@ const TechStack = ({ techStackData }) => {
       <section id="tech-stack" className="py-16 sm:py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-8">
-            <p className="text-yellow-400 text-lg">Invalid tech stack data format</p>
+            <p className="text-yellow-400 text-lg">
+              <TranslatedText>Invalid tech stack data format</TranslatedText>
+            </p>
           </div>
         </div>
       </section>
@@ -222,7 +227,9 @@ const TechStack = ({ techStackData }) => {
       <section id="tech-stack" className="py-16 sm:py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-gray-500/10 border border-gray-500/20 rounded-2xl p-8">
-            <p className="text-gray-400 text-lg">No technologies to display</p>
+            <p className="text-gray-400 text-lg">
+              <TranslatedText>No technologies to display</TranslatedText>
+            </p>
           </div>
         </div>
       </section>
@@ -261,14 +268,16 @@ const TechStack = ({ techStackData }) => {
         }`}>
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-6">
             <Sparkles className="h-4 w-4 text-blue-400 animate-pulse" />
-            <span className="text-blue-400 text-sm font-medium">Technologies & Tools</span>
+            <span className="text-blue-400 text-sm font-medium">
+              <TranslatedText>Technologies & Tools</TranslatedText>
+            </span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-            Tech Stack
+            <TranslatedText>My Tools</TranslatedText>
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-6 sm:mb-8 rounded-full"></div>
           <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-            Technologies and tools I use to build amazing web experiences
+            <TranslatedText>Technologies and tools I use to build amazing web experiences</TranslatedText>
           </p>
         </div>
 
@@ -379,10 +388,10 @@ const TechStack = ({ techStackData }) => {
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-4 group-hover:text-blue-100 transition-colors duration-300">
-                  {category.title}
+                  <TranslatedText>{category.title}</TranslatedText>
                 </h3>
                 <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-300">
-                  {category.description}
+                  <TranslatedText>{category.description}</TranslatedText>
                 </p>
                 <div className="w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-4 group-hover:w-full transition-all duration-500 rounded-full"></div>
               </div>
