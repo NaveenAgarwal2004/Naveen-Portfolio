@@ -42,22 +42,32 @@ const Projects = () => {
 
   // Intersection Observer for scroll animations
   useEffect(() => {
-    if (loading || !projectsRef.current) return;
+    if (loading) return;
+
+    // 1. Safety Timer: Force projects to show after 500ms even if Observer fails
+    // This fixes the "Invisible Projects" bug on mobile
+    const safetyTimer = setTimeout(() => {
+      setIsVisible(true);
+    }, 500);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
+          clearTimeout(safetyTimer); // Cancel timer if observer works naturally
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0 } // Changed to 0 so it triggers as soon as 1 pixel is visible
     );
 
     if (projectsRef.current) {
       observer.observe(projectsRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(safetyTimer);
+    };
   }, [loading]);
 
   const filteredProjects = Array.isArray(projects)
