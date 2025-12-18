@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Download, MapPin, Mail, Phone, ChevronDown, User, Code, Coffee, Award } from 'lucide-react';
+import TranslatedText from './TranslatedText';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const About = ({ personalData }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -214,11 +216,13 @@ const About = ({ personalData }) => {
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-            {displayData.title || "About Me"}
+            <TranslatedText>{displayData.title || "About Me"}</TranslatedText>
           </h2>
           <div className="w-20 sm:w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-6 sm:mb-8 rounded-full"></div>
           <p className="text-base sm:text-lg lg:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed px-4">
-            {displayData.description || "Get to know more about my journey, skills, and passion for creating amazing web experiences"}
+            <TranslatedText>
+              {displayData.description || "Get to know more about my journey, skills, and passion for creating amazing web experiences"}
+            </TranslatedText>
           </p>
         </div>
 
@@ -250,7 +254,7 @@ const About = ({ personalData }) => {
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 hover:bg-white/10 transition-all duration-300 shadow-xl">
               <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6 flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                Contact Information
+                <TranslatedText>Contact Information</TranslatedText>
               </h3>
               <div className="space-y-3 sm:space-y-4">
                 <div className="group flex items-center gap-3 sm:gap-4 p-3 rounded-xl hover:bg-white/5 transition-all duration-200">
@@ -289,7 +293,7 @@ const About = ({ personalData }) => {
                   <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                   <span className="relative z-10 flex items-center gap-2">
                     <Download className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Download Resume
+                    <TranslatedText>Download Resume</TranslatedText>
                   </span>
                   <ChevronDown className={`h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 relative z-10 ${isOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -314,7 +318,9 @@ const About = ({ personalData }) => {
                         }}
                       >
                         <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200 shrink-0"></div>
-                        <span className="font-medium flex-1 truncate">{resume.name}</span>
+                        <span className="font-medium flex-1 truncate">
+                          <TranslatedText>{resume.name}</TranslatedText>
+                        </span>
                         <Download className="h-3 w-3 sm:h-4 sm:w-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
                       </button>
                     ))}
@@ -332,11 +338,13 @@ const About = ({ personalData }) => {
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 lg:p-8 hover:bg-white/10 transition-all duration-300">
               <h3 className="text-xl sm:text-2xl font-semibold text-white mb-4 sm:mb-6 flex items-center gap-2">
                 <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
-                My Story
+                <TranslatedText>My Story</TranslatedText>
               </h3>
               <div className="space-y-4 sm:space-y-6 text-gray-300 leading-relaxed">
                 <p className="text-sm sm:text-base lg:text-lg">
-                  {displayData.bio || "I'm a passionate frontend developer with expertise in creating modern, responsive web applications using cutting-edge technologies like React, Tailwind CSS, and the MERN stack. With a strong foundation in both frontend and backend development, I specialize in building seamless user experiences that are both visually appealing and highly functional."}
+                  <TranslatedText>
+                    {displayData.bio || "I'm a passionate frontend developer with expertise in creating modern, responsive web applications using cutting-edge technologies like React, Tailwind CSS, and the MERN stack. With a strong foundation in both frontend and backend development, I specialize in building seamless user experiences that are both visually appealing and highly functional."}
+                  </TranslatedText>
                 </p>
                 
                 {/* Stats Grid */}
@@ -346,25 +354,33 @@ const About = ({ personalData }) => {
                       <div className="text-xl sm:text-2xl font-bold text-blue-400">
                         {displayData.experience || "3+"}
                       </div>
-                      <div className="text-xs sm:text-sm text-gray-400">Years Experience</div>
+                      <div className="text-xs sm:text-sm text-gray-400">
+                        <TranslatedText>Years Experience</TranslatedText>
+                      </div>
                     </div>
                     <div className="text-center">
                       <div className="text-xl sm:text-2xl font-bold text-purple-400">
                         {displayData.projects || "25+"}
                       </div>
-                      <div className="text-xs sm:text-sm text-gray-400">Projects</div>
+                      <div className="text-xs sm:text-sm text-gray-400">
+                        <TranslatedText>Projects</TranslatedText>
+                      </div>
                     </div>
                     <div className="text-center">
                       <div className="text-xl sm:text-2xl font-bold text-green-400">
                         {displayData.technologies || "15+"}
                       </div>
-                      <div className="text-xs sm:text-sm text-gray-400">Technologies</div>
+                      <div className="text-xs sm:text-sm text-gray-400">
+                        <TranslatedText>Technologies</TranslatedText>
+                      </div>
                     </div>
                   </div>
                 )}
                 
                 <p className="text-gray-400 text-sm sm:text-base">
-                  When I'm not coding, I enjoy exploring new technologies, contributing to open-source projects, and staying updated with the latest trends in web development and artificial intelligence.
+                  <TranslatedText>
+                    When I'm not coding, I enjoy exploring new technologies, contributing to open-source projects, and staying updated with the latest trends in web development and artificial intelligence.
+                  </TranslatedText>
                 </p>
               </div>
             </div>
@@ -374,20 +390,24 @@ const About = ({ personalData }) => {
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-white/10 transition-all duration-300">
                 <div className="flex items-center mb-3">
                   <Code className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400 mr-2" />
-                  <h4 className="font-semibold text-white text-sm sm:text-base">Frontend</h4>
+                  <h4 className="font-semibold text-white text-sm sm:text-base">
+                    <TranslatedText>Frontend</TranslatedText>
+                  </h4>
                 </div>
                 <p className="text-gray-400 text-xs sm:text-sm">
-                  React, Next.js, TypeScript, Tailwind CSS
+                  <TranslatedText>React, Next.js, TypeScript, Tailwind CSS</TranslatedText>
                 </p>
               </div>
 
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-white/10 transition-all duration-300">
                 <div className="flex items-center mb-3">
                   <Coffee className="h-5 w-5 sm:h-6 sm:w-6 text-green-400 mr-2" />
-                  <h4 className="font-semibold text-white text-sm sm:text-base">Backend</h4>
+                  <h4 className="font-semibold text-white text-sm sm:text-base">
+                    <TranslatedText>Backend</TranslatedText>
+                  </h4>
                 </div>
                 <p className="text-gray-400 text-xs sm:text-sm">
-                  Node.js, Express, MongoDB
+                  <TranslatedText>Node.js, Express, MongoDB</TranslatedText>
                 </p>
               </div>
             </div>
@@ -396,7 +416,7 @@ const About = ({ personalData }) => {
             <div ref={skillsRef} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 lg:p-8 hover:bg-white/10 transition-all duration-300">
               <h3 className="text-xl sm:text-2xl font-semibold text-white mb-4 sm:mb-6 flex items-center gap-2">
                 <Award className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
-                Technical Skills
+                <TranslatedText>Technical Skills</TranslatedText>
               </h3>
               <div className="grid gap-4 sm:gap-6">
                 {skills.map((skill, index) => (
