@@ -49,6 +49,17 @@ code {
 
 @layer base {
   :root {
+        /* Geometric Craftsperson Brand Colors */
+        --forge-orange: #E85D04;
+        --ember-red: #DC2F02;
+        --clay: #D97757;
+        --craft-green: #40916C;
+        --workshop-tan: #F5EBE0;
+        --carbon: #0A0A0A;
+        --slate: #52525B;
+        --parchment: #F7EDE2;
+        
+        /* Existing shadcn/ui theme variables */
         --background: 0 0% 100%;
         --foreground: 0 0% 3.9%;
         --card: 0 0% 100%;
@@ -76,6 +87,17 @@ code {
         --radius: 0.5rem;
     }
   .dark {
+        /* Geometric Craftsperson Brand Colors (same in dark mode) */
+        --forge-orange: #E85D04;
+        --ember-red: #DC2F02;
+        --clay: #D97757;
+        --craft-green: #40916C;
+        --workshop-tan: #F5EBE0;
+        --carbon: #0A0A0A;
+        --slate: #52525B;
+        --parchment: #F7EDE2;
+        
+        /* Existing shadcn/ui dark theme variables */
         --background: 0 0% 3.9%;
         --foreground: 0 0% 98%;
         --card: 0 0% 3.9%;

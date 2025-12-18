@@ -1,11 +1,12 @@
-/* Enhanced Typography System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+/* Enhanced Typography System - Geometric Craftsperson Brand */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&display=swap');
 
 /* Typography Variables */
 :root {
-  /* Font Families */
+  /* Font Families - Geometric Craftsperson Brand */
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', monospace;
+  --font-heading: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-mono: 'Fira Code', 'JetBrains Mono', 'Monaco', 'Cascadia Code', monospace;
   
   /* Font Sizes */
   --text-xs: 0.75rem;     /* 12px */
@@ -45,6 +46,19 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global Heading Styles - Space Grotesk */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Code Elements - Fira Code */
+code, pre, .code {
+  font-family: var(--font-mono);
+  font-feature-settings: 'liga' 1, 'calt' 1;
 }
 
 /* Headings */
@@ -97,16 +111,23 @@ body {
   line-height: var(--leading-normal);
 }
 
-/* Special Text Styles */
+/* Special Text Styles - Geometric Craftsperson Brand */
 .text-gradient {
-  background: linear-gradient(135deg, #60a5fa 0%, #a855f7 50%, #ec4899 100%);
+  background: linear-gradient(135deg, #E85D04 0%, #DC2F02 50%, #D97757 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.text-gradient-blue {
-  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+.text-gradient-forge {
+  background: linear-gradient(135deg, #E85D04 0%, #DC2F02 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-craft {
+  background: linear-gradient(135deg, #40916C 0%, #D97757 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -144,14 +165,14 @@ body {
   text-wrap: pretty;
 }
 
-/* Focus and Selection Styles */
+/* Focus and Selection Styles - Geometric Craftsperson Brand */
 ::selection {
-  background: rgba(59, 130, 246, 0.3);
+  background: rgba(232, 93, 4, 0.3);
   color: white;
 }
 
 ::-moz-selection {
-  background: rgba(59, 130, 246, 0.3);
+  background: rgba(232, 93, 4, 0.3);
   color: white;
 }
 
