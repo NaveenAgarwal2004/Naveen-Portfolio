@@ -48,10 +48,15 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Vendor chunks
+          // CRITICAL FIX: Keep React in main bundle to prevent createContext errors
+          // The issue was React being split into separate chunk causing module resolution failures
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'react-vendor';
+            // Keep React, ReactDOM in main bundle - DO NOT split
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor'; // Put in main vendor chunk
+            }
+            if (id.includes('react-router-dom')) {
+              return 'vendor';
             }
             if (id.includes('@radix-ui') || id.includes('lucide-react')) {
               return 'ui-vendor';
@@ -59,10 +64,7 @@ export default defineConfig({
             if (id.includes('axios')) {
               return 'http-vendor';
             }
-            // Add Three.js/Vanta to separate chunk if you decide to bundle them later
-            if (id.includes('three') || id.includes('vanta')) {
-              return 'three-vendor';
-            }
+            // Remove Three.js/Vanta reference - no longer used
             return 'vendor';
           }
 
@@ -82,10 +84,7 @@ export default defineConfig({
           }
         },
         // Optimize chunk names and ensure proper file extensions
-        chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop().replace('.jsx', '').replace('.js', '') : 'chunk';
-          return `assets/${facadeModuleId}-[hash].js`;
-        },
+        chunkFileNames: 'assets/[name]-[hash].js',
         // Ensure entry files have proper extensions
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
@@ -115,11 +114,18 @@ export default defineConfig({
     include: [
       'react',
       'react-dom',
+      'react-dom/client',
+      'react/jsx-runtime',
       'react-router-dom',
       'axios',
       'lucide-react',
+      'framer-motion'
     ],
     exclude: ['@vite/client', '@vite/env'],
+    // Force React to be bundled properly
+    esbuildOptions: {
+      resolveExtensions: ['.js', '.jsx', '.json', '.ts', '.tsx']
+    }
   },
 
   // Performance optimizations
