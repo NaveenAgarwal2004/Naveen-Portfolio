@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Github, Filter, Star, Calendar, Code, Target, Lightbulb, Trophy, ChevronRight } from 'lucide-react';
 import OptimizedImage, { ImagePresets } from './ui/OptimizedImage';
 import { ScrollAnimationWrapper, HoverAnimationWrapper } from './ui/AnimationWrapper';
+import TranslatedText from './TranslatedText';
 
 const Projects = () => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -32,7 +33,12 @@ const Projects = () => {
     });
   }, []);
 
-  const filters = ['All', 'AI', 'Web'];
+  // Define filter labels with translation support
+  const filters = [
+    { id: 'All', label: 'All' },
+    { id: 'AI', label: 'AI' },
+    { id: 'Web', label: 'Web' }
+  ];
 
   // Intersection Observer for scroll animations
   useEffect(() => {
@@ -134,14 +140,14 @@ const Projects = () => {
                     onClick={() => window.open(project.githubUrl, '_blank')}
                   >
                     <Github className="h-4 w-4" />
-                    <span className="hidden sm:inline">Code</span>
+                    <span className="hidden sm:inline"><TranslatedText>Code</TranslatedText></span>
                   </button>
                   <button
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl font-medium transition-all duration-200 hover:scale-105 text-sm"
                     onClick={() => window.open(project.liveUrl, '_blank')}
                   >
                     <ExternalLink className="h-4 w-4" />
-                    <span className="hidden sm:inline">Demo</span>
+                    <span className="hidden sm:inline"><TranslatedText>Demo</TranslatedText></span>
                   </button>
                 </div>
               </div>
@@ -152,7 +158,7 @@ const Projects = () => {
               <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
                 <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white flex items-center gap-1 text-xs">
                   <Star className="h-3 w-3" />
-                  Featured
+                  <TranslatedText>Featured</TranslatedText>
                 </Badge>
               </div>
             )}
@@ -188,7 +194,7 @@ const Projects = () => {
                 onClick={() => setShowCaseStudy(!showCaseStudy)}
                 className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors duration-200 text-xs sm:text-sm font-medium"
               >
-                {showCaseStudy ? 'Hide Details' : 'View Case Study'}
+                <TranslatedText>{showCaseStudy ? 'Hide Details' : 'View Case Study'}</TranslatedText>
                 <ChevronRight className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200 ${showCaseStudy ? 'rotate-90' : ''}`} />
               </button>
             </div>
@@ -200,10 +206,14 @@ const Projects = () => {
                 <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 sm:p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Target className="h-3 w-3 sm:h-4 sm:w-4 text-red-400 shrink-0" />
-                    <span className="text-xs sm:text-sm font-semibold text-red-300">Problem</span>
+                    <span className="text-xs sm:text-sm font-semibold text-red-300">
+                      <TranslatedText>Problem</TranslatedText>
+                    </span>
                   </div>
                   <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-                    {project.problem || 'Identified key challenges in user experience and performance optimization that needed innovative solutions.'}
+                    <TranslatedText>
+                      {project.problem || 'Identified key challenges in user experience and performance optimization that needed innovative solutions.'}
+                    </TranslatedText>
                   </p>
                 </div>
 
@@ -211,10 +221,14 @@ const Projects = () => {
                 <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 sm:p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400 shrink-0" />
-                    <span className="text-xs sm:text-sm font-semibold text-blue-300">Solution</span>
+                    <span className="text-xs sm:text-sm font-semibold text-blue-300">
+                      <TranslatedText>Solution</TranslatedText>
+                    </span>
                   </div>
                   <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-                    {project.solution || 'Developed a comprehensive solution using modern technologies and best practices to address the identified challenges.'}
+                    <TranslatedText>
+                      {project.solution || 'Developed a comprehensive solution using modern technologies and best practices to address the identified challenges.'}
+                    </TranslatedText>
                   </p>
                 </div>
 
@@ -222,10 +236,14 @@ const Projects = () => {
                 <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 sm:p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-green-400 shrink-0" />
-                    <span className="text-xs sm:text-sm font-semibold text-green-300">Results</span>
+                    <span className="text-xs sm:text-sm font-semibold text-green-300">
+                      <TranslatedText>Results</TranslatedText>
+                    </span>
                   </div>
                   <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-                    {project.outcome || 'Successfully delivered a high-performance application with improved user experience and measurable performance gains.'}
+                    <TranslatedText>
+                      {project.outcome || 'Successfully delivered a high-performance application with improved user experience and measurable performance gains.'}
+                    </TranslatedText>
                   </p>
                 </div>
               </div>
@@ -236,7 +254,9 @@ const Projects = () => {
               <div>
                 <div className="flex items-center gap-2 mb-2 sm:mb-3">
                   <Code className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 shrink-0" />
-                  <span className="text-xs sm:text-sm text-gray-500 font-medium">Tech Stack</span>
+                  <span className="text-xs sm:text-sm text-gray-500 font-medium">
+                    <TranslatedText>Tech Stack</TranslatedText>
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {project.techStack.map((tech, techIndex) => (
@@ -261,14 +281,14 @@ const Projects = () => {
                   onClick={() => window.open(project.githubUrl, '_blank')}
                 >
                   <Github className="h-4 w-4" />
-                  <span>GitHub</span>
+                  <span><TranslatedText>GitHub</TranslatedText></span>
                 </button>
                 <button
                   className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium transition-all duration-200 hover:scale-105 text-sm"
                   onClick={() => window.open(project.liveUrl, '_blank')}
                 >
                   <ExternalLink className="h-4 w-4" />
-                  <span>Demo</span>
+                  <span><TranslatedText>Demo</TranslatedText></span>
                 </button>
               </div>
             </div>
@@ -285,7 +305,9 @@ const Projects = () => {
           <div className="text-center">
             <div className="inline-flex items-center gap-3 text-white">
               <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-400/30 border-t-blue-400"></div>
-              <span className="text-sm sm:text-base">Loading amazing projects...</span>
+              <span className="text-sm sm:text-base">
+                <TranslatedText>Loading amazing projects...</TranslatedText>
+              </span>
             </div>
           </div>
         </div>
@@ -319,11 +341,11 @@ const Projects = () => {
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-            My Projects
+            <TranslatedText>My Projects</TranslatedText>
           </h2>
           <div className="w-16 sm:w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-6 sm:mb-8 rounded-full"></div>
           <p className="text-base sm:text-lg lg:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed px-4">
-            Explore my latest work and side projects that showcase my skills and passion for development
+            <TranslatedText>Explore my latest work and side projects that showcase my skills and passion for development</TranslatedText>
           </p>
         </div>
 
@@ -334,10 +356,10 @@ const Projects = () => {
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-1 flex gap-1 overflow-x-auto scrollbar-hide max-w-full">
             {filters.map((filter, index) => (
               <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
+                key={filter.id}
+                onClick={() => setActiveFilter(filter.id)}
                 className={`px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 font-medium text-sm sm:text-base whitespace-nowrap flex items-center gap-2 ${
-                  activeFilter === filter
+                  activeFilter === filter.id
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105'
                     : 'text-gray-400 hover:text-white hover:bg-white/10'
                 }`}
@@ -346,10 +368,10 @@ const Projects = () => {
                 }}
               >
                 <Filter className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span>{filter}</span>
-                {filter !== 'All' && (
+                <span><TranslatedText>{filter.label}</TranslatedText></span>
+                {filter.id !== 'All' && (
                   <span className="text-xs bg-white/20 px-1.5 sm:px-2 py-0.5 rounded-full min-w-[1.25rem] text-center">
-                    {filteredProjects.filter(p => p.category === filter).length}
+                    {filteredProjects.filter(p => p.category === filter.id).length}
                   </span>
                 )}
               </button>
@@ -367,7 +389,9 @@ const Projects = () => {
               }`}>
                 <div className="flex items-center gap-3 mb-6 sm:mb-8 px-2">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                  <h3 className="text-xl sm:text-2xl font-semibold text-white">Featured Projects</h3>
+                  <h3 className="text-xl sm:text-2xl font-semibold text-white">
+                    <TranslatedText>Featured Projects</TranslatedText>
+                  </h3>
                   <div className="flex-1 h-px bg-gradient-to-r from-yellow-500/50 to-transparent"></div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
@@ -391,11 +415,13 @@ const Projects = () => {
                 <div className="flex items-center gap-3 mb-6 sm:mb-8 px-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                   <h3 className="text-xl sm:text-2xl font-semibold text-white">
-                    {featuredProjects.length > 0 ? 'Other Projects' : 'Projects'}
+                    <TranslatedText>
+                      {featuredProjects.length > 0 ? 'Other Projects' : 'Projects'}
+                    </TranslatedText>
                   </h3>
                   <div className="flex-1 h-px bg-gradient-to-r from-blue-500/50 to-transparent"></div>
                   <span className="text-sm text-gray-400 bg-gray-800/50 px-3 py-1 rounded-full">
-                    {displayedCount} of {totalProjects}
+                    {displayedCount} <TranslatedText>of</TranslatedText> {totalProjects}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
@@ -425,11 +451,11 @@ const Projects = () => {
                   {loadingMore ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-400/30 border-t-blue-400"></div>
-                      <span>Loading...</span>
+                      <span><TranslatedText>Loading...</TranslatedText></span>
                     </>
                   ) : (
                     <>
-                      <span>Load More Projects</span>
+                      <span><TranslatedText>Load More Projects</TranslatedText></span>
                       <span className="text-sm text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full">
                         +{Math.min(PROJECTS_PER_LOAD, totalProjects - displayedCount)}
                       </span>
@@ -449,8 +475,12 @@ const Projects = () => {
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Filter className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
               </div>
-              <p className="text-gray-400 text-base sm:text-lg mb-2">No projects found</p>
-              <p className="text-gray-500 text-sm">Try selecting a different filter</p>
+              <p className="text-gray-400 text-base sm:text-lg mb-2">
+                <TranslatedText>No projects found</TranslatedText>
+              </p>
+              <p className="text-gray-500 text-sm">
+                <TranslatedText>Try selecting a different filter</TranslatedText>
+              </p>
             </div>
           </div>
         )}
@@ -461,9 +491,11 @@ const Projects = () => {
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}>
             <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto">
-              <h3 className="text-white text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Want to see more?</h3>
+              <h3 className="text-white text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+                <TranslatedText>Want to see more?</TranslatedText>
+              </h3>
               <p className="text-gray-400 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
-                Check out my GitHub profile for more projects, contributions, and open-source work.
+                <TranslatedText>Check out my GitHub profile for more projects, contributions, and open-source work.</TranslatedText>
               </p>
               <button
                 className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-medium
@@ -472,7 +504,7 @@ const Projects = () => {
               >
                 <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 <Github className="h-4 w-4 sm:h-5 sm:w-5 relative z-10" />
-                <span className="relative z-10">View All on GitHub</span>
+                <span className="relative z-10"><TranslatedText>View All on GitHub</TranslatedText></span>
                 <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
             </div>
