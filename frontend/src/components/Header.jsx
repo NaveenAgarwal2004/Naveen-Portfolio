@@ -84,7 +84,7 @@ const ResumeDropdown = ({
           <button
             key={option.name}
             onClick={() => onDownload(option)}
-            className={`w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-xl transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
+            className={`w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-forge-orange/10 rounded-xl transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-forge-orange/50 ${
               isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
             }`}
             style={{
@@ -93,7 +93,7 @@ const ResumeDropdown = ({
             role="menuitem"
             tabIndex={isOpen ? 0 : -1}
           >
-            <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200 shrink-0" />
+            <div className="w-2 h-2 bg-forge-orange rounded-full group-hover:scale-125 transition-transform duration-200 shrink-0" />
             <TranslatedText tag="span" fallback={option.name} className="font-medium flex-1 text-sm" />
             <Download className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0" />
           </button>
@@ -407,13 +407,13 @@ const Header = () => {
 
   const navItems = [
     { id: 'hero', label: tSync('navigation.home', 'Home'), icon: Home },
-    { id: 'about', label: tSync('navigation.about', 'About'), icon: User },
-    { id: 'tech-stack', label: tSync('navigation.skills', 'Skills'), icon: Code },
-    { id: 'projects', label: tSync('navigation.projects', 'Projects'), icon: Briefcase },
+    { id: 'about', label: tSync('navigation.about', 'The Workbench'), icon: User },
+    { id: 'tech-stack', label: tSync('navigation.skills', 'My Tools'), icon: Code },
+    { id: 'projects', label: tSync('navigation.projects', 'The Workshop'), icon: Briefcase },
     // { id: 'timeline', label: tSync('navigation.timeline', 'Timeline'), icon: Clock },
     { id: 'resumes', label: 'Resumes', icon: FileText },
     { id: 'certificates', label: 'Certificates', icon: Award },
-    { id: 'contact', label: tSync('navigation.contact', 'Contact'), icon: Mail }
+    { id: 'contact', label: tSync('navigation.contact', 'Commission a Piece'), icon: Mail }
   ];
 
   if (!mounted) {
@@ -454,12 +454,12 @@ const Header = () => {
           <div className="flex-shrink-0">
             <button 
               onClick={() => scrollToSection('hero')}
-              className={`font-bold text-white hover:text-blue-400 transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-400/50 rounded-lg px-3 py-2 ${
+              className={`font-bold text-white hover:text-forge-orange transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-forge-orange/50 rounded-lg px-3 py-2 ${
                 isMobile ? 'text-lg' : 'text-xl'
               }`}
               aria-label={tSync('nav.goToTop', 'Go to top of page')}
             >
-              Naveen<span className="text-blue-500 animate-pulse">.</span>
+              Naveen<span className="text-forge-orange animate-pulse">.</span>
             </button>
           </div>
 
@@ -471,9 +471,9 @@ const Header = () => {
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className={`relative font-medium transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 rounded-lg px-3 py-2 ${
+                className={`relative font-medium transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-forge-orange/50 rounded-lg px-3 py-2 ${
                   activeSection === item.id 
-                    ? 'text-blue-400' 
+                    ? 'text-forge-orange' 
                     : 'text-gray-300 hover:text-white'
                 } ${
                   isTablet ? 'text-sm' : 'text-sm'
@@ -482,10 +482,10 @@ const Header = () => {
                 aria-current={activeSection === item.id ? 'page' : undefined}
               >
                 <span className="relative z-10">{item.label}</span>
-                <div className={`absolute inset-0 bg-blue-500/20 rounded-lg transition-transform duration-300 -z-10 ${
+                <div className={`absolute inset-0 bg-forge-orange/20 rounded-lg transition-transform duration-300 -z-10 ${
                   activeSection === item.id ? 'scale-100' : 'scale-0 group-hover:scale-100'
                 }`} />
-                <div className={`absolute bottom-0 left-0 h-0.5 bg-blue-500 transition-all duration-300 ${
+                <div className={`absolute bottom-0 left-0 h-0.5 bg-forge-orange transition-all duration-300 ${
                   activeSection === item.id ? 'w-full' : 'w-0 group-hover:w-full'
                 }`} />
               </button>
@@ -505,7 +505,7 @@ const Header = () => {
               <button
                 id="resume-button"
                 onClick={() => setIsResumeOpen(!isResumeOpen)}
-                className={`group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50 rounded-xl ${
+                className={`group relative bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-forge-orange text-white font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-forge-orange/25 flex items-center gap-2 overflow-hidden focus:outline-none focus:ring-2 focus:ring-forge-orange/50 rounded-xl ${
                   isTablet ? 'px-4 py-2 text-sm' : 'px-6 py-2.5 text-sm'
                 } ${
                   isDownloading ? 'opacity-75 cursor-not-allowed' : ''
@@ -574,10 +574,10 @@ const Header = () => {
                     console.log(`🔥 Mobile nav clicked: ${item.id}`); // Debug log
                     scrollToSection(item.id);
                   }}
-                  className={`flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium w-full text-left transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-blue-400/50 active:scale-95 ${
+                  className={`flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium w-full text-left transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-forge-orange/50 active:scale-95 ${
                     activeSection === item.id
-                      ? 'text-white bg-blue-500/20 border border-blue-500/30 scale-105'
-                      : 'text-gray-300 hover:text-white hover:bg-blue-500/10 hover:scale-105'
+                      ? 'text-white bg-forge-orange/20 border border-forge-orange/30 scale-105'
+                      : 'text-gray-300 hover:text-white hover:bg-forge-orange/10 hover:scale-105'
                   } ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
                   style={{ 
                     transitionDelay: isOpen ? `${index * 80}ms` : '0ms',
@@ -589,11 +589,11 @@ const Header = () => {
                   tabIndex={isOpen ? 0 : -1}
                 >
                   <Icon className={`h-5 w-5 ${
-                    activeSection === item.id ? 'text-blue-400' : 'text-blue-400'
+                    activeSection === item.id ? 'text-forge-orange' : 'text-forge-orange'
                   }`} />
                   <span className="flex-1">{item.label}</span>
                   {activeSection === item.id && (
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                    <div className="w-2 h-2 bg-forge-orange rounded-full animate-pulse" />
                   )}
                 </button>
               );
@@ -621,7 +621,7 @@ const Header = () => {
                           console.log(`📄 Mobile resume download: ${option.name}`); // Debug log
                           handleResumeDownload(option);
                         }}
-                        className={`w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-500/10 rounded-lg transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-400/50 active:scale-95 ${
+                        className={`w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-forge-orange/10 rounded-lg transition-all duration-200 flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-forge-orange/50 active:scale-95 ${
                           isMobileResumeOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
                         }`}
                         style={{ 
@@ -631,7 +631,7 @@ const Header = () => {
                         }}
                         tabIndex={isMobileResumeOpen ? 0 : -1}
                       >
-                        <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:scale-125 transition-transform duration-200" />
+                        <div className="w-2 h-2 bg-forge-orange rounded-full group-hover:scale-125 transition-transform duration-200" />
                         <span className="text-sm flex-1">{option.name}</span>
                         <Download className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                       </button>
@@ -641,8 +641,8 @@ const Header = () => {
 
                 <button
                   onClick={() => setIsMobileResumeOpen(!isMobileResumeOpen)}
-                  className={`group w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-5 py-4 rounded-xl font-medium 
-                    transition-all duration-300 transform hover:scale-105 flex items-center justify-between overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400/50 active:scale-95
+                  className={`group w-full bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-forge-orange text-white px-5 py-4 rounded-xl font-medium 
+                    transition-all duration-300 transform hover:scale-105 flex items-center justify-between overflow-hidden focus:outline-none focus:ring-2 focus:ring-forge-orange/50 active:scale-95
                     ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}`}
                   style={{
                     transitionDelay: isOpen ? `${(navItems.length + 1) * 80}ms` : '0ms',

@@ -30,9 +30,9 @@ const Hero = ({ personalData }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const fullText = personalData?.title || 'Front-End Web Developer';
+  const fullText = personalData?.title || 'Full-Stack Craftsman';
   const name = personalData?.name || 'Naveen Agarwal';
-  const tagline = personalData?.tagline || t('hero.tagline', 'Building modern, responsive web experiences with clean code and creative design');
+  const tagline = personalData?.tagline || t('hero.tagline', 'Building digital experiences with precision and care');
   const socialLinks = personalData?.socialLinks || {};
 
   // Removed Vanta.js initialization - replaced with lightweight CSS gradient
@@ -81,7 +81,7 @@ const Hero = ({ personalData }) => {
       {[...Array(isMobile ? 8 : 15)].map((_, i) => (
         <div
           key={i}
-          className="absolute w-1 h-1 bg-blue-400/30 rounded-full animate-float"
+          className="absolute w-1 h-1 bg-forge-orange/30 rounded-full animate-float"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
@@ -102,7 +102,7 @@ const Hero = ({ personalData }) => {
       {/* Lightweight CSS Gradient Background - Replaces Vanta.js */}
       <div className="hero-bg absolute inset-0" style={{ zIndex: 0 }} />
 
-      {/* Enhanced background with tech image overlay */}
+      {/* Enhanced background with workshop image overlay */}
       <div className="absolute inset-0" style={{ zIndex: 1 }}>
         <OptimizedImage
           src="https://images.unsplash.com/photo-1576272531110-2a342fe22342?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxkZXZlbG9wZXIlMjB3b3Jrc3BhY2V8ZW58MHx8fGJsdWV8MTc1ODQ2NjI0NHww&ixlib=rb-4.1.0&q=85"
@@ -110,8 +110,8 @@ const Hero = ({ personalData }) => {
           {...ImagePresets.hero}
           className="w-full h-full object-cover opacity-10"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-blue-950/90 to-slate-900/95" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-carbon/95 via-slate-900/90 to-carbon/95" />
+        <div className="absolute inset-0 bg-gradient-to-t from-carbon via-transparent to-transparent" />
       </div>
 
       <FloatingParticles />
@@ -119,7 +119,7 @@ const Hero = ({ personalData }) => {
       {/* Interactive cursor following effect (desktop only) */}
       {!isMobile && (
         <div 
-          className="fixed w-4 h-4 bg-blue-400/20 rounded-full pointer-events-none z-10 transition-all duration-300 hidden lg:block"
+          className="fixed w-4 h-4 bg-forge-orange/20 rounded-full pointer-events-none z-10 transition-all duration-300 hidden lg:block"
           style={{
             left: mousePosition.x - 8,
             top: mousePosition.y - 8,
@@ -132,87 +132,87 @@ const Hero = ({ personalData }) => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative" style={{ zIndex: 20 }}>
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-          {/* Greeting with tech elements */}
+          {/* Availability Badge with Workshop Theme */}
           <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 rounded-full mb-4 sm:mb-6 group hover:bg-blue-500/15 transition-colors duration-300">
-              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-carbon/50 backdrop-blur-sm border border-craft-green/30 rounded-full mb-4 sm:mb-6 group hover:bg-carbon/70 transition-colors duration-300">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-craft-green rounded-full animate-pulse"></div>
               <TranslatedText 
                 tag="span" 
-                fallback={t('hero.availableForWork', 'Available for work')} 
-                className="text-blue-400 text-xs sm:text-sm font-medium"
+                fallback={t('hero.availableForWork', 'Available for Craft Commissions')} 
+                className="text-craft-green text-xs sm:text-sm font-medium"
               />
-              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400 animate-pulse group-hover:animate-spin transition-all duration-300" />
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-craft-green animate-pulse group-hover:animate-spin transition-all duration-300" />
             </div>
             
-            {/* Tech stack preview */}
+            {/* Workshop Tools preview */}
             <div className="flex justify-center items-center gap-2 mb-4 sm:mb-6">
-              <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <Code2 className="h-3 w-3 text-green-400" />
-                <span className="text-xs text-gray-300">MERN</span>
+              <div className="flex items-center gap-1 px-2 py-1 bg-workshop-tan/10 rounded-lg border border-forge-orange/30">
+                <Code2 className="h-3 w-3 text-forge-orange" />
+                <span className="text-xs text-parchment">MERN</span>
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <Terminal className="h-3 w-3 text-blue-400" />
-                <TranslatedText tag="span" fallback="Full Stack" className="text-xs text-gray-300" />
+              <div className="flex items-center gap-1 px-2 py-1 bg-workshop-tan/10 rounded-lg border border-ember-red/30">
+                <Terminal className="h-3 w-3 text-ember-red" />
+                <TranslatedText tag="span" fallback="Full-Stack Craftsman" className="text-xs text-parchment" />
               </div>
             </div>
             
             <TranslatedText 
               tag="p" 
-              fallback="👋 Hello, I'm" 
-              className="text-base sm:text-lg lg:text-xl text-blue-400 mb-3 sm:mb-4 font-medium"
+              fallback="👋 Welcome to the workshop, I'm" 
+              className="text-base sm:text-lg lg:text-xl text-forge-orange mb-3 sm:mb-4 font-medium"
             />
           </div>
 
-          {/* Name with gradient effect */}
+          {/* Name with workshop gradient effect */}
           <div className={`transform transition-all duration-1000 delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4 sm:mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-heading font-bold mb-4 sm:mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-parchment via-workshop-tan to-parchment bg-clip-text text-transparent">
                 {name}
               </span>
             </h1>
           </div>
 
-          {/* Typing animation */}
+          {/* Typing animation with workshop theme */}
           <div className={`transform transition-all duration-1000 delay-400 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300 mb-6 sm:mb-8 h-8 sm:h-10 lg:h-12 xl:h-16 flex items-center justify-center">
+            <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light text-workshop-tan mb-6 sm:mb-8 h-8 sm:h-10 lg:h-12 xl:h-16 flex items-center justify-center">
               <span className="relative px-2">
                 {displayText}
-                <span className="inline-block w-0.5 h-6 sm:h-8 lg:h-10 bg-blue-500 ml-1 animate-pulse"></span>
+                <span className="inline-block w-0.5 h-6 sm:h-8 lg:h-10 bg-forge-orange ml-1 animate-pulse"></span>
               </span>
             </div>
           </div>
 
-          {/* Tagline */}
+          {/* Tagline with workshop language */}
           <div className={`transform transition-all duration-1000 delay-600 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
             <TranslatedText 
               tag="p" 
-              fallback={tagline}
-              className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed px-4"
+              fallback="Full-Stack Craftsman • Building digital experiences with precision and care"
+              className="text-sm sm:text-base md:text-lg lg:text-xl text-slate max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed px-4"
             />
           </div>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons with Workshop Theme */}
           <div className={`transform transition-all duration-1000 delay-800 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-12 sm:mb-16 px-4">
               <button
                 onClick={scrollToProjects}
-                className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-2xl text-base sm:text-lg font-medium
-                transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25 flex items-center gap-3 overflow-hidden w-full sm:w-auto max-w-xs sm:max-w-none"
+                className="group relative bg-gradient-to-r from-forge-orange to-ember-red hover:from-ember-red hover:to-forge-orange text-white px-6 py-3 sm:px-8 sm:py-4 rounded-2xl text-base sm:text-lg font-semibold
+                transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-forge-orange/25 flex items-center gap-3 overflow-hidden w-full sm:w-auto max-w-xs sm:max-w-none"
               >
                 <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
                 <span className="relative z-10 flex items-center gap-2">
-                  <TranslatedText fallback={t('hero.viewWork', 'View My Work')} />
+                  <TranslatedText fallback={t('hero.viewWork', 'Inspect the Craft')} />
                   <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </span>
               </button>
               
               <button
                 onClick={scrollToAbout}
-                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-2xl text-base sm:text-lg font-medium
-                transition-all duration-300 hover:bg-white/10 hover:scale-105 w-full sm:w-auto max-w-xs sm:max-w-none"
+                className="group relative bg-carbon/50 backdrop-blur-sm border-2 border-slate hover:border-forge-orange text-parchment px-6 py-3 sm:px-8 sm:py-4 rounded-xl text-base sm:text-lg font-semibold
+                transition-all duration-300 hover:bg-slate/10 hover:scale-105 w-full sm:w-auto max-w-xs sm:max-w-none"
               >
-                <TranslatedText tag="span" fallback={t('hero.aboutMe', 'About Me')} className="relative z-10" />
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                <TranslatedText tag="span" fallback={t('hero.aboutMe', 'Visit the Workshop')} className="relative z-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-forge-orange/10 to-ember-red/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
               </button>
             </div>
           </div>
