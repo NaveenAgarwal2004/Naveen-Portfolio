@@ -1,7 +1,7 @@
 const express = require('express');
 const Personal = require('../models/Personal');
-const Project = require('../models/Project');
 const TechStack = require('../models/TechStack');
+const projectController = require('../src/controllers/projectController');
 
 const router = express.Router();
 
@@ -54,33 +54,12 @@ router.get('/personal', async (req, res) => {
   }
 });
 
-// ================= GET PROJECTS =================
-router.get('/projects', async (req, res) => {
-  try {
-    const { category } = req.query;
-    let query = {};
-    if (category && category !== 'All') {
-      query.category = category;
-    }
+// ================= PROJECT ROUTES (Using Controller Layer) =================
+// GET /api/portfolio/projects - Get all projects with pagination
+router.get('/projects', projectController.getAllProjects);
 
-    const projects = await Project.find(query).sort({ featured: -1, order: 1, createdAt: -1 });
-    res.json({ success: true, data: projects });
-  } catch (error) {
-    console.error('Error fetching projects:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch projects' });
-  }
-});
-
-// ================= GET FEATURED PROJECTS =================
-router.get('/projects/featured', async (req, res) => {
-  try {
-    const projects = await Project.find({ featured: true }).sort({ order: 1, createdAt: -1 }).limit(3);
-    res.json({ success: true, data: projects });
-  } catch (error) {
-    console.error('Error fetching featured projects:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch featured projects' });
-  }
-});
+// GET /api/portfolio/projects/featured - Get featured projects
+router.get('/projects/featured', projectController.getFeaturedProjects);
 
 // ================= GET TECH STACK =================
 router.get('/tech-stack', async (req, res) => {
@@ -96,19 +75,14 @@ router.get('/tech-stack', async (req, res) => {
 // ================= GET PORTFOLIO STATS =================
 router.get('/stats', async (req, res) => {
   try {
-    const [totalProjects, aiProjects, webProjects, techCount] = await Promise.all([
-      Project.countDocuments(),
-      Project.countDocuments({ category: 'AI' }),
-      Project.countDocuments({ category: 'Web' }),
-      TechStack.countDocuments()
-    ]);
+    const projectService = require('../src/services/projectService');
+    const projectStats = await projectService.getProjectStats();
+    const techCount = await TechStack.countDocuments();
 
     res.json({
       success: true,
       data: {
-        totalProjects,
-        aiProjects,
-        webProjects,
+        ...projectStats,
         techCount,
         yearsExperience: 3,
         clients: 25

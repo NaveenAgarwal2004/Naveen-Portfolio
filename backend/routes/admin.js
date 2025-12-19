@@ -1,6 +1,5 @@
 const express = require('express');
 const Personal = require('../models/Personal');
-const Project = require('../models/Project');
 const TechStack = require('../models/TechStack');
 const Contact = require('../models/Contact');
 const auth = require('../middleware/auth');
@@ -11,124 +10,33 @@ const {
   techStackValidation, 
   handleValidationErrors 
 } = require('../middleware/validation');
+const projectController = require('../src/controllers/projectController');
 
 const router = express.Router();
 
 // Apply auth middleware to all routes
 router.use(auth);
 
-// ============= PROJECTS MANAGEMENT =============
+// ============= PROJECTS MANAGEMENT (Using Controller Layer) =============
 
 // GET /api/admin/projects - Get all projects for admin
-router.get('/projects', async (req, res) => {
-  try {
-    const projects = await Project.find()
-      .sort({ featured: -1, order: 1, createdAt: -1 });
-
-    res.json({
-      success: true,
-      data: projects
-    });
-  } catch (error) {
-    console.error('Error fetching admin projects:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch projects'
-    });
-  }
-});
+router.get('/projects', projectController.getAllProjects);
 
 // POST /api/admin/projects - Create new project
-router.post('/projects', projectValidation, handleValidationErrors, async (req, res) => {
-  try {
-    const projectData = req.body;
-    
-    if (projectData.featured) {
-      const featuredCount = await Project.countDocuments({ featured: true });
-      if (featuredCount >= 3) {
-        await Project.updateOne(
-          { featured: true },
-          { featured: false },
-          { sort: { updatedAt: 1 } }
-        );
-      }
-    }
-
-    const project = new Project(projectData);
-    await project.save();
-
-    res.status(201).json({
-      success: true,
-      message: 'Project created successfully',
-      data: project
-    });
-  } catch (error) {
-    console.error('Error creating project:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create project'
-    });
-  }
-});
+router.post('/projects', projectValidation, handleValidationErrors, projectController.createProject);
 
 // PUT /api/admin/projects/:id - Update project
-router.put('/projects/:id', projectValidation, handleValidationErrors, async (req, res) => {
-  try {
-    const { id } = req.params;
-    // Log the incoming request for debugging
-    console.log('=== Project Update Request ===');
-    console.log('Project ID:', id);
-    console.log('Request Body:', JSON.stringify(req.body, null, 2));
-    console.log('Body Type Check:');
-    console.log('- title type:', typeof req.body.title);
-    console.log('- techStack type:', typeof req.body.techStack, 'isArray:', Array.isArray(req.body.techStack));
-    console.log('- featured type:', typeof req.body.featured);
-    console.log('- order type:', typeof req.body.order);
+router.put('/projects/:id', projectValidation, handleValidationErrors, projectController.updateProject);
 
-    // Additional techStack debugging
-    if (req.body.techStack) {
-      console.log('TechStack Details:');
-      console.log('- Length:', req.body.techStack.length);
-      console.log('- Items:', req.body.techStack.map((item, index) => `[${index}]: "${item}" (type: ${typeof item}, length: ${item.length})`));
-      console.log('- Empty items check:', req.body.techStack.filter(item => !item || item.trim().length === 0));
-    }
-
-    const updateData = req.body;
-
-    const project = await Project.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    );
-
-    if (!project) {
-      return res.status(404).json({
-        success: false,
-        message: 'Project not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Project updated successfully',
-      data: project
-    });
-  } catch (error) {
-    console.error('Error updating project:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update project'
-    });
-  }
-});
-
-// DELETE /api/admin/projects/:id - Delete project
+// DELETE /api/admin/projects/:id - Delete project (with Cloudinary cleanup)
 router.delete('/projects/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const projectRepository = require('../src/repositories/projectRepository');
 
-    const project = await Project.findByIdAndDelete(id);
-
+    // Get project before deletion to clean up Cloudinary
+    const project = await projectRepository.findById(id);
+    
     if (!project) {
       return res.status(404).json({
         success: false,
@@ -136,6 +44,7 @@ router.delete('/projects/:id', async (req, res) => {
       });
     }
 
+    // Delete from Cloudinary if image exists
     if (project.imagePublicId) {
       try {
         await deleteFromCloudinary(project.imagePublicId, 'image');
@@ -144,10 +53,8 @@ router.delete('/projects/:id', async (req, res) => {
       }
     }
 
-    res.json({
-      success: true,
-      message: 'Project deleted successfully'
-    });
+    // Delete project using controller
+    return await projectController.deleteProject(req, res);
   } catch (error) {
     console.error('Error deleting project:', error);
     res.status(500).json({
