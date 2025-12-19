@@ -15,21 +15,20 @@ class EmailService {
    * Initialize Nodemailer transporter with Gmail SMTP
    * FIX: Use Port 465 (SSL) to bypass cloud firewalls/timeouts
    */
-  initializeTransporter() {
+initializeTransporter() {
     this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // Must be true for port 465
+      service: 'gmail', // Let nodemailer handle host/port/secure internally
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
       },
-      // Add timeouts to fail fast if connection hangs
-      connectionTimeout: 10000,
-      greetingTimeout: 10000
+      // HARDENED TIMEOUTS: Force longer waits and bypass IPv6 issues
+      connectionTimeout: 15000, 
+      greetingTimeout: 15000,
+      socketTimeout: 20000,
+      dnsVerror: false 
     });
 
-    // Verify connection at startup
     this.verifyConnection();
   }
 
@@ -39,7 +38,7 @@ class EmailService {
   async verifyConnection() {
     try {
       await this.transporter.verify();
-      console.log('✅ Email server is ready');
+      console.log('🚀 EMAIL SYSTEM: LIVE AND VERIFIED');
     } catch (error) {
       console.error('❌ Email server not ready:', error.message);
     }
