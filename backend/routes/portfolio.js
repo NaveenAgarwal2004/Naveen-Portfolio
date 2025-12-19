@@ -2,6 +2,8 @@ const express = require('express');
 const Personal = require('../models/Personal');
 const TechStack = require('../models/TechStack');
 const projectController = require('../src/controllers/projectController');
+const { validateQuery, validateParams } = require('../src/middleware/validate');
+const { projectQuerySchema, mongoIdSchema } = require('../src/validators/projectValidator');
 
 const router = express.Router();
 
@@ -54,9 +56,9 @@ router.get('/personal', async (req, res) => {
   }
 });
 
-// ================= PROJECT ROUTES (Using Controller Layer) =================
-// GET /api/portfolio/projects - Get all projects with pagination
-router.get('/projects', projectController.getAllProjects);
+// ================= PROJECT ROUTES (Using Controller Layer + Zod Validation) =================
+// GET /api/portfolio/projects - Get all projects with pagination and query validation
+router.get('/projects', validateQuery(projectQuerySchema), projectController.getAllProjects);
 
 // GET /api/portfolio/projects/featured - Get featured projects
 router.get('/projects/featured', projectController.getFeaturedProjects);

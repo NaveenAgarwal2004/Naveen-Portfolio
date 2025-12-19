@@ -1,9 +1,9 @@
 const express = require('express');
-const { validationResult } = require('express-validator');
 const Contact = require('../models/Contact');
 const { sendContactEmail, sendAutoReply } = require('../config/emailService');
-const { contactValidation, handleValidationErrors } = require('../middleware/validation');
 const rateLimit = require('express-rate-limit');
+const { validate } = require('../src/middleware/validate');
+const { contactSchema } = require('../src/validators/contactValidator');
 
 // Contact form specific rate limiting
 const contactLimiter = rateLimit({
@@ -24,23 +24,8 @@ const contactLimiter = rateLimit({
 
 const router = express.Router();
 
-// Enhanced validation error handler with debugging
-const handleValidationErrorsWithDebug = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log('❌ Validation errors:', errors.array());
-    console.log('📝 Request body:', req.body);
-    return res.status(400).json({
-      success: false,
-      message: 'Validation errors',
-      errors: errors.array()
-    });
-  }
-  next();
-};
-
-// 📩 POST /api/contact - Submit contact form
-router.post('/', contactLimiter, contactValidation, handleValidationErrorsWithDebug, async (req, res) => {
+// 📩 POST /api/contact - Submit contact form with Zod validation
+router.post('/', contactLimiter, validate(contactSchema), async (req, res) => {
   try {
     console.log('📧 Processing contact form submission:', req.body);
     

@@ -4,29 +4,41 @@ const TechStack = require('../models/TechStack');
 const Contact = require('../models/Contact');
 const auth = require('../middleware/auth');
 const { uploadResume, uploadProfileImage, uploadProjectImage, uploadTechLogo, deleteFromCloudinary } = require('../config/cloudinary');
-const { 
-  projectValidation, 
-  personalValidation, 
-  techStackValidation, 
-  handleValidationErrors 
-} = require('../middleware/validation');
 const projectController = require('../src/controllers/projectController');
+
+// Import Zod validation middleware and schemas
+const { validate, validateParams, validateQuery } = require('../src/middleware/validate');
+const { 
+  createProjectSchema, 
+  updateProjectSchema, 
+  projectQuerySchema,
+  mongoIdSchema 
+} = require('../src/validators/projectValidator');
+const { 
+  personalSchema, 
+  updatePersonalSchema 
+} = require('../src/validators/personalValidator');
+const { 
+  createTechStackSchema, 
+  updateTechStackSchema 
+} = require('../src/validators/techStackValidator');
+const { updateContactStatusSchema } = require('../src/validators/contactValidator');
 
 const router = express.Router();
 
 // Apply auth middleware to all routes
 router.use(auth);
 
-// ============= PROJECTS MANAGEMENT (Using Controller Layer) =============
+// ============= PROJECTS MANAGEMENT (Using Controller Layer + Zod Validation) =============
 
-// GET /api/admin/projects - Get all projects for admin
-router.get('/projects', projectController.getAllProjects);
+// GET /api/admin/projects - Get all projects for admin with query validation
+router.get('/projects', validateQuery(projectQuerySchema), projectController.getAllProjects);
 
-// POST /api/admin/projects - Create new project
-router.post('/projects', projectValidation, handleValidationErrors, projectController.createProject);
+// POST /api/admin/projects - Create new project with Zod validation
+router.post('/projects', validate(createProjectSchema), projectController.createProject);
 
-// PUT /api/admin/projects/:id - Update project
-router.put('/projects/:id', projectValidation, handleValidationErrors, projectController.updateProject);
+// PUT /api/admin/projects/:id - Update project with Zod validation
+router.put('/projects/:id', validateParams(mongoIdSchema), validate(updateProjectSchema), projectController.updateProject);
 
 // DELETE /api/admin/projects/:id - Delete project (with Cloudinary cleanup)
 router.delete('/projects/:id', async (req, res) => {
