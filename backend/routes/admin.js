@@ -2,6 +2,7 @@ const express = require('express');
 const Personal = require('../models/Personal');
 const TechStack = require('../models/TechStack');
 const Contact = require('../models/Contact');
+const Project = require('../models/Project');
 const auth = require('../middleware/auth');
 const { uploadResume, uploadProfileImage, uploadProjectImage, uploadTechLogo, deleteFromCloudinary } = require('../config/cloudinary');
 const projectController = require('../src/controllers/projectController');
@@ -142,8 +143,8 @@ router.get('/personal', async (req, res) => {
   }
 });
 
-// PUT /api/admin/personal - Update personal info
-router.put('/personal', personalValidation, handleValidationErrors, async (req, res) => {
+// PUT /api/admin/personal - Update personal info with Zod validation
+router.put('/personal', validate(updatePersonalSchema), async (req, res) => {
   try {
     const updateData = req.body;
 
@@ -558,8 +559,8 @@ router.get('/tech-stack', async (req, res) => {
   }
 });
 
-// POST /api/admin/tech-stack - Create new tech stack item
-router.post('/tech-stack', techStackValidation, handleValidationErrors, async (req, res) => {
+// POST /api/admin/tech-stack - Create new tech stack item with Zod validation
+router.post('/tech-stack', validate(createTechStackSchema), async (req, res) => {
   try {
     const techItem = new TechStack(req.body);
     await techItem.save();
@@ -578,8 +579,8 @@ router.post('/tech-stack', techStackValidation, handleValidationErrors, async (r
   }
 });
 
-// PUT /api/admin/tech-stack/:id - Update tech stack item
-router.put('/tech-stack/:id', techStackValidation, handleValidationErrors, async (req, res) => {
+// PUT /api/admin/tech-stack/:id - Update tech stack item with Zod validation
+router.put('/tech-stack/:id', validate(updateTechStackSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;

@@ -2,12 +2,13 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
-const { loginValidation, handleValidationErrors } = require('../middleware/validation');
+const { validate } = require('../src/middleware/validate');
+const { loginSchema } = require('../src/validators/authValidator');
 
 const router = express.Router();
 
-// POST /api/auth/login
-router.post('/login', loginValidation, handleValidationErrors, async (req, res) => {
+// POST /api/auth/login - User login with Zod validation
+router.post('/login', validate(loginSchema), async (req, res) => {
   try {
     const { email, password } = req.body;
 

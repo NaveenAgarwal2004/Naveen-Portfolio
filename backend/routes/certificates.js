@@ -7,11 +7,12 @@ const {
   deleteFromCloudinary,
   generateImageVariants 
 } = require('../config/cloudinary');
+const { validate } = require('../src/middleware/validate');
 const { 
-  certificateValidation, 
-  bulkOperationValidation, 
-  handleValidationErrors 
-} = require('../middleware/validation');
+  createCertificateSchema, 
+  updateCertificateSchema,
+  bulkOperationSchema
+} = require('../src/validators/certificateValidator');
 
 const router = express.Router();
 
@@ -235,8 +236,8 @@ router.get('/admin/all', auth, async (req, res) => {
   }
 });
 
-// Add new certificate (admin only)
-router.post('/', auth, certificateValidation, handleValidationErrors, async (req, res) => {
+// Add new certificate (admin only) with Zod validation
+router.post('/', auth, validate(createCertificateSchema), async (req, res) => {
   try {
     const {
       title,
@@ -301,8 +302,8 @@ router.post('/', auth, certificateValidation, handleValidationErrors, async (req
   }
 });
 
-// Update certificate (admin only)
-router.put('/:id', auth, certificateValidation, handleValidationErrors, async (req, res) => {
+// Update certificate (admin only) with Zod validation
+router.put('/:id', auth, validate(updateCertificateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -541,8 +542,8 @@ router.post('/:id/logo', auth, uploadCertificateLogo.single('logo'), async (req,
   }
 });
 
-// Bulk operations (admin only)
-router.post('/bulk', auth, bulkOperationValidation, handleValidationErrors, async (req, res) => {
+// Bulk operations (admin only) with Zod validation
+router.post('/bulk', auth, validate(bulkOperationSchema), async (req, res) => {
   try {
     const { action, certificateIds, data: updateData } = req.body;
 

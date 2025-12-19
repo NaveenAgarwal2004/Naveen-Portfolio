@@ -8,6 +8,8 @@ const contactValidators = require('./contactValidator');
 const personalValidators = require('./personalValidator');
 const certificateValidators = require('./certificateValidator');
 const techStackValidators = require('./techStackValidator');
+const authValidators = require('./authValidator');
+const seoValidators = require('./seoValidator');
 
 module.exports = {
   // Project validators
@@ -23,5 +25,11 @@ module.exports = {
   ...certificateValidators,
   
   // Tech stack validators
-  ...techStackValidators
+  ...techStackValidators,
+  
+  // Auth validators
+  ...authValidators,
+  
+  // SEO validators
+  ...seoValidators
 };

@@ -110,8 +110,27 @@ const certificateQuerySchema = z.object({
   limit: z.string().regex(/^\d+$/, 'Limit must be a number').optional().default('20')
 });
 
+/**
+ * Zod schema for bulk certificate operations
+ */
+const bulkOperationSchema = z.object({
+  action: z.enum(['delete', 'updateStatus', 'updateVisibility'], {
+    errorMap: () => ({ message: 'Action must be one of: delete, updateStatus, updateVisibility' })
+  }),
+  
+  certificateIds: z.array(z.string())
+    .min(1, 'At least one certificate ID is required')
+    .max(100, 'Maximum 100 certificates can be processed at once'),
+  
+  data: z.object({
+    isActive: z.boolean().optional(),
+    isPublic: z.boolean().optional()
+  }).optional()
+});
+
 module.exports = {
   createCertificateSchema,
   updateCertificateSchema,
-  certificateQuerySchema
+  certificateQuerySchema,
+  bulkOperationSchema
 };

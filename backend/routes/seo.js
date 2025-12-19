@@ -3,7 +3,8 @@ const router = express.Router();
 const SEO = require('../models/SEO');
 const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
-const { seoValidation, handleValidationErrors } = require('../middleware/validation');
+const { validate } = require('../src/middleware/validate');
+const { seoSchema } = require('../src/validators/seoValidator');
 
 // GET /api/seo - Get all SEO data (public route)
 router.get('/', async (req, res) => {
@@ -91,8 +92,8 @@ router.get('/:page', async (req, res) => {
   }
 });
 
-// POST /api/seo - Create or update SEO data (admin only)
-router.post('/', auth, seoValidation, handleValidationErrors, async (req, res) => {
+// POST /api/seo - Create or update SEO data (admin only) with Zod validation
+router.post('/', auth, validate(seoSchema), async (req, res) => {
   try {
     const { page, title, description, keywords, twitterHandle, canonicalUrl } = req.body;
     
