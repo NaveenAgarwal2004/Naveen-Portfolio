@@ -1,41 +1,45 @@
-const projectService = require('../services/projectService');
+import { Request, Response } from 'express';
+import projectService from '../services/projectService';
+import { ApiResponse, CreateProjectDTO, UpdateProjectDTO } from '../types/dtos';
 
 class ProjectController {
-  async getAllProjects(req, res) {
+  async getAllProjects(req: Request, res: Response): Promise<Response> {
     try {
-      const { category, featured, page = 1, limit = 20 } = req.query;
+      const { category, featured, page = '1', limit = '20' } = req.query;
       
       const filters = {
-        category,
+        category: category as string,
         featured: featured === 'true' ? true : undefined,
-        limit: parseInt(limit),
-        skip: (parseInt(page) - 1) * parseInt(limit)
+        limit: parseInt(limit as string),
+        skip: (parseInt(page as string) - 1) * parseInt(limit as string)
       };
       
       const result = await projectService.getAllProjects(filters);
       
-      return res.json({
+      const response: ApiResponse = {
         success: true,
         data: result.projects,
         pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
           total: result.total,
-          totalPages: Math.ceil(result.total / parseInt(limit)),
-          hasNextPage: (parseInt(page) * parseInt(limit)) < result.total,
-          hasPrevPage: parseInt(page) > 1
+          totalPages: Math.ceil(result.total / parseInt(limit as string)),
+          hasNextPage: (parseInt(page as string) * parseInt(limit as string)) < result.total,
+          hasPrevPage: parseInt(page as string) > 1
         }
-      });
+      };
+      
+      return res.json(response);
     } catch (error) {
       console.error('Get projects error:', error);
       return res.status(500).json({
         success: false,
-        message: error.message
+        message: (error as Error).message
       });
     }
   }
   
-  async getProjectById(req, res) {
+  async getProjectById(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
       const project = await projectService.getProjectById(id);
@@ -45,15 +49,15 @@ class ProjectController {
         data: project
       });
     } catch (error) {
-      const statusCode = error.message === 'Project not found' ? 404 : 500;
+      const statusCode = (error as Error).message === 'Project not found' ? 404 : 500;
       return res.status(statusCode).json({
         success: false,
-        message: error.message
+        message: (error as Error).message
       });
     }
   }
 
-  async getFeaturedProjects(req, res) {
+  async getFeaturedProjects(_req: Request, res: Response): Promise<Response> {
     try {
       const projects = await projectService.getFeaturedProjects();
       
@@ -70,9 +74,10 @@ class ProjectController {
     }
   }
   
-  async createProject(req, res) {
+  async createProject(req: Request, res: Response): Promise<Response> {
     try {
-      const project = await projectService.createProject(req.body);
+      const projectData: CreateProjectDTO = req.body;
+      const project = await projectService.createProject(projectData);
       
       return res.status(201).json({
         success: true,
@@ -83,15 +88,16 @@ class ProjectController {
       console.error('Create project error:', error);
       return res.status(400).json({
         success: false,
-        message: error.message
+        message: (error as Error).message
       });
     }
   }
   
-  async updateProject(req, res) {
+  async updateProject(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const project = await projectService.updateProject(id, req.body);
+      const updateData: UpdateProjectDTO = req.body;
+      const project = await projectService.updateProject(id, updateData);
       
       return res.json({
         success: true,
@@ -102,12 +108,12 @@ class ProjectController {
       console.error('Update project error:', error);
       return res.status(400).json({
         success: false,
-        message: error.message
+        message: (error as Error).message
       });
     }
   }
   
-  async deleteProject(req, res) {
+  async deleteProject(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
       await projectService.deleteProject(id);
@@ -120,10 +126,10 @@ class ProjectController {
       console.error('Delete project error:', error);
       return res.status(500).json({
         success: false,
-        message: error.message
+        message: (error as Error).message
       });
     }
   }
 }
 
-module.exports = new ProjectController();
+export default new ProjectController();

@@ -1,16 +1,23 @@
-const projectRepository = require('../repositories/projectRepository');
-const { invalidateCache } = require('../../middleware/cache');
+import projectRepository from '../repositories/projectRepository';
+import { invalidateCache } from '../../middleware/cache';
+import { IProject } from '../types/models';
+import { CreateProjectDTO, UpdateProjectDTO, ProjectFiltersDTO } from '../types/dtos';
+
+interface GetProjectsResult {
+  projects: IProject[];
+  total: number;
+}
 
 class ProjectService {
-  async getAllProjects(filters) {
-    // Business logic: Fetch from repository
+  async getAllProjects(filters: ProjectFiltersDTO): Promise<GetProjectsResult> {
+    // Fetch from database
     const projects = await projectRepository.findAll(filters);
     const total = await projectRepository.count(filters);
     
     return { projects, total };
   }
   
-  async getProjectById(id) {
+  async getProjectById(id: string): Promise<IProject> {
     if (!id) throw new Error('Project ID is required');
     
     const project = await projectRepository.findById(id);
@@ -19,13 +26,13 @@ class ProjectService {
     return project;
   }
 
-  async getFeaturedProjects(limit = 3) {
+  async getFeaturedProjects(limit: number = 3): Promise<IProject[]> {
     return await projectRepository.findFeatured(limit);
   }
   
-  async createProject(data) {
+  async createProject(data: CreateProjectDTO): Promise<IProject> {
     // Business logic: Validate, enrich data
-    const enrichedData = {
+    const enrichedData: Partial<IProject> = {
       ...data,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -48,7 +55,7 @@ class ProjectService {
     return project;
   }
   
-  async updateProject(id, data) {
+  async updateProject(id: string, data: UpdateProjectDTO): Promise<IProject> {
     // Business logic: Handle featured projects limit
     if (data.featured) {
       const project = await projectRepository.findById(id);
@@ -61,12 +68,13 @@ class ProjectService {
       }
     }
 
-    const enrichedData = {
+    const enrichedData: Partial<IProject> = {
       ...data,
       updatedAt: new Date()
     };
     
     const project = await projectRepository.update(id, enrichedData);
+    if (!project) throw new Error('Project not found');
     
     // Invalidate cache
     invalidateCache.portfolio();
@@ -74,17 +82,19 @@ class ProjectService {
     return project;
   }
   
-  async deleteProject(id) {
+  async deleteProject(id: string): Promise<void> {
     const project = await projectRepository.delete(id);
     if (!project) throw new Error('Project not found');
     
     // Invalidate cache
     invalidateCache.portfolio();
-    
-    return { deleted: true };
   }
 
-  async getProjectStats() {
+  async getProjectStats(): Promise<{
+    totalProjects: number;
+    aiProjects: number;
+    webProjects: number;
+  }> {
     const [totalProjects, aiProjects, webProjects] = await Promise.all([
       projectRepository.count(),
       projectRepository.count({ category: 'AI' }),
@@ -99,4 +109,4 @@ class ProjectService {
   }
 }
 
-module.exports = new ProjectService();
+export default new ProjectService();
